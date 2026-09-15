@@ -1,6 +1,6 @@
 # Dyania Health Hackathon 2026 — Team Submission Repository
 
-**Challenge:** Predictive risk of bioprosthetic valve failure — Using ML to predict structural valve deterioration (SVD) and long-term durability risk after aortic valve replacement (SAVR / TAVR)
+**Challenge:** Build a study — using machine learning, a statistical model, or whatever approach you prefer — proposing a protocol to predict aortic valve durability in patients with a bioprosthetic aortic valve replacement.
 **Event:** September 15–17, 2026 (3 days)
 **Team size:** 2–3 ML engineers
 **Team:** `[Your team name]`
@@ -32,7 +32,7 @@
 
 ### 1. Fork this repository
 
-Go to **[https://github.com/dyania-health/dyania-hackathon-avr-durability](https://github.com/dyania-health/dyania-hackathon-avr-durability)** and click **Fork** (top-right) to create a copy under your own GitHub account.
+Go to **[https://github.com/dyaniahealth/dyania-hackathon-avr-durability](https://github.com/dyaniahealth/dyania-hackathon-avr-durability)** and click **Fork** (top-right) to create a copy under your own GitHub account.
 
 ### 2. Clone your fork
 
@@ -53,7 +53,7 @@ Examples: `team/panathinea`, `team/valve-guardians`, `team/svd-sentinels`
 
 ### 4. Work on your branch
 
-Edit the template files inside `protocol/`, `ml/`, `data/`, and `presentation/`. Every `> *Fill in:*` block is a placeholder — replace it with your team's content.
+Edit the template files inside `protocol/`, `model/`, `data/`, and `presentation/`. Every `> *Fill in:*` block is a placeholder — replace it with your team's content.
 
 ```bash
 # Stage and commit as you go

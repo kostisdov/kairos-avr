@@ -1,12 +1,12 @@
-# ML Approach
+# Model Approach
 
-> **Instructions:** Describe your machine learning methodology. Be specific — vague answers score low. Every choice should have a justification tied to the clinical context.
+> **Instructions:** Describe your modeling methodology — machine learning, a statistical model, or whatever approach you prefer. Be specific — vague answers score low. Every choice should have a justification tied to the clinical context.
 
 ---
 
 ## 1. Problem Formulation
 
-> *Fill in: How did you frame the ML task? (e.g., binary classification at a fixed horizon, survival/time-to-event analysis, competing-risks model, longitudinal/sequence modelling of serial echo measurements). Why is this framing appropriate for predicting bioprosthetic aortic valve durability, given right-censored follow-up?*
+> *Fill in: How did you frame the prediction task? (e.g., binary classification at a fixed horizon, survival/time-to-event analysis, competing-risks model, longitudinal/sequence modelling of serial echo measurements). Why is this framing appropriate for predicting bioprosthetic aortic valve durability, given right-censored follow-up?*
 
 ---
 
