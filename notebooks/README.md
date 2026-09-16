@@ -1,6 +1,6 @@
 # Notebooks — Proof-of-Concept Implementation
 
-> This folder is **optional** but evaluated positively if present.
+> This folder is **required** — include your proof-of-concept implementation here.
 
 Place your Jupyter notebooks here. A strong submission includes:
 

@@ -72,7 +72,7 @@ git push origin team/your-team-name
 ```
 
 Then go to your fork on GitHub and click **"Compare & pull request"**.
-Set the base repository to `dyania-health/dyania-hackathon-avr-durability` and the base branch to `main`.
+Set the base repository to `dyaniahealth/dyania-hackathon-avr-durability` and the base branch to `main`.
 Title your PR: `Team submission: <your-team-name>`
 
 > **Deadline: September 17, 2026 — before the presentation session.**
@@ -88,13 +88,13 @@ Title your PR: `Team submission: <your-team-name>`
 ├── README.md                        # This file — team overview and key decisions
 ├── protocol/
 │   └── study_protocol.md            # Full study design (main deliverable)
-├── ml/
-│   └── approach.md                  # ML methodology and validation strategy
+├── model/
+│   └── approach.md                  # Model methodology and validation strategy
 ├── data/
 │   └── data_plan.md                 # Data sources, preprocessing, availability
 ├── presentation/
 │   └── slides.pdf                   # 5–10 slide deck for expert panel
-└── notebooks/                       # (Optional) Proof-of-concept implementation
+└── notebooks/                       # Proof-of-concept implementation
 ```
 
 ---
@@ -103,7 +103,7 @@ Title your PR: `Team submission: <your-team-name>`
 
 - [ ] `README.md` — team overview, problem framing, key design decisions
 - [ ] `protocol/study_protocol.md` — complete study protocol
-- [ ] `ml/approach.md` — ML methodology
+- [ ] `model/approach.md` — model methodology
 - [ ] `data/data_plan.md` — data plan
 - [ ] `presentation/slides.pdf` — slide deck
-- [ ] `notebooks/` — proof-of-concept (optional, evaluated positively if present)
+- [ ] `notebooks/` — proof-of-concept implementation
