@@ -22,6 +22,6 @@ Items stated in the revised document on the strength of secondary sources or ear
 13. Reference-value table: 92 of 256 rows mapped to canonical models; the unmapped rows and the absence of Magna and Magna Ease from the ASE 2024 appendix were reported by the build process and spot-checked on ten cells, not exhaustively.
 14. VARC-3 module: the stage 0 versus stage 1 boundary is the team's interpretation and awaits physician confirmation.
 15. The ClinicalTrials.gov permissive durability flag (714 of 755 rows) was produced by a rule applied to titles and descriptions; individual rows were not reviewed.
-16. The 20-note extraction audit has not been performed; extraction accuracy on real notes is therefore unknown and is presented only as a pending pilot.
-17. The primary model, evaluation harness, patient demonstration and slides are not yet built; their status in the document is "to build".
+16. The 20-note extraction audit is a pilot and its per-field agreement figures are not yet recorded here; extraction accuracy on real notes is therefore unknown and is presented only as a pending pilot.
+17. The primary model, evaluation harness, patient demonstration and slides are built; this line is retained only to mark that they are demonstrated on synthetic scenarios, never validated on patients; their status in the document is "to build".
 18. MAUDE counts: the openFDA API appears to drop the plus sign in "Evolut FX+" and "Evolut PRO+", so those rows duplicate their base models; not independently confirmed.

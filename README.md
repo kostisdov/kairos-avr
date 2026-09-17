@@ -109,7 +109,6 @@ src/kairos/            core package (kairos-core)
   io/                  config.py (settings and the real-notes switch), storage.py (Blob or local), db.py
   privacy.py           privacy scan used by CI and the deploy scripts
 services/              extract (FastAPI), predict (FastAPI), jobs (CLI), demo (Streamlit), one Dockerfile each
-infra/                 Bicep (subscription scope) and azure.yaml for azd
 scripts/               deploy.ps1 / deploy.sh, privacy_scan.py, export_schemas.py, build_all.py
 config/                scenarios.yaml (literature skeleton + simulation section), model.yaml, app.yaml
 tests/                 unit, contract and service tests; synthetic note fixtures

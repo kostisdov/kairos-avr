@@ -70,8 +70,14 @@ def test_held_out_fold_cannot_change_training_decisions(small_cohort, model_cfg,
     a = evaluate_ladder(small_cohort, model_cfg, lm=lm, **kw).fold_fits["core_plus_mineral"]
     b = evaluate_ladder(small_cohort, model_cfg, lm=mutated, **kw).fold_fits["core_plus_mineral"]
     assert 1 in a and 0 in a
-    # fold 1 is held out: its fit uses fold 0 rows only and must be identical
-    assert a[1] == b[1]
+
+    # fold 1 is held out: its fit uses fold 0 rows only and must be identical.
+    # Wall-clock timings are recorded in the fit record and differ between runs by
+    # construction, so they are excluded before comparing; they are not a decision.
+    def _decisions(record):
+        return {k: v for k, v in record.items() if k not in {"seconds", "duration_seconds", "elapsed"}}
+
+    assert _decisions(a[1]) == _decisions(b[1])
     # fold 0 trains on the mutated rows, so its decisions do change (the test can detect a difference)
     assert a[0]["eligibility"]["modules"]["biomarker_mineral"]["status"] != "unavailable"
     assert b[0]["eligibility"]["modules"]["biomarker_mineral"]["status"] == "unavailable"

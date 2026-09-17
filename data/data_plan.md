@@ -72,12 +72,15 @@ denominators, stated in each row.
 | Implant documented in an operative or procedure note | 97 | Of 117 patients: 53 surgical, 44 transcatheter. A further 15 mention the implant only in history; 5 unspecified |
 | Implant year stated explicitly | 86 | Of the 97; 2006 to 2022, two thirds in 2013 to 2018 |
 | Valve model named, with generation | 110 | Of 117; 7 with no model identified |
-| Label size | 85 | Of 117; mode 23 mm and 26 mm; ten patients at 21 mm or smaller |
+| Label size | 85 | Of 117; mode 23 mm and 26 mm; at least eleven patients at 21 mm or smaller |
 | At least one prosthetic mean gradient in text | 46 | Of 117; one patient has gradients in two different years |
 
-**Device and era are confounded in this sample.** All 19 dated Trifecta implants fall in 2013 to
-2017, and 24 of 32 SAPIEN implants in 2018 to 2022. Any apparent device effect in these records is
-inseparable from the year it was implanted, which is why no device conclusion is drawn from them.
+**Device and era are confounded in this sample.** Of the 29 patients carrying an externally mounted
+pericardial valve, 24 were implanted between 2013 and 2017; of the 35 with a balloon-expandable
+transcatheter valve, 25 were implanted between 2018 and 2022. Any apparent device effect in these
+records is inseparable from the year it was implanted, which is why no device conclusion is drawn
+from them. All counts here are read from `data/derived/aggregates/implant_era_by_design_class.csv`,
+where cells below five patients are suppressed.
 
 ### Extraction traps that produce wrong counts
 
