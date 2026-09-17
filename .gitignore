@@ -22,3 +22,6 @@ artifacts/
 .azure/
 infra/*.local.json
 
+
+# Presentation sources stay local; the PDF is the deliverable
+presentation/*.html
