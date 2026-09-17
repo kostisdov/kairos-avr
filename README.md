@@ -18,7 +18,7 @@ Minas Papageorgiou, engineering
 | Study design | [`protocol/study_protocol.md`](protocol/study_protocol.md) |
 | Model approach | [`model/approach.md`](model/approach.md) |
 | Data plan | [`data/data_plan.md`](data/data_plan.md) |
-| Slides | [`presentation/slides.pdf`](presentation/slides.pdf) |
+| Slides | [`presentation/slides.pdf`](presentation/slides.pdf) (PowerPoint: [`presentation/KAIROS_deck.pptx`](presentation/KAIROS_deck.pptx)) |
 | Proof of concept | [`notebooks/`](notebooks/) |
 
 ---
