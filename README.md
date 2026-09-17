@@ -162,8 +162,11 @@ One command provisions and deploys everything into `rg-kairos-dev` (Sweden Centr
 .\scripts\deploy.ps1
 ```
 
-or `bash scripts/deploy.sh`, or `azd up` when the Azure Developer CLI is installed. Details,
-the model-availability record, cost notes and the teardown are in `docs/runbook.md`.
+or `bash scripts/deploy.sh`, or `azd up` when the Azure Developer CLI is installed. The bicep
+modules and the azd manifest are in `infra/` and `azure.yaml`; copy
+`infra/main.bicepparam.example` to `infra/main.bicepparam` and fill in the four owner values
+first. Details, the model-availability record, cost notes and the teardown are in
+`docs/runbook.md` and `infra/README.md`.
 
 ## Interfaces
 
