@@ -27,6 +27,7 @@ import pandas as pd
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[2]
+LOGO_PATH = ROOT / "logo" / "kairos-lockup-descriptor-bright.svg"
 if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
@@ -74,15 +75,23 @@ def _load_module(name: str, path: Path):
 def _inprocess() -> dict:
     from fastapi.testclient import TestClient
 
+    from kairos.modelling.store import active_families, load_active_bundle
+
     extract_mod = _load_module("kairos_demo_extract_app", ROOT / "services" / "extract" / "app.py")
     predict_mod = _load_module("kairos_demo_predict_app", ROOT / "services" / "predict" / "app.py")
-    bundle, bundle_error = None, None
+    bundle, bundles, bundle_error = None, {}, None
     try:
-        bundle = predict_mod.load_bundle_from_store(settings)
+        store = get_store(settings)
+        namespace = os.environ.get("KAIROS_MODEL_NAMESPACE", "full")
+        bundles = {family: loaded for family in active_families(store, namespace)
+                   if (loaded := load_active_bundle(store, namespace, family)) is not None}
+        if not bundles:
+            bundle = predict_mod.load_bundle_from_store(settings)
     except Exception as exc:  # noqa: BLE001 - shown in the sidebar; predict then answers 503
         bundle_error = f"{type(exc).__name__}: {exc}"
     return {"extract": TestClient(extract_mod.create_app(settings=settings, persist=False)),
-            "predict": TestClient(predict_mod.create_app(settings=settings, bundle=bundle, persist=False)),
+            "predict": TestClient(predict_mod.create_app(settings=settings, bundle=bundle, bundles=bundles,
+                                                          persist=False)),
             "bundle_error": bundle_error}
 
 
@@ -176,8 +185,18 @@ def model_inventory() -> dict:
 def loaded_models() -> dict[str, dict]:
     """Only service-listed families explicitly compatible with the service default."""
     inventory = model_inventory()
-    return {family: info for family, info in inventory["models"].items()
-            if info.get("compatible_with_default", True) is True}
+    models = inventory["models"]
+    compatible = {family: info for family, info in models.items()
+                  if info.get("compatible_with_default") is True}
+    if compatible:
+        return compatible
+    # A legacy one-family inventory is usable only when its identity agrees with the
+    # reported default; absence of compatibility metadata never implies two-family support.
+    if len(models) == 1:
+        family, info = next(iter(models.items()))
+        if inventory.get("default_family") in (None, family):
+            return {family: info}
+    return {}
 
 
 def family_label(family: str | None) -> str:
@@ -398,7 +417,7 @@ def render_reason_list(p: dict, *, heading: bool = True) -> None:
         st.caption("No reliability reasons reported.")
         return
     order = {"blocking": 0, "warning": 1, "info": 2}
-    for index, reason in enumerate(sorted(reasons, key=lambda r: order.get(r.get("severity"), 3))):
+    for reason in sorted(reasons, key=lambda r: order.get(r.get("severity"), 3)):
         severity = reason.get("severity", "info")
         alert = getattr(st, SEVERITY_ALERT.get(severity, "info"))
         alert(reason.get("message") or "Unspecified reliability reason")
@@ -694,18 +713,22 @@ def render_patient_summary(request, payload: dict | None, payload_key: str | Non
     st.caption("Consolidated consultation view. The selected model estimates future risk; the independent echo rule "
                "asks whether current change criteria are met. Neither output changes the other.")
     if request is None or payload is None:
-        st.info("Complete the Patient inputs before updating the summary.")
+        st.info("Complete the Patient inputs before the summary can be built.")
         return
+    family_compare = None
+    if comparison and comparison.get("key") == compare_key:
+        valid = {fam: res["body"] for fam, res in comparison.get("results", {}).items()
+                 if res.get("status") == 200 and res.get("body")}
+        if len(valid) >= 2:
+            family_compare = {fam: {"model_version": p.get("model_version"), "p_svd_12m": p.get("p_svd_12m"),
+                                    "earlier_assessment": (p.get("messages") or {}).get("earlier_assessment")}
+                              for fam, p in valid.items()}
+    ss.setdefault("include_family_comparison", True)
+    include = bool(ss.get("include_family_comparison")) and family_compare is not None
+    expected_version = (models_info.get(selected_family) or {}).get("model_version") if selected_family else None
+    binding_key = json.dumps([payload_key, selected_family, inventory.get("namespace"), expected_version, include])
     binding = ss.get("summary_binding")
-    current = bool(binding and binding.get("snapshot_key") == payload_key
-                   and binding.get("selected_family") == selected_family
-                   and binding.get("namespace") == inventory.get("namespace")
-                   and (selected_family is None or binding.get("model_version")
-                        == (models_info.get(selected_family) or {}).get("model_version")))
-    if binding and not current:
-        st.warning("Out of date — update summary. The previous result and findings are excluded from this view and download.")
-    update = st.button("Update summary", key="update_summary", type="primary")
-    if update:
+    if not (binding and binding.get("binding_key") == binding_key):
         response = None
         if selected_family:
             existing = ss.get("res_predict")
@@ -715,33 +738,9 @@ def render_patient_summary(request, payload: dict | None, payload_key: str | Non
             else:
                 response = run_or_reuse(payload, selected_family)
                 ss["res_predict"] = response
-        comparator = comparator_for_request(request, source_kind=source_kind)
-        family_compare = None
-        include_compare = bool(ss.get("include_family_comparison"))
-        if include_compare and comparison and comparison.get("key") == compare_key:
-            valid = {fam: res["body"] for fam, res in comparison.get("results", {}).items()
-                     if res.get("status") == 200 and res.get("body")}
-            if len(valid) >= 2:
-                family_compare = {fam: {"model_version": p.get("model_version"), "p_svd_12m": p.get("p_svd_12m"),
-                                        "earlier_assessment": (p.get("messages") or {}).get("earlier_assessment")}
-                                  for fam, p in valid.items()}
-        model_body = response.get("body") if response and response.get("status") == 200 else None
-        facts = assemble_patient_summary(request, model_body, comparator, selected_family=selected_family,
-                                         source_provenance=source_kind, family_comparison=family_compare)
-        ss["summary_binding"] = binding = {
-            "snapshot_key": payload_key, "selected_family": selected_family,
-            "returned_family": facts.returned_family, "model_version": facts.model_version,
-            "namespace": inventory.get("namespace"), "threshold": 0.05,
-            "request": json.loads(json.dumps(payload, default=str)), "response": model_body,
-            "comparator": comparator.to_dict(), "facts": facts.model_dump(mode="json"),
-            "include_family_comparison": bool(family_compare),
-        }
-        ss.pop("summary_draft", None)
-        current = True
-    if not current:
-        st.info("Select Update summary to bind the current inputs, model identity and independent comparator. "
-                "No hosted-model request is made by opening this tab.")
-        return
+        binding = store_summary_binding(request, payload, response, selected_family,
+                                        family_compare if include else None)
+        binding["binding_key"] = binding_key
 
     facts_data = binding["facts"]
     from kairos.summary.schema import PatientSummaryFacts
@@ -749,6 +748,34 @@ def render_patient_summary(request, payload: dict | None, payload_key: str | Non
     facts = PatientSummaryFacts.model_validate(facts_data)
     response, comparator = binding.get("response"), binding["comparator"]
     fact_map = {f.id: f for f in facts.facts}
+
+    st.subheader("Findings and recommendations for clinical review")
+    st.checkbox("Include family comparison in findings", key="include_family_comparison",
+                disabled=family_compare is None,
+                help="On by default; applied when a current, verified two-family comparison is available.")
+    draft_state = ss.get("summary_draft")
+    regenerate = st.button("Regenerate findings", key="generate_findings")
+    if regenerate or not (draft_state and draft_state.get("binding_key") == binding_key):
+        try:
+            with st.spinner("Generating a bounded clinician draft…"):
+                draft, metadata = PatientSummaryWriter(settings).write(facts)
+            draft_state = {"kind": "AI-generated draft for clinician review", "markdown": findings_markdown(draft),
+                           "metadata": metadata.__dict__}
+        except Exception as exc:  # noqa: BLE001 - safe class-only failure shown with deterministic fallback
+            draft_state = {"kind": "Template summary", "markdown": deterministic_summary(facts),
+                           "error": PatientSummaryWriter.safe_error(exc)}
+        draft_state.update(binding_key=binding_key, snapshot_id=facts.snapshot_id, family=facts.returned_family,
+                           model_version=facts.model_version, include_family_comparison=include)
+        ss["summary_draft"] = draft_state
+    if draft_state.get("error"):
+        st.warning(f"Narrative unavailable ({draft_state['error']}). A deterministic template is shown instead.")
+    else:
+        st.success("AI-generated draft for clinician review")
+    st.markdown(draft_state["markdown"])
+    st.download_button("Download summary", export_summary(facts, draft_state["markdown"], draft_label=draft_state["kind"]),
+                       file_name=f"kairos-summary-{facts.snapshot_id[:12]}.md", mime="text/markdown",
+                       key="download_summary")
+
     st.subheader("Patient and valve")
     header_cols = st.columns(5)
     for col, fact_id, label in zip(header_cols,
@@ -788,7 +815,7 @@ def render_patient_summary(request, payload: dict | None, payload_key: str | Non
     st.subheader("Key clinical inputs")
     clinical = [f for f in facts.facts if f.category in ("patient", "laboratory", "exposure")
                 and f.id not in ("patient.case_id", "patient.source", "patient.assessment_date")]
-    st.dataframe(pd.DataFrame([{"input": f.label, "value": f.value, "unit": f.unit or "",
+    st.dataframe(pd.DataFrame([{"input": f.label, "value": str(f.value), "unit": f.unit or "",
                                "date": f.measured_on or "", "source": f.provenance} for f in clinical]),
                  hide_index=True, width="stretch")
 
@@ -798,6 +825,8 @@ def render_patient_summary(request, payload: dict | None, payload_key: str | Non
         st.markdown("**What influenced this estimate**")
         render_drivers(response)
         render_messages(response)
+        with st.expander("Reliability metadata and excluded modules", expanded=False):
+            render_reliability(response)
     else:
         st.warning("Prediction unavailable. Patient facts and the comparator remain available.")
 
@@ -808,62 +837,14 @@ def render_patient_summary(request, payload: dict | None, payload_key: str | Non
     st.info(str(comparison_fact.value if comparison_fact else "Comparison incomplete."))
     render_comparator(comparator)
 
-    st.subheader("Findings and recommendations for clinical review")
-    valid_family_comparison = bool(comparison and comparison.get("key") == compare_key
-                                   and len([r for r in comparison.get("results", {}).values() if r.get("status") == 200]) >= 2)
-    include = st.checkbox("Include family comparison in findings", key="include_family_comparison",
-                          disabled=not valid_family_comparison,
-                          help="Off by default; enabled only for a current, verified two-family comparison.")
-    if include != binding.get("include_family_comparison"):
-        st.warning("The findings binding changed — update summary before generating or downloading findings.")
-        ss.pop("summary_draft", None)
-        return
-    draft_state = ss.get("summary_draft")
-    draft_current = bool(draft_state and draft_state.get("snapshot_id") == facts.snapshot_id
-                         and draft_state.get("family") == facts.returned_family
-                         and draft_state.get("model_version") == facts.model_version
-                         and draft_state.get("include_family_comparison") == include)
-    label = "Regenerate findings" if draft_current else "Generate findings"
-    if st.button(label, key="generate_findings"):
-        try:
-            with st.spinner("Generating a bounded clinician draft…"):
-                draft, metadata = PatientSummaryWriter(settings).write(facts)
-            ss["summary_draft"] = draft_state = {
-                "snapshot_id": facts.snapshot_id, "family": facts.returned_family,
-                "model_version": facts.model_version, "include_family_comparison": include,
-                "kind": "AI-generated draft for clinician review", "markdown": findings_markdown(draft),
-                "metadata": metadata.__dict__,
-            }
-        except Exception as exc:  # noqa: BLE001 - safe class-only failure shown with deterministic fallback
-            ss["summary_draft"] = draft_state = {
-                "snapshot_id": facts.snapshot_id, "family": facts.returned_family,
-                "model_version": facts.model_version, "include_family_comparison": include,
-                "kind": "Template summary", "markdown": deterministic_summary(facts),
-                "error": PatientSummaryWriter.safe_error(exc),
-            }
-        draft_current = True
-    if draft_current:
-        if draft_state.get("error"):
-            st.warning(f"Narrative unavailable ({draft_state['error']}). A deterministic template is shown instead.")
-        else:
-            st.success("AI-generated draft for clinician review")
-        st.markdown(draft_state["markdown"])
-        export = export_summary(facts, draft_state["markdown"], draft_label=draft_state["kind"])
-        st.download_button("Download summary", export, file_name=f"kairos-summary-{facts.snapshot_id[:12]}.md",
-                           mime="text/markdown", key="download_summary")
-    else:
-        template = deterministic_summary(facts)
-        st.markdown(template)
-        st.download_button("Download summary", export_summary(facts, template),
-                           file_name=f"kairos-summary-{facts.snapshot_id[:12]}.md", mime="text/markdown",
-                           key="download_summary")
     with st.expander("Full input audit", expanded=False):
-        st.dataframe(pd.DataFrame([f.model_dump() for f in facts.facts]), hide_index=True, width="stretch")
+        audit_rows = [{**f.model_dump(), "value": json.dumps(f.value, default=str) if isinstance(f.value, (dict, list))
+                       else str(f.value)} for f in facts.facts]
+        st.dataframe(pd.DataFrame(audit_rows), hide_index=True, width="stretch")
 
 
 # --- page -------------------------------------------------------------------------------------------
-st.title("KAIROS: patient model")
-st.warning(BANNER, icon="⚠️")
+st.image(str(LOGO_PATH), width=300)
 try:
     principal = st.context.headers.get("X-MS-CLIENT-PRINCIPAL-NAME")
 except Exception:  # noqa: BLE001
@@ -871,19 +852,6 @@ except Exception:  # noqa: BLE001
 notice = ss.pop("notice", None)
 if notice:
     getattr(st, notice[0])(notice[1])
-
-with st.sidebar:
-    st.header("Example patient")
-    st.selectbox("Synthetic example", list(dp.PRESETS) + [PUBLISHED], key="preset_choice")
-    st.button("Load into the form", key="load_preset", on_click=cb_load_example, type="primary")
-    st.caption("All examples are synthetic. Every input stays editable after loading.")
-    st.divider()
-    st.header("Prediction")
-    st.radio("Guideline jurisdiction", dp.JURISDICTIONS, key="jurisdiction",
-             format_func=lambda j: "ESC/EACTS" if j == "ESC_EACTS" else "ACC/AHA")
-    st.caption("Selected model family: " + family_label(ss.get("model_family")))
-    st.caption(f"Backend: {BACKEND}. Version {__version__}. "
-               + (f"Signed in as {principal}." if principal else "Not behind Entra ID sign-in (local run)."))
 
 inventory = model_inventory()
 models_info = loaded_models()
@@ -896,40 +864,51 @@ family_options = list(available_families)
 if selected_missing:
     family_options.append(ss["model_family"])
 
-st.markdown("#### Patient workflow")
-tool_family, tool_version, tool_default, tool_date, tool_refresh = st.columns([2, 1.4, 1.2, 1.5, 1.2])
-if family_options:
-    tool_family.selectbox("Model family", family_options, key="model_family", format_func=family_label,
-                          help="The selected family is used by Prediction, Risk over time, What-if and Patient Summary. "
-                               "Each family keeps the action flags returned by the service.")
-else:
-    tool_family.caption("Model family")
-    tool_family.error("No compatible model family is available.")
-selected_info = models_info.get(ss.get("model_family"), {})
-tool_version.metric("Model version", selected_info.get("model_version") or "Unavailable")
-default_family = inventory.get("default_family")
-tool_default.metric("Service default", family_label(default_family) if default_family else "Unverified")
-tool_date.date_input("Assessment date", key="prediction_time", min_value=MIN_DATE, max_value=MAX_DATE,
-                     help="Only information dated on or before this day is used.")
-if tool_refresh.button("Refresh available models", key="refresh_models"):
-    model_inventory.clear()
-    model_card.clear()
-    st.rerun()
-if not inventory.get("verified"):
-    st.warning("Family availability could not be verified. Refresh available models; no unverified family option is invented.")
-elif selected_missing:
-    st.error("The selected model family is no longer available. Its bound results are out of date; select an available family.")
-elif len(available_families) == 1:
-    st.caption(f"Only {family_label(available_families[0])} is available; a two-family comparison has not been run.")
-if inventory.get("verified") and inventory.get("models"):
-    unavailable = {f: i for f, i in inventory["models"].items() if f not in models_info}
-    with st.expander("Model-family availability", expanded=False):
-        st.dataframe(pd.DataFrame([
-            {"family": family_label(f), "version": i.get("model_version"),
-             "compatible": i.get("compatible_with_default"),
-             "status": "available" if f in models_info else "incompatible"}
-            for f, i in inventory["models"].items()
-        ]), hide_index=True, width="stretch")
+with st.sidebar:
+    st.warning(BANNER, icon="⚠️")
+    st.header("Example patient")
+    st.selectbox("Synthetic example", list(dp.PRESETS) + [PUBLISHED], key="preset_choice")
+    st.button("Load into the form", key="load_preset", on_click=cb_load_example, type="primary")
+    st.caption("All examples are synthetic. Every input stays editable after loading.")
+    st.divider()
+    st.header("Model family")
+    if family_options:
+        st.selectbox("Model family", family_options, key="model_family", format_func=family_label,
+                     help="The selected family is used by Prediction, Risk over time, What-if and Patient Summary. "
+                          "Each family keeps the action flags returned by the service.")
+    else:
+        st.error("No compatible model family is available.")
+    selected_info = models_info.get(ss.get("model_family"), {})
+    default_family = inventory.get("default_family")
+    tool_version, tool_default = st.columns(2)
+    tool_version.metric("Model version", selected_info.get("model_version") or "Unavailable")
+    tool_default.metric("Service default", family_label(default_family) if default_family else "Unverified")
+    if st.button("Refresh available models", key="refresh_models"):
+        model_inventory.clear()
+        model_card.clear()
+        st.rerun()
+    if not inventory.get("verified"):
+        st.warning("Family availability could not be verified. Refresh available models; no unverified family option is invented.")
+    elif selected_missing:
+        st.error("The selected model family is no longer available. Its bound results are out of date; select an available family.")
+    elif len(available_families) == 1:
+        st.caption(f"Only {family_label(available_families[0])} is available; a two-family comparison has not been run.")
+    if inventory.get("verified") and inventory.get("models"):
+        with st.expander("Model-family availability", expanded=False):
+            st.dataframe(pd.DataFrame([
+                {"family": family_label(f), "version": i.get("model_version"),
+                 "compatible": i.get("compatible_with_default"),
+                 "status": "available" if f in models_info else "incompatible"}
+                for f, i in inventory["models"].items()
+            ]), hide_index=True, width="stretch")
+    st.divider()
+    st.header("Prediction")
+    st.date_input("Assessment date", key="prediction_time", min_value=MIN_DATE, max_value=MAX_DATE,
+                  help="Only information dated on or before this day is used.")
+    st.radio("Guideline jurisdiction", dp.JURISDICTIONS, key="jurisdiction",
+             format_func=lambda j: "ESC/EACTS" if j == "ESC_EACTS" else "ACC/AHA")
+    st.caption(f"Backend: {BACKEND}. Version {__version__}. "
+               + (f"Signed in as {principal}." if principal else "Not behind Entra ID sign-in (local run)."))
 
 card = model_card(ss.get("model_family")) if ss.get("model_family") in available_families else None
 tab_summary, tab_inputs, tab_pred, tab_compare, tab_traj, tab_what, tab_note, tab_about = st.tabs(
@@ -1085,18 +1064,51 @@ def run_or_reuse(body: dict, fam: str) -> dict:
     return cached_prediction(body, fam) or cache_prediction(body, fam, predict_for(body, fam))
 
 
+def store_summary_binding(request_obj, body: dict, response: dict | None, selected: str | None,
+                          family_compare: dict | None = None) -> dict:
+    comparator = comparator_for_request(request_obj, source_kind=source_provenance)
+    model_body = response.get("body") if response and response.get("status") == 200 else None
+    facts = assemble_patient_summary(request_obj, model_body, comparator, selected_family=selected,
+                                     source_provenance=source_provenance, family_comparison=family_compare)
+    binding = {
+        "snapshot_key": snapshot_hash(body, source_provenance), "selected_family": selected,
+        "returned_family": facts.returned_family, "model_version": facts.model_version,
+        "namespace": inventory.get("namespace"), "threshold": 0.05,
+        "request": json.loads(json.dumps(body, default=str)), "response": model_body,
+        "comparator": comparator.to_dict(), "facts": facts.model_dump(mode="json"),
+        "include_family_comparison": bool(family_compare),
+    }
+    ss["summary_binding"] = binding
+    ss.pop("summary_draft", None)
+    return binding
+
+
 def cb_use_family(fam: str) -> None:
     ss["model_family"] = fam
     ss.pop("summary_draft", None)
 
+
+compare_families = available_families
+compare_key = json.dumps({"snapshot": payload_key, "families": compare_families,
+                          "versions": {f: models_info[f].get("model_version") for f in compare_families},
+                          "namespace": inventory.get("namespace")}, sort_keys=True, default=str)
+# Run the family comparison automatically for every new input snapshot so the summary can include it.
+if payload is not None and len(compare_families) >= 2 and (ss.get("res_compare") or {}).get("key") != compare_key:
+    with st.spinner("Comparing model families…"):
+        ss["res_compare"] = {"key": compare_key, "snapshot_key": payload_key,
+                             "results": {fam: run_or_reuse(payload, fam) for fam in compare_families}}
 
 with tab_pred:
     if request is None:
         st.info("Fix the inputs listed on the Patient inputs tab first.")
     if st.button("Run prediction", key="run_predict", type="primary", disabled=request is None or family is None):
         ss["res_predict"] = run_or_reuse(payload, family)
+        store_summary_binding(request, payload, ss["res_predict"], family)
     current_prediction = ss.get("res_predict")
-    if current_prediction and current_prediction.get("snapshot_key") != payload_key:
+    expected_version = (models_info.get(family) or {}).get("model_version") if family else None
+    if current_prediction and (current_prediction.get("snapshot_key") != payload_key
+                               or current_prediction.get("requested_family") != family
+                               or (expected_version and (current_prediction.get("body") or {}).get("model_version") != expected_version)):
         st.warning("Out of date — run prediction for the current inputs.")
     else:
         render_prediction(current_prediction)
@@ -1104,10 +1116,6 @@ with tab_pred:
 with tab_compare:
     st.caption("This compares compatible estimator families on one fixed input snapshot; Patient Summary separately compares "
                "the selected model with the fixed current-echo rule. Sensitivities are not treatment effects.")
-    compare_families = available_families
-    compare_key = json.dumps({"snapshot": payload_key, "families": compare_families,
-                              "versions": {f: models_info[f].get("model_version") for f in compare_families},
-                              "namespace": inventory.get("namespace")}, sort_keys=True, default=str)
     cached = ss.get("res_compare")
     comparison_current = bool(cached and cached.get("key") == compare_key)
     if payload is None:
@@ -1146,7 +1154,11 @@ with tab_traj:
     st.caption("One prediction at every echo from time zero to the prediction time: how the risk updates as the series grows.")
     if st.button("Compute risk over time", key="run_traj", type="primary", disabled=request is None or family is None):
         ss["res_traj"] = predict_for(payload, family, "/predict/trajectory")
-    render_trajectory(ss.get("res_traj"), form)
+    trajectory_result = ss.get("res_traj")
+    if trajectory_result and trajectory_result.get("family") != family:
+        st.warning("Risk-over-time output is out of date for the selected family. Compute it again.")
+    else:
+        render_trajectory(trajectory_result, form)
 
 with tab_what:
     last = dp.latest_echo(form)
@@ -1173,13 +1185,18 @@ with tab_what:
                 hypothetical_request = dp.request_from_form(hypothetical)
                 rows, _ref = dp.staging_rows(hypothetical)
                 ss["res_whatif"] = {
+                    "family": family,
                     "now": predict_for(base_request.model_dump(mode="json", by_alias=True), family),
                     "then": predict_for(hypothetical_request.model_dump(mode="json", by_alias=True), family),
                     "dates": (base_request.prediction_time, hypothetical_request.prediction_time),
                     "new_stage": next((r for r in rows if r["date"] == dp.to_date(hypothetical["prediction_time"])), None)}
             except dp.FormError as exc:
                 ss["res_whatif"] = {"form_error": "; ".join(exc.messages)}
-        render_whatif(ss.get("res_whatif"))
+        whatif_result = ss.get("res_whatif")
+        if whatif_result and whatif_result.get("family") not in (None, family):
+            st.warning("What-if output is out of date for the selected family. Run it again.")
+        else:
+            render_whatif(whatif_result)
 
 with tab_note:
     st.caption("Paste an operative, procedure or progress note. The extract service reads it with rules first and with the "
