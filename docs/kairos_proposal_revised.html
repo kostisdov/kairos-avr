@@ -1,0 +1,659 @@
+<title>KAIROS Submission</title>
+<meta name="description" content="Revised submission for the Dyania Health AVR durability challenge: a working research prototype for dynamic prediction of bioprosthetic aortic valve deterioration, with protocol, model approach, biomarker and anticoagulant modules, simulation design, data plan and delivery plan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Source+Serif+4:opsz,wght@8..60,600&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --ground:#F3F4F8;
+  --surface:#FFFFFF;
+  --surface-2:#EAECF3;
+  --ink:#171A26;
+  --ink-2:#4B5163;
+  --ink-3:#656C7E;
+  --rule:#D8DBE5;
+  --rule-strong:#B9BECD;
+  --accent:#3A47A6;
+  --accent-soft:#E7E9F7;
+  --brief:#9E2B3A;
+  --brief-soft:#F5E6E8;
+  --evid:#1B6E74;
+  --evid-soft:#E4EFEF;
+  --data:#8A5A00;
+  --data-soft:#FBF1DC;
+  --data-line:#E5C27E;
+  --focus:#3A47A6;
+  --shadow:0 6px 20px rgba(23,26,38,.12);
+  --serif:"Source Serif 4","Iowan Old Style",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#12141C;
+    --surface:#191C27;
+    --surface-2:#202431;
+    --ink:#E8EAF2;
+    --ink-2:#B0B6C6;
+    --ink-3:#8D94A6;
+    --rule:#2B2F3D;
+    --rule-strong:#3E4454;
+    --accent:#9BA6EE;
+    --accent-soft:#1F2340;
+    --brief:#E0707E;
+    --brief-soft:#2A1A1F;
+    --evid:#5CB7BC;
+    --evid-soft:#172B2D;
+    --data:#E7B865;
+    --data-soft:#2A2213;
+    --data-line:#5A4722;
+    --focus:#9BA6EE;
+    --shadow:0 6px 20px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#12141C;
+  --surface:#191C27;
+  --surface-2:#202431;
+  --ink:#E8EAF2;
+  --ink-2:#B0B6C6;
+  --ink-3:#8D94A6;
+  --rule:#2B2F3D;
+  --rule-strong:#3E4454;
+  --accent:#9BA6EE;
+  --accent-soft:#1F2340;
+  --brief:#E0707E;
+  --brief-soft:#2A1A1F;
+  --evid:#5CB7BC;
+  --evid-soft:#172B2D;
+  --data:#E7B865;
+  --data-soft:#2A2213;
+  --data-line:#5A4722;
+  --focus:#9BA6EE;
+  --shadow:0 6px 20px rgba(0,0,0,.5);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:3px}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-2);padding:.12em .38em;border-radius:4px;overflow-wrap:anywhere}
+b,strong{font-weight:600}
+h1,h2,h3{text-wrap:balance}
+
+.page{max-width:1180px;margin-inline:auto;padding-inline:clamp(16px,4vw,48px);padding-block:clamp(28px,5vw,60px) 64px}
+
+.masthead{display:grid;gap:14px;padding-block-end:28px;border-bottom:1px solid var(--rule)}
+.eyebrow{margin:0;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+h1{margin:0;font-family:var(--serif);font-weight:600;font-size:clamp(36px,5.6vw,56px);line-height:1.02;letter-spacing:-.012em}
+h1 small{display:block;margin-top:10px;font-family:var(--sans);font-weight:400;font-size:clamp(16px,1.6vw,19px);line-height:1.45;letter-spacing:0;color:var(--ink-2)}
+.standfirst{margin:0;max-width:62ch;font-size:clamp(16.5px,1.6vw,18.5px);line-height:1.55;color:var(--ink-2)}
+.meta{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px 28px;font-size:13.5px;color:var(--ink-2)}
+.meta-k{margin-right:8px;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+
+.layout{display:grid;gap:26px;margin-top:26px}
+main{min-width:0;max-width:880px}
+.toc-k{margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.toc ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:2px 18px;font-size:14px}
+.toc a{display:block;padding:3px 0;color:var(--ink-2);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+@media (max-width:1039px){.toc{padding-bottom:18px;border-bottom:1px solid var(--rule)}}
+@media (min-width:1040px){
+  .layout{grid-template-columns:196px minmax(0,1fr);gap:64px;margin-top:40px}
+  .toc{position:sticky;top:28px;align-self:start}
+  .toc ul{flex-direction:column;gap:0}
+  .toc a{padding:5px 0 5px 12px;border-left:1px solid var(--rule)}
+  .toc a:hover{border-left-color:var(--accent)}
+}
+
+section{padding-block:44px;border-top:1px solid var(--rule);scroll-margin-top:16px}
+section.first{padding-top:0;border-top:0}
+h2{margin:0 0 14px;font-family:var(--serif);font-weight:600;font-size:clamp(26px,3.4vw,34px);line-height:1.12;letter-spacing:-.006em}
+h3{margin:30px 0 10px;font-size:18px;line-height:1.3;font-weight:600}
+h4{margin:0;font-size:15.5px;line-height:1.35;font-weight:600}
+p{margin:0 0 14px;max-width:68ch}
+.lede{font-size:17.5px;color:var(--ink-2)}
+.bullets{margin:0 0 14px;padding-left:1.15em;display:grid;gap:8px;max-width:72ch}
+.bullets li{padding-left:.2em}
+.bullets li::marker{color:var(--ink-3)}
+.bullets.tight{gap:5px;font-size:15px}
+.muted{font-size:14px;color:var(--ink-3)}
+.file{font-family:var(--mono);font-size:.9em;color:var(--ink);background:var(--surface-2);padding:.1em .38em;border-radius:4px}
+
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;vertical-align:middle;line-height:1.3}
+.tag.impl{background:var(--evid-soft);color:var(--evid)}
+.tag.demo{background:var(--accent-soft);color:var(--accent)}
+.tag.plan{background:var(--data-soft);color:var(--data)}
+.tag.unv{background:var(--brief-soft);color:var(--brief)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:16px 0 0;font-size:13.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+
+.decision{margin:18px 0 0;padding:clamp(18px,3vw,28px);background:var(--surface);border:1px solid var(--rule-strong);border-radius:10px;display:grid;gap:14px}
+.decision dl{margin:0;display:grid;grid-template-columns:170px minmax(0,1fr);gap:10px 22px}
+.decision dt{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);padding-top:3px}
+.decision dd{margin:0;font-size:15.5px;line-height:1.55}
+@media (max-width:560px){.decision dl{grid-template-columns:1fr;gap:2px 0}.decision dd{margin-bottom:10px}}
+
+.table-wrap{margin:14px 0 6px;overflow-x:auto;background:var(--surface);border:1px solid var(--rule);border-radius:10px}
+table{width:100%;min-width:640px;border-collapse:collapse;font-size:14.5px;line-height:1.45}
+th,td{padding:10px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--rule)}
+thead th{background:var(--surface-2);font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+tbody th{font-weight:600;color:var(--ink)}
+tbody td{color:var(--ink-2)}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+td.num,th.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.narrow table{min-width:520px}
+.figure-note{margin:8px 0 0;font-size:13.5px;color:var(--ink-3)}
+
+.dl{margin:18px 0 0;display:grid;grid-template-columns:170px minmax(0,1fr);gap:0 24px;max-width:820px}
+.dl dt,.dl dd{padding-block:10px;border-top:1px solid var(--rule)}
+.dl dt{padding-top:13px;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.dl dd{margin:0;font-size:15px}
+.dl dd p{margin:0 0 8px}
+.dl dd p:last-child{margin-bottom:0}
+@media (max-width:560px){.dl{grid-template-columns:1fr}.dl dt{padding-bottom:2px}.dl dd{border-top:0;padding-top:0}}
+
+.pipe{list-style:none;margin:18px 0 6px;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.pipe li{position:relative;display:grid;gap:4px;padding:12px 14px;background:var(--surface);border:1px solid var(--rule);border-radius:8px}
+.pipe li strong{font-size:14px;line-height:1.3}
+.pipe li span{font-size:13px;line-height:1.45;color:var(--ink-2)}
+.pipe li i{font-style:normal;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.pipe li.act{border-color:var(--accent);background:var(--accent-soft)}
+
+.note{display:grid;grid-template-columns:20px minmax(0,1fr);gap:12px;align-items:start;max-width:72ch;padding:12px 16px;margin:14px 0;background:var(--data-soft);border:1px solid var(--data-line);border-radius:8px}
+.note p{margin:0;font-size:14.5px;color:var(--ink)}
+.ico{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--data);color:var(--data);font-size:12px;font-weight:700;line-height:1;margin-top:1px}
+.risk{font-weight:600;color:var(--brief)}
+
+.check{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px;max-width:72ch}
+.check li{display:grid;grid-template-columns:18px minmax(0,1fr);gap:10px;font-size:15px}
+.check li::before{content:"";width:14px;height:14px;margin-top:5px;border:1.5px solid var(--rule-strong);border-radius:3px}
+
+.sources{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px;font-size:14px;color:var(--ink-2)}
+.foot{margin-top:40px;padding-top:22px;border-top:1px solid var(--rule);font-size:13px;color:var(--ink-3)}
+.foot p{margin:0;max-width:none}
+
+@media print{
+  .toc{display:none}
+  .layout{display:block}
+  a{color:inherit;text-decoration:none}
+  .table-wrap{overflow:visible;border:0;background:none}
+  table{min-width:0;font-size:11.5px}
+  th,td{padding:6px 8px}
+  thead{display:table-header-group}
+  tr,li,.note,.decision,.pipe li,.foot{break-inside:avoid}
+  section{break-inside:auto}
+  h2,h3{break-after:avoid}
+  .decision{box-shadow:none}
+}
+</style>
+
+<div class="page">
+  <header class="masthead">
+    <p class="eyebrow">Dyania Health Hackathon 2026 · AVR Durability Challenge · Revised submission</p>
+    <h1>KAIROS<small>A working research prototype for dynamic prediction of bioprosthetic aortic valve deterioration. Kinetics of Aortic bioprosthesis Integrity, Risk-adapted echO Surveillance; from καιρός, the right moment.</small></h1>
+    <p class="standfirst">KAIROS demonstrates how valve identity, serial echocardiography, biological susceptibility and treatment history can update the predicted risk of structural valve deterioration while accounting for competing mortality. The prototype extracts real records, develops and evaluates the model on explicitly synthetic scenarios, and lays out the clinical validation that comes next. It does not claim demonstrated clinical accuracy, improved outcomes or deployment readiness.</p>
+    <ul class="meta">
+      <li><span class="meta-k">Team</span>[Team name] · [Name, physician] · [Name, engineer, data and extraction] · [Name, engineer, modelling]</li>
+      <li><span class="meta-k">Submission</span>Thu 17 Sep 2026, 17:00 Athens</li>
+      <li><span class="meta-k">Document</span>Revised submission draft, 16 Sep 2026. The original proposal is preserved separately.</li>
+    </ul>
+    <div class="legend" aria-label="Status legend">
+      <span><span class="tag impl">Implemented</span>exists in the repository and is tested</span>
+      <span><span class="tag demo">Demonstrated</span>shown on explicitly synthetic scenarios</span>
+      <span><span class="tag plan">Planned</span>future work requiring clinical cohorts</span>
+      <span><span class="tag unv">Unverified</span>stated by a source we could not check in full</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Contents">
+      <p class="toc-k">Contents</p>
+      <ul>
+        <li><a href="#summary">Summary</a></li>
+        <li><a href="#readme">Problem, approach, decisions</a></li>
+        <li><a href="#quantities">What is predicted</a></li>
+        <li><a href="#protocol">Study protocol</a></li>
+        <li><a href="#model">Model approach</a></li>
+        <li><a href="#biomarkers">Biomarker modules</a></li>
+        <li><a href="#anticoag">Anticoagulant exposure module</a></li>
+        <li><a href="#simulation">Simulation design</a></li>
+        <li><a href="#demo">The demonstration</a></li>
+        <li><a href="#data">Data</a></li>
+        <li><a href="#dataplan">Data plan</a></li>
+        <li><a href="#delivery">Deliverables and plan</a></li>
+        <li><a href="#limits">Limitations and non-claims</a></li>
+        <li><a href="#appendix">Appendices</a></li>
+        <li><a href="#references">References</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <section id="summary" class="first">
+        <h2>Summary</h2>
+        <p class="lede">Bioprosthetic aortic valves deteriorate, mostly without symptoms, on a timetable that depends on the valve, the patient and the biology between them. Surveillance today is a fixed schedule. KAIROS is a working prototype of the alternative: a dynamic, competing-risk prediction of structural valve deterioration that updates every time an echocardiogram is read and says, for this patient with this valve, how likely deterioration is before death over the next one, three and five years.</p>
+        <p>The prototype has three layers, and the document keeps them apart throughout.</p>
+        <ul class="bullets">
+          <li><b>Real-record extraction.</b> <span class="tag impl">Implemented</span> A valve passport is extracted from 202 de-identified operative reports, procedure notes and progress notes covering 117 patients: route, valve model and generation, size, implant year, serial gradients and event mentions. This layer establishes what a hospital record actually contains and how reliably it can be read. It does not train the model.</li>
+          <li><b>Model development on synthetic scenarios.</b> <span class="tag demo">Demonstrated</span> A penalised cause-specific survival model with dynamic landmarking is developed and evaluated on explicitly synthetic cohorts whose parameters are literature-informed, assumed or varied in sensitivity analysis. Evaluation shows whether the model recovers what the scenarios contain, and whether biomarker and anticoagulant modules add information when it is there and stay quiet when it is not. Synthetic performance is evidence about the demonstration, not about patients.</li>
+          <li><b>Clinical validation as the next phase.</b> <span class="tag plan">Planned</span> Retrospective development in adequate hospital cohorts, a frozen model, temporal and external validation, then prospective silent evaluation. Only after that would any change to surveillance be tested. Its absence today is the boundary of a 36-hour event, not a failure of the objective.</li>
+        </ul>
+        <p>Two scientific differentiators are carried in full: an organised biomarker panel spanning renal and metabolic, mineral, lipid, cardiac-response and inflammatory-molecular modules, and detailed modelling of anticoagulant exposure as dated, class-specific history. Both are built so the core model runs without them and so their contribution is measured, never assumed.</p>
+      </section>
+
+      <section id="readme">
+        <h2>Problem statement, approach and design decisions</h2>
+        <p class="muted">The content of <span class="file">README.md</span>.</p>
+
+        <h3>Problem statement</h3>
+        <p>Bioprosthetic aortic valves deteriorate, usually without symptoms: in a 1,387-patient surgical cohort about a third developed haemodynamic deterioration under pre-VARC-3 criteria over a decade, and in a 2,403-patient TAVI registry VARC-3 moderate or severe deterioration reached 10.8% at five years. Surveillance follows fixed schedules that differ between guidelines, roughly a third of scheduled five-year echocardiograms in trials never happened, and echo readings vary between sites, so deterioration is often recognised late, when reoperation is urgent rather than planned; in UK national data on all reoperative aortic valve surgery from 1996 to 2019, operative mortality was 4.8% for elective, 11.8% for urgent and 31.7% for emergency cases, a description of how presentation urgency and mortality travel together across all reoperation causes, not a count of preventable deaths. Every bioprosthetic recipient is affected, most acutely younger recipients who will outlive their first valve and for whom valve identity, from withdrawn Trifecta to current SAPIEN 3, changes the odds materially.</p>
+
+        <h3>Our approach</h3>
+        <p><b>Data.</b> What a hospital already holds: implant and procedure records with the device identifier, echocardiography reports both structured and free-text, laboratory results, medication history with dates, and outcomes from procedure codes and death records, assembled per patient by text extraction and adjudicated against VARC-3 criteria. Public device identifiers and guideline reference tables supply the device hierarchy and contextual reference values; open-access trial reports and FDA device summaries supply literature-informed simulation parameters.</p>
+        <p><b>Method.</b> One primary model: penalised cause-specific proportional hazards for structural valve deterioration and for death, fitted on a landmark dataset so that each prediction uses only information available at that time, and combined into cumulative incidence. Valve identity enters as route and design class, with model and generation where counts allow; partial pooling across sparse devices is a planned extension. Biomarker modules and an anticoagulant-exposure module are added to the core model as separate blocks and judged on incremental calibration and Brier score against a reference model of valve age and type. Gradient boosting is an optional comparison, lower in priority than the modules.</p>
+        <p><b>Actionable for surveillance.</b> One inference returns the probability of structural deterioration before death within one, three and five years, conditional on the patient being alive with the index valve and free of deterioration at prediction time, with the corresponding probabilities of death before deterioration and of remaining alive with an intact valve, the main drivers, and a reliability statement. Three separate messages reach the clinic: a current abnormality that needs clinical assessment now, a predicted risk that is high enough to bring forward the next assessment, and a scheduled echo that has not happened. Guideline surveillance stays in place; the model never recommends reintervention or a longer interval.</p>
+
+        <h3>Key design decisions</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Decision</th><th scope="col">Rationale</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Primary endpoint: first adjudicated moderate or severe haemodynamic valve deterioration attributable to structural valve deterioration, VARC-3 criteria, stenotic, regurgitant and mixed phenotypes; death and index-valve replacement for a non-SVD cause as competing events; thrombosis as a reversible intercurrent state</th><td>Reintervention undercounts deterioration and arrives too late to change surveillance. Haemodynamic change is a sign, not a cause, so attribution is adjudicated. A valve replaced for endocarditis can never show structural deterioration, so that replacement competes; a treated thrombosis can resolve, so it does not.</td></tr>
+              <tr><th scope="row">Time zero is the qualifying reference echocardiogram, 30 to 180 days after implantation; later predictions at each subsequent echo; only information dated on or before the prediction time is used; patients meeting the endpoint by that time leave the risk set</th><td>A fixed day-90 prediction cannot use an echo performed on day 150. Anchoring on the actual reference study removes that contradiction and the look-ahead leakage that comes with it. The echo that establishes an endpoint is never used to predict that endpoint.</td></tr>
+              <tr><th scope="row">Valve identity as route and design class in the prototype, model and generation where counts allow, partial pooling planned</th><td>Model and generation differences are large and tangled with implant era. A frailty model that pools sparse devices toward their class is the right long-term structure, but it is described as planned until it is implemented and tested; the prototype uses the grouping it actually fits.</td></tr>
+              <tr><th scope="row">Biomarker and anticoagulant information as separate modules on top of a working core, each judged on incremental calibration and Brier score</th><td>Susceptibility biology and treatment history are where this design differs from a valve-age chart, but plausibility is not prediction. Modular evaluation shows what each block adds, keeps the core usable when a marker is unmeasured, and prevents composite scores that would hide null contributions.</td></tr>
+              <tr><th scope="row">Irregular follow-up as an observation process; guideline surveillance preserved; reminder, current-abnormality and predicted-risk messages kept separate</th><td>Patients with symptoms get more echoes and more detections. A missed visit triggers a reminder and lowers confidence; its association with deterioration is learned, not imposed. A five-year risk cannot justify a six-month appointment; only a near-term horizon or a current finding can.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="quantities">
+        <h2>What is predicted</h2>
+        <p>Predictions condition on the patient being alive, with the index valve in place and free of adjudicated deterioration at the prediction time. Three quantities are reported together; none is labelled as another.</p>
+        <div class="decision">
+          <dl>
+            <dt>Principal output</dt>
+            <dd>Probability of adjudicated structural valve deterioration before death within the prediction horizon: the cause-specific cumulative incidence of SVD at 1, 3 and 5 years from the prediction time.</dd>
+            <dt>Companion outputs</dt>
+            <dd>Probability of death before deterioration within the horizon, and probability of remaining alive with the index valve and without deterioration. The three sum to one together with the small probability of index-valve replacement for a non-SVD cause, which is reported separately.</dd>
+            <dt>Near-term horizon</dt>
+            <dd>A 12-month cumulative incidence accompanies every prediction, because the only decision the prototype supports, bringing the next assessment forward, needs a near-term risk, not a five-year one.</dd>
+            <dt>Horizons and evidence</dt>
+            <dd>One, three and five years are the supported horizons. Eight- and ten-year estimates are exploratory and labelled by whether the device generation's own follow-up reaches them. Individual 15- and 20-year predictions are future research, sketched in Appendix D, and not part of the core demonstration.</dd>
+            <dt>Not the complement</dt>
+            <dd>One minus the SVD cumulative incidence is not the probability of being alive with a functioning valve; it includes patients who died first. The document never uses it that way.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <section id="protocol">
+        <h2>Study protocol <span class="file">protocol/study_protocol.md</span></h2>
+        <p>Section numbers follow the submission template. Where a statement describes the prototype rather than the planned study, the status tag says so.</p>
+        <dl class="dl">
+          <dt>§1 Title and objectives</dt>
+          <dd>
+            <p><b>Title.</b> KAIROS: dynamic prediction of structural deterioration of bioprosthetic aortic valves with competing mortality. Prototype development on synthetic scenarios, with a protocol for retrospective development and independent validation in hospital cohorts.</p>
+            <p><b>Primary objective.</b> To develop, and in the next phase externally validate, a dynamic prediction model estimating the 1-, 3- and 5-year cumulative incidence of adjudicated structural valve deterioration before death, conditional on survival and valve status at prediction time, and to quantify the incremental value of serial echocardiography, biomarker modules and anticoagulant-exposure history over patient, valve and reference-echo information.</p>
+            <p><b>Secondary objectives.</b> Predict bioprosthetic valve failure, all-cause and SVD-attributable, as a separate outcome; characterise gradient and regurgitation trajectories by route and design class; estimate the association of antithrombotic exposure history with SVD and with thrombosis-related dysfunction as distinct outcomes, reported as predictive associations; test transportability to device generations absent from training where event counts permit.</p>
+            <p><b>Exploratory.</b> Simulated counts of patients whose next assessment would be brought forward, under stated assumptions; longer-horizon estimation to 8 and 10 years by device generation; the framework for 15- to 20-year estimation in Appendix D; a nested imaging and pathology component to attribute mechanism where CT or explant data exist.</p>
+            <p><b>Out of scope.</b> Any change to guideline surveillance intervals, any treatment recommendation, and any claim of clinical accuracy before validation in real cohorts.</p>
+          </dd>
+          <dt>§2 Target population</dt>
+          <dd>
+            <p><b>Time zero.</b> The date of the first adequate transthoracic echocardiogram performed 30 to 180 days after implantation, the qualifying reference study. Patients enter the cohort at that date if they are alive with the index valve and have not met the primary endpoint. Subsequent predictions are made at each later echocardiogram and, for reminder purposes only, at implant anniversaries.</p>
+            <p><b>Inclusion.</b> Adults with a first bioprosthetic aortic valve, surgical or transcatheter, implanted at a participating centre, with a qualifying reference study. No criterion depends on what is observed after entry.</p>
+            <p><b>Exclusion at entry.</b> Mechanical valves; endocarditis before the reference study; adjudicated deterioration or index-valve replacement before the reference study; concomitant mitral prosthesis. Early procedural failures before the reference study are described separately. Valve-in-valve implants form a pre-specified sensitivity cohort.</p>
+            <p><b>Prototype data and dates.</b> <span class="tag impl">Implemented</span> The de-identified records supplied for the event carry year-only dates. They cannot support landmark timing, exposure lags or longitudinal rates. All demonstrations requiring day-level precision use explicitly synthetic dates; the real records contribute extraction findings and descriptive counts only.</p>
+            <p><b>Cohort size for the planned study.</b> <span class="tag plan">Planned</span> With valve class and generation categories, spline terms, route-specific baselines and landmark summaries, the core model carries roughly 40 to 60 effective parameters. Riley's criteria with an anticipated Cox-Snell R² of 0.10 imply about 3,400 to 5,100 development patients, with the five-year event fraction taken as 6% and 11% in two planning scenarios; repeated landmark rows add no independent patients or events. External validation needs about 200 primary events for a precise calibration slope. Numbers are recomputed with pmsampsize once endpoint prevalence is measured in the source cohort.</p>
+          </dd>
+          <dt>§3 Endpoints</dt>
+          <dd>
+            <div class="table-wrap narrow">
+              <table>
+                <thead><tr><th scope="col">Outcome</th><th scope="col">Role</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">First adjudicated moderate or severe haemodynamic valve deterioration (VARC-3 stage 2 or 3) attributable to structural valve deterioration, stenotic, regurgitant or mixed</th><td>Primary</td></tr>
+                  <tr><th scope="row">Bioprosthetic valve failure per VARC-3: stage 1, any bioprosthetic valve dysfunction with clinically expressive criteria or irreversible stage 3 haemodynamic deterioration; stage 2, aortic valve reintervention; stage 3, valve-related death. Reported as all-cause BVF and, where the underlying dysfunction is adjudicated as SVD, SVD-attributable BVF</td><td>Key secondary</td></tr>
+                  <tr><th scope="row">SVD-related reintervention; time to first stage 3 haemodynamic deterioration</th><td>Secondary</td></tr>
+                  <tr><th scope="row">Thrombosis-related dysfunction, endocarditis, non-structural dysfunction (patient-prosthesis mismatch, paravalvular leak, pannus, malposition)</th><td>Separately classified bioprosthetic valve dysfunction; thrombosis-related dysfunction is also modelled as its own outcome</td></tr>
+                  <tr><th scope="row">Death from any cause before the primary endpoint</th><td>Competing event</td></tr>
+                  <tr><th scope="row">Index-valve replacement or explant for a non-SVD cause before the primary endpoint</th><td>Competing event, because SVD of the index valve can no longer be observed</td></tr>
+                  <tr><th scope="row">Valve thrombosis treated medically and resolved</th><td>Intercurrent event: the patient remains at risk and the episode enters as a time-varying covariate</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p><b>Clinical usefulness threshold for the planned study.</b> Calibration within 3 percentage points of observed at five years, Brier score better than the valve-age-and-type reference at 1, 3 and 5 years, discrimination above the reference as supporting evidence, and positive net benefit across the 1-year risk thresholds at which an earlier assessment would be triggered. Discrimination alone does not establish usefulness.</p>
+          </dd>
+          <dt>§4 Data sources and ground truth</dt>
+          <dd>
+            <p>Implant record and device identifier · echo reports, structured and free-text, for gradients, velocities, area, dimensionless index, regurgitation, LVEF and stroke volume · laboratory results by module (§ Biomarker modules) · medications with start, stop, interruption and switch dates · procedure and diagnosis codes and death records for candidate outcomes · CT or explant findings where they exist. Access through the institutional data warehouse under ethics approval, with text extraction for free text.</p>
+            <p><b>Adjudication framework.</b> Candidates are identified from codes and from echo reports flagged by the VARC-3 module; codes never establish a diagnosis. Two reviewers independently classify each candidate using all available evidence, with a third arbitrating. Change-based staging requires the patient's own reference study; published normal values inform context but cannot substitute for the patient's baseline. A stenotic endpoint requires the gradient criterion with the area or dimensionless-index criterion; a regurgitant endpoint requires the regurgitation criterion and is not invalidated by missing area or index. Confirmation is a second study or, where that is impossible, operative, pathological or unequivocal morphological evidence; death or reintervention before a second study is a pre-specified exception. Mechanism is assigned as SVD, thrombosis, endocarditis or non-structural with a confidence grade; where mechanisms overlap, the dominant mechanism is recorded with the alternative, and cases that cannot be resolved are classed <b>uncertain</b> rather than negative. Uncertain cases are excluded from the primary analysis and included in a sensitivity analysis under both classifications.</p>
+          </dd>
+          <dt>§5 Statistical analysis plan</dt>
+          <dd>
+            <p><b>Primary model.</b> Penalised cause-specific proportional hazards for SVD, for death and for non-SVD replacement, fitted on a landmark dataset with one row per patient per prediction time, spline terms for continuous predictors, baseline hazards stratified by route, and combined into cumulative incidence. Device effects: design class as fixed effects, with model and generation where at least a pre-specified number of events exist; a frailty term for model nested in class is the planned extension. <span class="tag demo">Demonstrated</span> on synthetic scenarios; <span class="tag plan">Planned</span> in cohorts.</p>
+            <p><b>Reference and comparisons.</b> Reference: valve age and valve type. Core: patient, valve, reference echo and serial echo. Core plus biomarker modules; core plus anticoagulant-exposure history; core plus both. Where feasible, core without serial echo, to isolate what updating adds. Every comparison reports calibration-in-the-large and slope, Brier score and its decomposition at 1, 3 and 5 years, with discrimination as supporting evidence, bootstrap uncertainty, and results under missing-data scenarios.</p>
+            <p><b>Leakage rules.</b> Only information dated on or before the prediction time; patients who met the endpoint leave the risk set; the echo establishing an endpoint is never a predictor of that event; all rows of one patient stay together in every resampling; preprocessing, imputation and model selection are fitted within training data; the model chosen on development data is frozen before it meets the temporal or external cohort, and no model is selected on the final cohort and then called validated.</p>
+            <p><b>Observation process.</b> The primary analysis predicts first adjudicated detection, which can be dated. Sensitivity analyses treat onset as interval-censored between the last negative and first positive study, and model surveillance intensity as informative. Missed visits are a reminder trigger and a confidence penalty; their coefficient, if any, is estimated.</p>
+            <p><b>Optional comparison.</b> <span class="tag plan">Planned, lower priority</span> A gradient-boosting survival model fitted to the same cause-specific structure, reported only if it beats the primary model on calibration and Brier score. It is not part of the core demonstration and no other model family is promised.</p>
+            <p><b>Validation sequence for the planned study.</b> Develop and tune in designated centres with patient-level resampling; freeze; evaluate in a later implant cohort and an untouched external centre; run leave-one-generation-out checks where events permit. Subgroups: route, design class, manufacturer, age at implant, sex, valve size and mismatch, renal function, diabetes, failure phenotype.</p>
+          </dd>
+          <dt>§6 Ethics and privacy</dt>
+          <dd>
+            <p>Retrospective, pseudonymised data. In Greece: hospital ethics committee approval, GDPR Article 9(2)(j) research basis, a data protection impact assessment, data minimisation and on-premises training. For a US partner: IRB review with waiver of consent, HIPAA de-identification or a limited dataset under a data use agreement. No identifiable data leaves the institution. Fairness: calibration and discrimination reported by sex, age band, race or ethnicity where recorded, and manufacturer, with recalibration by subgroup if drift is found. Transparency: each output shows the three probabilities, the horizon, the main drivers, the reliability statement and, separately, any reminder; the model never recommends reintervention or treatment changes and never alters guideline surveillance on its own. Reporting follows TRIPOD+AI with a model card.</p>
+          </dd>
+        </dl>
+      </section>
+
+      <section id="model">
+        <h2>Model approach <span class="file">model/approach.md</span></h2>
+        <ol class="pipe">
+          <li><i>Ingest</i><strong>Implant + echo + labs + meds</strong><span>EHR tables and free-text reports</span></li>
+          <li><i>Extract</i><strong>Valve passport</strong><span>Model, size, route, date; serial gradients, DVI, area, regurgitation, flow</span></li>
+          <li><i>Adjudicate</i><strong>VARC-3 classification</strong><span>Against the patient's reference study; uncertain class; reviewers</span></li>
+          <li><i>Predict</i><strong>Cause-specific hazards</strong><span>SVD, death, non-SVD replacement, at each landmark</span></li>
+          <li><i>Update</i><strong>Modules</strong><span>Serial echo, biomarkers, anticoagulant history, as available</span></li>
+          <li class="act"><i>Report</i><strong>Three probabilities + reliability</strong><span>Separate messages: assess now, earlier assessment, overdue</span></li>
+        </ol>
+        <dl class="dl">
+          <dt>§1 Formulation</dt>
+          <dd><p>Dynamic prediction by landmarking. The dataset holds one row per patient per prediction time, carrying every feature as known at that time. Cause-specific hazards for SVD, death and non-SVD replacement over the following five years are estimated and combined into cumulative incidence, conditional on being alive with the index valve and SVD-free at the landmark. Thrombosis-related dysfunction is modelled as its own outcome in a secondary analysis, since its predictors (route, intra-annular balloon-expandable design, valve-in-valve, absence of anticoagulation) and its management differ from structural deterioration, and a resolved episode returns the patient to the SVD risk set with the episode recorded as a covariate.</p></dd>
+          <dt>§2 The primary model</dt>
+          <dd><p>Penalised (ridge) cause-specific proportional hazards with splines, route-stratified baselines and landmark time as a covariate. It is interpretable, publishable as a nomogram, and its competing-risk claim is explicit in its structure. <span class="tag demo">Demonstrated</span> on synthetic scenarios in the prototype. Device effects in the prototype are design-class fixed effects with model and generation where the synthetic scenario supplies enough events; the frailty term for partial pooling is <span class="tag plan">planned</span> and described as such wherever the hierarchy is mentioned. A monotonic constraint on gradient change is not imposed: gradients are flow dependent and failure may be regurgitant; a constrained model is a sensitivity analysis, and performance is reported by failure phenotype.</p></dd>
+          <dt>§3 Core features</dt>
+          <dd>
+            <p><b>Static at time zero.</b> Age at implant, sex, BSA and BMI, route, design class, model and generation where available, label size within class, indexed effective orifice area and mismatch grade, tissue treatment, reference mean gradient, dimensionless index, area, regurgitation and paravalvular leak, LVEF and stroke volume index, diabetes with duration, eGFR and dialysis status, smoking status, atrial fibrillation and any other anticoagulation indication, antithrombotic class at time zero, bicuspid native valve, implant year, and for TAVI the residual regurgitation at discharge. Lipid-lowering treatment is recorded as exposure, not as protection.</p>
+            <p><b>Longitudinal at each landmark.</b> Current mean gradient, change from the reference study, most recent change and its interval, longer-term slope where three or more studies exist, current and changed dimensionless index and area, regurgitation grade and its change, stroke volume index and LVEF so that flow-dependent gradients are read in context, time since last echo, and the overdue indicator. Only measurements dated on or before the landmark are used.</p>
+            <p><b>Missing data.</b> Multiple imputation fitted within training data for covariates that are measured in most patients. Markers essentially absent in a cohort are not imputed into existence: the module that needs them is switched off and the core model reports without it. Stale echo values older than 18 months are flagged, not carried forward.</p>
+          </dd>
+          <dt>§4 Outputs</dt>
+          <dd><p>The three probabilities of § What is predicted at 1, 3 and 5 years, the 12-month cumulative incidence, the top drivers, and a reliability statement covering device evidence, data completeness, staleness and, where the model displayed is trained on synthetic scenarios, the label <b>illustrative, unvalidated</b>. Three messages are kept apart: a current abnormality that needs clinical assessment now, which is a finding, not a prediction; a predicted near-term risk high enough to bring the next assessment forward; and an overdue scheduled echo, which is a reminder. A five-year risk never drives an appointment interval.</p></dd>
+          <dt>§5 Clinical integration</dt>
+          <dd><p>Guideline surveillance stays in place and differs by jurisdiction: ESC/EACTS guidance recommends yearly clinical review with imaging for bioprostheses, while the 2020 ACC/AHA guideline considers transthoracic echo at 5 and 10 years and annually thereafter reasonable for surgical bioprostheses and annual echo reasonable after TAVI. The exact wording of the 2025 ESC/EACTS follow-up table was not verified by us <span class="tag unv">Unverified</span>. KAIROS runs when an echo report is finalised and at anniversaries for reminders. It never triggers reintervention, never changes antithrombotic treatment and never lengthens an interval. Whether it improves attendance or finds deterioration earlier is a question for the prospective phase.</p></dd>
+          <dt>§6 Limitations of the model</dt>
+          <dd><p>New and withdrawn devices with short records; sparse or irregular echo and the observation bias it creates; site variability in echo reading; flow-dependent gradients and low-flow states; regurgitant failure that gradients miss; mismatch mistaken for deterioration when the reference is missing; valve-in-valve physiology; extraction errors, above all native versus prosthetic values; confounding by indication and era in every treatment covariate; abrupt events with no preceding signal. The prototype's synthetic training data is the largest limitation and is stated first wherever results appear.</p></dd>
+        </dl>
+      </section>
+
+      <section id="biomarkers">
+        <h2>Biomarker modules</h2>
+        <p>The panel is a scientific differentiator and is retained in full, organised into modules that are added to the core model one at a time. For each, the table states the biological rationale, whether the evidence concerns bioprostheses directly or is extrapolated from native valve or vascular disease, the failure phenotype it speaks to, its availability in the supplied records, how the prototype represents it, and whether its predictive contribution is still hypothetical. No module is turned into a composite score, no marker is assumed to help, and the core model runs when any module is unavailable.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Module and markers</th><th scope="col">Biological rationale</th><th scope="col">Evidence</th><th scope="col">Phenotype</th><th scope="col">In supplied data (17 patients)</th><th scope="col">In prototype</th><th scope="col">Status</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Renal and metabolic: eGFR trajectory, dialysis status and start, HbA1c and diabetes duration, LDL and non-HDL cholesterol with lipid-lowering treatment</th><td>Uraemic mineral disturbance and glycation accelerate leaflet calcification; dialysis also raises competing mortality</td><td>Bioprosthesis-specific: renal dysfunction, dialysis and diabetes associated with deterioration in surgical and TAVI cohorts (Salaun 2018; Bern registry; TAVI review). Lipids alone inconsistent; a large observational study found no slower deterioration on lipid-lowering therapy <span class="tag unv">Unverified</span></td><td>Stenotic, calcific</td><td>eGFR or creatinine 17; HbA1c 11; lipids 15</td><td>Core features; trajectories in synthetic scenarios</td><td>Established association; incremental value over valve and echo to be measured</td></tr>
+              <tr><th scope="row">Mineral metabolism: phosphate, albumin-corrected and ionised calcium, PTH, alkaline phosphatase</th><td>Phosphocalcic balance governs hydroxyapatite nucleation on devitalised leaflet matrix</td><td>Small haemodialysis series with six events linked pre-operative phosphate to deterioration <span class="tag unv">Unverified</span>; otherwise mechanistic. Normal serum calcium says nothing about leaflet calcification</td><td>Stenotic</td><td>Phosphorus 4; PTH 0</td><td>Simulated only, in scenarios where the module carries meaningful, weak or no information</td><td>Hypothetical</td></tr>
+              <tr><th scope="row">Lipid-related susceptibility: lipoprotein(a), assay and original units preserved; oxidised phospholipids, Lp-PLA2 and PCSK9 where measured</th><td>Lp(a) carries oxidised phospholipids and autotaxin that drive osteogenic transition of valve interstitial cells</td><td>Conflicting and phenotype-specific. A 174-patient incident-SVD cohort found Lp(a) above 125 nmol/L associated with stenotic or mixed deterioration (adjusted sub-hazard ratio 3.0) and not with regurgitant deterioration. A 97-patient imaging study found no association over two years and a 389-patient study of patients already undergoing reintervention found no difference by Lp(a); the latter answers a different question from an inception cohort <span class="tag unv">Unverified</span>. Lp-PLA2, PCSK9 and insulin resistance were associated with deterioration in one prospective surgical cohort</td><td>Stenotic and mixed</td><td>Lp(a) 1; others 0</td><td>Simulated as a phenotype-specific effect; analysed continuously in original units</td><td>Hypothetical, phenotype-specific</td></tr>
+              <tr><th scope="row">Cardiac response: NT-proBNP</th><td>Marks the ventricle's response to any haemodynamic burden</td><td>Not SVD-specific; prognostic for heart failure and death</td><td>Any; mainly informs competing mortality</td><td>10</td><td>Longitudinal covariate in scenarios</td><td>Hypothetical for SVD</td></tr>
+              <tr><th scope="row">Vitamin K status: dephosphorylated-uncarboxylated matrix Gla protein (dp-ucMGP), chosen over undercarboxylated osteocalcin because MGP is the calcification inhibitor active in valve and vascular tissue</th><td>Vitamin K antagonists block carboxylation of MGP; high dp-ucMGP marks a disabled calcification brake and is the mechanistic link behind the VKA hypothesis in the anticoagulant module</td><td>dp-ucMGP rises on vitamin K antagonists and tracks vascular and native-valve calcification; no bioprosthetic outcome study. Randomised vitamin K supplementation did not slow native aortic valve calcification (AVADEC). Labelled extrapolation</td><td>Stenotic, calcific</td><td>0</td><td>Consumed by the anticoagulant module as a spline main effect and a VKA interaction; fitted in the measured substudy on a full-cohort offset, never imputed; simulated in the vitamin K antagonist scenario as the marker that should carry the VKA signal if the mechanism is real (see the module section)</td><td>Hypothetical; the single most informative research assay for this design</td></tr>
+              <tr><th scope="row">Inflammatory and molecular: hs-CRP; fetuin-A, serum calcification propensity; anti-alpha-Gal and anti-Neu5Gc IgG</th><td>Inflammation and loss of circulating calcification inhibitors; antibody responses against xenoantigens on animal-derived tissue</td><td>Anti-glycan antibodies: bioprosthesis-specific human longitudinal and experimental evidence (Senage 2022). Fetuin-A and calcification propensity: native-valve and vascular evidence, labelled extrapolation. hs-CRP: nonspecific</td><td>Calcific</td><td>hs-CRP few; others 0</td><td>Simulated as the "no incremental information" case unless a scenario states otherwise</td><td>Hypothetical</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="figure-note">Availability counts come from the supplied laboratory file (17 patients with structured results). Where a marker is essentially absent, the prototype does not impute it and does not claim evidence about it; it shows how the pipeline would carry it and how the evaluation would judge it.</p>
+      </section>
+
+      <section id="anticoag">
+        <h2>Anticoagulant exposure module</h2>
+        <p>Treatment history is the second differentiator, and it is modelled as dated exposure rather than a discharge checkbox. Its purpose is prediction: to learn whether exposure history carries information about structural deterioration and, separately, about thrombosis-related dysfunction. It makes no treatment recommendation and asserts no causal effect.</p>
+        <h3>What is recorded</h3>
+        <ul class="bullets tight">
+          <li><b>Drug and class.</b> Vitamin K antagonist, factor Xa inhibitor, direct thrombin inhibitor; antiplatelet agents recorded separately as single or dual therapy.</li>
+          <li><b>Indication.</b> Atrial fibrillation, venous thromboembolism, post-operative prophylaxis, suspected valve thrombosis, other.</li>
+          <li><b>History.</b> Start, stop, interruption and switching dates; current status at the prediction time; cumulative prior exposure by class.</li>
+          <li><b>INR control</b> only where adequately dated INR results exist; year-level data do not qualify.</li>
+          <li><b>Timing relative to echo findings.</b> An indicator for treatment initiated or changed within a defined window after a suspicious echo, kept as its own variable.</li>
+          <li><b>Prescription versus adherence.</b> Prescription records are labelled as such; confirmed adherence is a separate field where it exists.</li>
+        </ul>
+        <h3>How it is used</h3>
+        <p>Only exposure history available at the prediction time enters the model. Treatment started because dysfunction was suspected creates reverse causation, and a fixed lag alone does not remove the confounding by indication behind it; the module therefore keeps the post-suspicion indicator explicit, reports associations with and without those exposures, and does not apply a blanket lag that would erase recent thrombosis information relevant to the thrombosis outcome. SVD and thrombosis-related dysfunction remain distinct outcomes with distinct feature sets. Pre-specified interactions: antithrombotic class by route, and cumulative vitamin K antagonist exposure by tissue type. Where dp-ucMGP is measured, it enters beside cumulative VKA exposure as the marker of the mechanism the exposure is presumed to act through, so that the model can separate "on warfarin" from "vitamin K depleted". In the supplied records, exposure timelines were reconstructed at year resolution from start, end and discontinuation years for 17 patients <span class="tag impl">Implemented</span>; day-level behaviour is demonstrated on synthetic dates.</p>
+        <h3>How dp-ucMGP enters the model</h3>
+        <p>Dephosphorylated-uncarboxylated matrix Gla protein is a consumed input, not a tracked one. It enters the anticoagulant module as a log-transformed continuous value in pmol/L with the assay recorded, fitted with a spline, through two pre-specified terms: a main effect on the SVD hazard and an interaction with cumulative vitamin K antagonist exposure. The mechanistic hypothesis is directional: if the VKA signal is real it should run through dp-ucMGP, so the VKA coefficient is expected to shrink when the marker is added, and that shrinkage is a reported result. The marker is measured at time zero and at each annual landmark, carried forward for at most twelve months and then marked stale. It is never imputed across a cohort. Instead, the core model with the exposure module is fitted on the full cohort, and in the substudy subset where dp-ucMGP is measured a second model takes the full-cohort linear predictor as an offset and estimates only the dp-ucMGP terms; incremental Brier score and calibration are compared within that subset. In the vitamin K antagonist scenario the generator produces dp-ucMGP from VKA exposure plus noise and gives the SVD hazard its dependence on the marker rather than on the drug, so the demonstration checks that the model attributes the signal to the marker and that the VKA coefficient falls toward zero when the marker is present; a second variant makes the marker pure noise to check the model stays quiet. Every prediction states whether a measured dp-ucMGP value was used.</p>
+
+        <h3>Evidence, stated in balance</h3>
+        <ul class="bullets">
+          <li><b>Leaflet thrombosis.</b> Oral anticoagulation reduces subclinical leaflet thickening: GALILEO-4D 12.4% on a rivaroxaban strategy versus 32.4% on antiplatelet therapy; ADAPT-TAVR 9.8% on edoxaban versus 18.4% on dual antiplatelet therapy, a difference that did not reach significance; ATLANTIS-4D apixaban comparable to vitamin K antagonists.</li>
+          <li><b>Clinical outcomes.</b> In GALILEO, the rivaroxaban strategy without an anticoagulation indication increased death or thromboembolic events (HR 1.35), all-cause death (HR 1.69) and major bleeding. In ENVISAGE-TAVI AF, edoxaban was non-inferior to vitamin K antagonists for net adverse events but increased major bleeding (HR 1.40). Reduced imaging-detected thrombosis has not translated into clinical benefit, and factor Xa inhibitors are not described here as neutral or favourable.</li>
+          <li><b>Calcification.</b> Vitamin K antagonists inhibit matrix Gla protein, an endogenous calcification inhibitor. Observational signals of accelerated deterioration exist (warfarin as a correlate of late deterioration in the Salaun cohort; a small surgical series; higher fluoride uptake on PET in the ANTIPRO substudy <span class="tag unv">Unverified</span>), while other cohorts found anticoagulation associated with less deterioration (Quebec, FRANCE-TAVI) or more (Bern, HR 1.78). The evidence is conflicting and observational.</li>
+          <li><b>Conclusion for the module.</b> Exposure history is a predictive covariate whose direction may differ by outcome, route and tissue. Nothing here supports switching agents or claims that any anticoagulant prevents structural degeneration.</li>
+        </ul>
+      </section>
+
+      <section id="simulation">
+        <h2>Simulation design</h2>
+        <p>Synthetic scenarios exist to show whether the model and its modules recover what is in the data and stay honest about what is not. Each parameter is labelled literature-informed, assumed, or varied in sensitivity analysis. Published sub-distribution hazard ratios are not used as cause-specific hazard parameters without conversion and justification. Baseline hazards are anchored, where a curve could be read, to open-access reports (NOTION 10-year) and FDA device summaries; where only point estimates exist, that is stated.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Scenario</th><th scope="col">What it contains</th><th scope="col">What is evaluated</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Gradual stenotic deterioration</th><td>Rising gradient with falling area over years; measurement noise about 3 mmHg; competing mortality by age</td><td>Whether serial echo adds to baseline; calibration of 1-, 3- and 5-year SVD-before-death</td></tr>
+              <tr><th scope="row">Regurgitant or abrupt failure</th><td>Leaflet tear with little preceding gradient signal; regurgitant endpoint without area criteria</td><td>Whether the model correctly reports low predictability and the reliability statement flags it; phenotype-specific calibration</td></tr>
+              <tr><th scope="row">High competing mortality</th><td>Elderly TAVI-like cohort; death hazard several times the SVD hazard</td><td>Whether the three probabilities are reported correctly and the complement is never misread</td></tr>
+              <tr><th scope="row">Irregular or missing surveillance</th><td>Informative visit process; 25 to 35% missing at five years; interval-censored onset</td><td>Detection versus onset bias; overdue flag behaviour; sensitivity analyses</td></tr>
+              <tr><th scope="row">Biomarker information: meaningful, weak, absent</th><td>Three versions of the biomarker module effect, one per level, plus a marker essentially unmeasured</td><td>Whether incremental Brier and calibration gains appear only where information exists, and whether the pipeline degrades gracefully when a marker is absent</td></tr>
+              <tr><th scope="row">Anticoagulant associations by mechanism and confounding</th><td>Vitamin K antagonist raising calcific hazard and any anticoagulant lowering thrombosis hazard; confounding by indication; treatment started after a suspicious echo; dp-ucMGP generated from VKA exposure plus noise, with the SVD hazard depending on the marker rather than the drug, and a variant where the marker is pure noise</td><td>Whether opposite-direction effects are recovered rather than averaged; whether the post-suspicion indicator isolates reverse causation; whether the VKA coefficient shrinks toward zero when dp-ucMGP is present and the model stays quiet when the marker is noise</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Every synthetic figure is titled as a software demonstration. Synthetic performance is evidence about the demonstration, not clinical validation, and the document never presents it otherwise.</p>
+      </section>
+
+      <section id="demo">
+        <h2>The demonstration</h2>
+        <p>The story is one longitudinal patient. A de-identified record goes in; the valve passport comes out with route, model and generation, size and implant year, and the evidence spans highlighted. The echo trajectory is plotted. The model updates the three probabilities at each landmark, with the drivers and the reliability statement beside them. Where real extracted measurements are shown alongside a model trained on synthetic scenarios, the numerical prediction is labelled <b>illustrative, unvalidated</b>, and the real values appear in the deck only, never in the repository text.</p>
+        <p>The screen separates the three messages by design: a current abnormality, which is a clinical finding for assessment now; a predicted 12-month risk that would bring the next assessment forward; and an overdue scheduled echo, which is a reminder that needs no model at all. The guideline schedule is displayed beside them and is not modified.</p>
+        <p>Figures in the deliverable: the pipeline; the passport for one patient; the echo trajectory with landmarks; the three probabilities over time with intervals; calibration and Brier comparisons across the model ladder on synthetic scenarios; module incremental value where information is meaningful, weak and absent; the counts extracted from the real records.</p>
+      </section>
+
+      <section id="data">
+        <h2>Data</h2>
+        <h3>Real records supplied for the event</h3>
+        <p>Three de-identified exports from an Epic-based US heart and vascular institute, dates truncated to the year. They stay outside the repository; only code, aggregate counts with small-cell suppression and figures without patient-level rows are committed.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">File</th><th scope="col">Rows</th><th scope="col">Patients</th><th scope="col">Years</th><th scope="col">Content</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">notes_deidentified.xlsx</th><td class="num">215</td><td class="num">117</td><td class="num">2006–2026</td><td>Operative reports, progress notes, TAVR procedure notes, discharge summaries. Thirteen notes carry a deleted status (nine operative reports, four progress notes) and are excluded, leaving 202.</td></tr>
+              <tr><th scope="row">labs_deidentified.xlsx</th><td class="num">43,550</td><td class="num">17</td><td class="num">2004–2027</td><td>Creatinine or eGFR (17 patients), HbA1c (11), lipids (15), NT-proBNP (10), INR (17), LVEF recorded as a lab component (85 values), phosphorus (4), Lp(a) (1), no PTH. Device-interrogation and respiratory-therapy rows are filtered out.</td></tr>
+              <tr><th scope="row">medications_deidentified.xlsx</th><td class="num">5,807</td><td class="num">17</td><td class="num">2001–2027</td><td>Warfarin (6 patients), direct oral anticoagulants (3), antiplatelets (16), statins (16), antidiabetics (16), with start, end and discontinuation years.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="figure-note">Years extend to 2027, beyond the document date. The medication export carries an empty date-shift column, consistent with de-identification by date shifting; this explanation is inferred from the file structure, not confirmed by the data provider <span class="tag unv">Unverified</span>. No date before 2001 exists in any date column; earlier years inside note text are past medical history.</p>
+
+        <h3>Extraction findings</h3>
+        <p><span class="tag impl">Implemented</span> The extractor and the counts below are in the repository and covered by 39 passing tests. Counts use different denominators, stated in each row.</p>
+        <div class="table-wrap narrow">
+          <table>
+            <thead><tr><th scope="col">Element</th><th scope="col" class="num">Count</th><th scope="col">Denominator and note</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Implant documented in an operative or procedure note</th><td class="num">97</td><td>Of 117 patients: 53 surgical, 44 transcatheter. A further 15 mention the implant only in history; 5 are unspecified.</td></tr>
+              <tr><th scope="row">Implant year stated explicitly</th><td class="num">86</td><td>Of the 97; years 2006 to 2022, two thirds in 2013 to 2018. All 19 dated Trifecta implants fall in 2013 to 2017 and 24 of 32 SAPIEN implants in 2018 to 2022, so device and era are confounded in this sample.</td></tr>
+              <tr><th scope="row">Valve model named, with generation</th><td class="num">110</td><td>Of 117: Perimount family 31 (Perimount 28, Magna 3); Trifecta 21 and Trifecta GT 8; SAPIEN 3 17, SAPIEN 3 Ultra 15, SAPIEN XT under 5; CoreValve 5; Evolut PRO, Inspiris RESILIA, Epic and Freestyle under 5 each; 7 with no model identified.</td></tr>
+              <tr><th scope="row">Label size</th><td class="num">85</td><td>Of 117; mode 23 mm and 26 mm; ten patients at 21 mm or smaller.</td></tr>
+              <tr><th scope="row">At least one prosthetic mean gradient in text</th><td class="num">46</td><td>Of 117; one patient has gradients in two different years. Echo values live in progress notes, not a structured table.</td></tr>
+              <tr><th scope="row">Event mentions</th><td class="num">about 20</td><td>Valve-in-valve 10, redo sternotomy 9, prosthetic dysfunction or stenosis 9, endocarditis 9, thrombosis 1; overlapping and unadjudicated.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note"><span class="ico" aria-hidden="true">!</span><p><b>What these records can and cannot support.</b> They support extraction, a valve passport, descriptive statistics and the VARC-3 classification logic. They cannot support adjudicated outcomes, landmark timing, exposure lags or model training: about twenty unadjudicated event mentions, year-only dates, almost no serial echo. The physician's 20-note review is a pilot extraction audit; a proper validation needs an annotated sample enriched for hard cases.</p></div>
+
+        <h3>Open sources used and assets built</h3>
+        <p>No open, downloadable, patient-level dataset links valve identity, serial echo and adjudicated deterioration; registries publish curves and tables, never rows. The sources below fill the gaps around that fact. Appendix B holds the full register with access terms.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Asset</th><th scope="col">Built from</th><th scope="col">Use</th><th scope="col">Status</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Device table and aliases: 42 canonical models with identifiers, sizes, tissue, mounting, generation and market status</th><td>FDA AccessGUDID full release; FDA approvals; FDA Trifecta communication</td><td>Extraction of canonical model, class and size; withdrawn-device rule</td><td><span class="tag impl">Implemented</span>. LOTUS Edge is classed as a mechanically expanded intra-annular valve, corrected at source in the build script on 16 September so that regeneration keeps it</td></tr>
+              <tr><th scope="row">Reference values: 256 rows from the ASE 2024 prosthetic valve guideline appendix, 92 mapped to canonical models</th><td>Freely hosted guideline PDF</td><td>Contextual assessment when a value looks implausible; never a substitute for the patient's reference study in change-based staging</td><td><span class="tag impl">Implemented</span> as a table; Magna and Magna Ease are absent from the guideline's own table; wiring into the classifier as context is <span class="tag plan">planned</span></td></tr>
+              <tr><th scope="row">Published durability numbers and FDA summary tables</th><td>NOTION 10-year report; Trifecta comparisons; FDA summaries for SAPIEN 3, Inspiris RESILIA, Avalus, LOTUS Edge</td><td>Literature-informed simulation parameters, each with its definition and confidence</td><td><span class="tag impl">Implemented</span>; curve digitisation for reconstruction remains manual</td></tr>
+              <tr><th scope="row">Trial outcomes from ClinicalTrials.gov</th><td>API v2, six trials</td><td>Definitions table; cross-check of parameters</td><td><span class="tag impl">Implemented</span>; a permissive durability flag marks 714 of 755 rows and a strict title-based flag 50</td></tr>
+              <tr><th scope="row">Valve passport and eleven aggregate tables</th><td>The 202 real notes</td><td>Extraction findings; audit template</td><td><span class="tag impl">Implemented</span>, tested</td></tr>
+              <tr><th scope="row">Exposure timelines at year resolution</th><td>The medication and laboratory files</td><td>Demonstrates the exposure module's data model</td><td><span class="tag impl">Implemented</span></td></tr>
+              <tr><th scope="row">VARC-3 classification module</th><td>VARC-3 criteria</td><td>Proposes a stage against the reference study; uncertain class</td><td><span class="tag impl">Implemented</span>, tested; the stage 0 versus 1 boundary is our interpretation, for the physician to confirm</td></tr>
+              <tr><th scope="row">Scenario configuration</th><td>The tables above</td><td>Simulation parameters with source, definition and confidence</td><td><span class="tag impl">Implemented</span> as a skeleton; several parameters remain to be filled</td></tr>
+              <tr><th scope="row">Primary model, evaluation harness, patient demonstration, slides</th><td>Scenario data</td><td>The core demonstration</td><td><span class="tag plan">To build</span> in the remaining phases</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="dataplan">
+        <h2>Data plan <span class="file">data/data_plan.md</span></h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Deployment source</th><th scope="col">Type</th><th scope="col">Access</th><th scope="col">Variables</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Implant and procedure records</th><td>Structured, plus operative report text</td><td>Data warehouse; device identifier where recorded</td><td>Model, size, route, date, valve-in-valve, concomitant procedures</td></tr>
+              <tr><th scope="row">Echo reports</th><td>Structured measurements and free text</td><td>Echo reporting system; extraction for text</td><td>Gradients, velocity, area, DVI, regurgitation, LVEF, stroke volume, date</td></tr>
+              <tr><th scope="row">Laboratory</th><td>Structured, LOINC</td><td>Data warehouse</td><td>By module: eGFR trajectory, dialysis, HbA1c, lipids; phosphate, corrected calcium, PTH, alkaline phosphatase; Lp(a) in original units with assay and date; NT-proBNP; hs-CRP; research assays where a substudy exists</td></tr>
+              <tr><th scope="row">Medications</th><td>Structured, RxNorm</td><td>Data warehouse</td><td>Antithrombotic class with indication, start, stop, interruption and switch dates; INR results; lipid-lowering, glucose-lowering and mineral-metabolism drugs as exposures</td></tr>
+              <tr><th scope="row">Outcomes</th><td>Codes, procedure logs, death registry</td><td>Data warehouse; national death index</td><td>Candidate reinterventions, endocarditis, thrombosis, death and cause, for adjudication</td></tr>
+              <tr><th scope="row">Registries</th><td>Structured</td><td>Research application</td><td>External validation, incidence benchmarks</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Availability assumptions</h3>
+        <ul class="bullets">
+          <li><span class="risk">High risk.</span> Valve model and size coded consistently. In our notes they appear as "#21 Trifecta", "Implant Size: 25" and "Size: Ultra 26mm", so extraction is required.</li>
+          <li><span class="risk">High risk.</span> Serial echo for at least 60% of patients at five years. Published follow-up loss is 30 to 35%.</li>
+          <li><span class="risk">High risk.</span> Lp(a) measured: one test in 17 structured patients. Module switched off where absent.</li>
+          <li>Medium. Mineral-metabolism results outside kidney disease: phosphorus in 4 of 17, PTH in none.</li>
+          <li>Medium. Day-level dates: available in production, absent in the supplied records.</li>
+          <li>Low. Creatinine, HbA1c, lipids and medication history present for essentially all patients.</li>
+        </ul>
+        <h3>Preprocessing, labels and governance</h3>
+        <p>Deduplicate by patient, date and measurement; normalise units; parse free text with rules first and an LLM pass second, with an audit sample. Extreme values are flagged for source verification, not rejected. Align every echo to the implant date; define the reference study and the landmarks. Labels come from adjudication, with the VARC-3 module proposing and reviewers deciding. Medication records become dated exposure timelines. The supplied files stay on team machines and out of version control; production would run under a data use agreement, an impact assessment and on-premises compute, with the extraction step audited for leakage of names into structured fields.</p>
+      </section>
+
+      <section id="delivery">
+        <h2>Deliverables and delivery plan</h2>
+        <p>The remaining time is finite and not stated here in hours; the plan is in phases, each with a definition of done, in priority order. The core model and its evaluation come before any module, and modules come before optional models.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Phase</th><th scope="col">Deliverable</th><th scope="col">Done when</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">0. Freeze</th><td>Scope, endpoint table, time-zero definition and the three predicted quantities agreed and written once in <span class="file">numbers.md</span></td><td>Every file cites the same definitions</td></tr>
+              <tr><th scope="row">1. Core model</th><td>Landmark dataset builder with leakage rules; penalised cause-specific model for SVD, death and non-SVD replacement; cumulative incidence combination; reference model</td><td>Runs on the gradual-stenotic and high-mortality scenarios; calibration and Brier at 1, 3, 5 years with bootstrap intervals; patients kept together in resampling; tests pass</td></tr>
+              <tr><th scope="row">2. Modules</th><td>Biomarker modules and anticoagulant-exposure module as feature blocks; scenarios with meaningful, weak and absent information; post-suspicion indicator</td><td>Model ladder table: reference, core, core plus each module, core plus both; gains appear only where the scenario contains information</td></tr>
+              <tr><th scope="row">3. Extraction demonstration</th><td>Passport for one patient with highlighted spans; pilot audit number from the physician's 20-note review; aggregate tables</td><td>Real counts reported as extraction findings; no note text in repository or slides</td></tr>
+              <tr><th scope="row">4. Patient story and figures</th><td>One longitudinal example on synthetic dates; three probabilities over landmarks; reliability statement; separated messages</td><td>Every synthetic figure titled as a demonstration; illustrative predictions labelled unvalidated</td></tr>
+              <tr><th scope="row">5. Documents</th><td>README, protocol, approach, data plan filled from this document; notebooks run top to bottom; requirements pinned</td><td>No template placeholder left; one-command run; privacy scan clean</td></tr>
+              <tr><th scope="row">6. Presentation</th><td>Ten slides, five minutes, rehearsed twice; live demonstration with a recorded fallback; ten prepared questions</td><td>Timed run under five minutes; pull request open before the deadline</td></tr>
+              <tr><th scope="row">Optional</th><td>Gradient-boosting comparison; leave-one-generation-out table</td><td>Only after phase 6; reported only if calibration improves</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Reduced in scope</h3>
+        <ul class="bullets tight">
+          <li>Wearable signals: one sentence in future work (Appendix D). Nothing built.</li>
+          <li>MIMIC-IV-ECHO: a future data-source candidate requiring credentialed access and a feasibility audit of implant identity, serial measurements and outcomes. Not constructed during the event.</li>
+          <li>Individual 15- to 20-year predictions: exploratory future research (Appendix D), not part of the core demonstration.</li>
+          <li>Multiple model families: one primary model; gradient boosting optional.</li>
+        </ul>
+      </section>
+
+      <section id="limits">
+        <h2>Limitations and non-claims</h2>
+        <ul class="bullets">
+          <li>The model is developed and evaluated on synthetic scenarios. No clinical prediction accuracy is demonstrated, no outcome improvement is shown, and the prototype is not ready for deployment.</li>
+          <li>The supplied records carry year-only dates and almost no serial echo; they establish extraction feasibility and descriptive counts, nothing more.</li>
+          <li>Device effects in the prototype are class-level; hierarchical pooling is planned, not implemented.</li>
+          <li>Biomarker modules beyond the renal and metabolic module are hypothetical in predictive value; several markers are unmeasured in the supplied data and are not imputed.</li>
+          <li>Anticoagulant associations are predictive, confounded by indication and era, and carry no treatment implication.</li>
+          <li>Durability conclusions from randomised trials such as NOTION come from selected, older populations and specific device generations; they inform parameters, not universal claims.</li>
+          <li>Follow-up beyond ten years exists for first-generation TAVI in small surviving cohorts, to about twelve years; contemporary devices have less. Statements about long-horizon TAVI durability are correspondingly limited.</li>
+          <li>Novelty is qualified: to our knowledge no externally validated, individual-level, dynamic prediction model of adjudicated structural valve deterioration is in clinical use; existing work consists of cohort analyses of risk factors and device comparisons.</li>
+        </ul>
+      </section>
+
+      <section id="appendix">
+        <h2>Appendices</h2>
+
+        <h3>Appendix A. Evidence table</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Finding</th><th scope="col">Source and population</th><th scope="col">Consequence in KAIROS</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Haemodynamic deterioration in 30.9% of 1,387 surgical bioprostheses under a pre-VARC-3 definition; 3.7% within two years; associated with roughly doubled mortality</th><td>Salaun et al., Circulation 2018; single-centre surgical cohort</td><td>Detection-based endpoint rather than reintervention; renal, diabetes and smoking in the core</td></tr>
+              <tr><th scope="row">VARC-3 moderate or severe HVD 2.2% at one year, 10.8% at five, 25.6% at ten with wide uncertainty; oral anticoagulation HR 1.78; reintervention risk raised about five-fold</th><td>Bern TAVI registry, 2,403 patients, JACC CI 2025</td><td>Planning scenario for event fraction; anticoagulant association recorded as conflicting</td></tr>
+              <tr><th scope="row">Severe SVD 1.5% TAVI versus 10.0% SAVR at ten years; moderate or severe 15.4% versus 20.8%</th><td>NOTION, 280 low-risk patients, CoreValve versus mostly porcine surgical valves, EHJ 2024</td><td>Literature-informed simulation curve; not a universal durability conclusion</td></tr>
+              <tr><th scope="row">SVD at five years 9.5% SAPIEN XT, 3.9% SAPIEN 3, 3.5% surgery; CoreValve and SURTAVI pooled 2.2% versus 4.4%</th><td>PARTNER 2 analysis, JACC 2020; CoreValve US Pivotal and SURTAVI, 2022 to 2023</td><td>Generation matters; device and era modelled together</td></tr>
+              <tr><th scope="row">Trifecta: about twenty-fold hazard of reoperation for SVD versus Magna Ease in one series; FDA communication 2023; US withdrawal July 2023</th><td>Single-centre comparisons; FDA letter</td><td>Externally mounted pericardial class; withdrawn-device rule; era confounding noted in our sample</td></tr>
+              <tr><th scope="row">First-generation TAVI to 12 years: SVD cumulative incidence 9.8% in 1,825 high-risk patients with 92.8% mortality</th><td>Long-term high-risk cohort, JAHA 2025</td><td>Long-horizon TAVI statements limited to first-generation survivors</td></tr>
+              <tr><th scope="row">Reoperative aortic valve surgery mortality 4.8% elective, 11.8% urgent, 31.7% emergency, 50.7% salvage</th><td>UK national registry, all reoperative AVR 1996 to 2019</td><td>Problem statement, as association across all reoperation causes</td></tr>
+              <tr><th scope="row">Five-year echo follow-up missing in 30.4% of TAVR and 35.7% of surgical patients</th><td>Low-risk randomised trial five-year report, NEJM 2020</td><td>Observation-process modelling; reminder function</td></tr>
+              <tr><th scope="row">Guideline follow-up differs: ESC yearly imaging for bioprostheses; ACC/AHA echo at 5 and 10 years then yearly for surgical valves, yearly after TAVI</th><td>ESC/EACTS 2021; ACC/AHA 2020; 2025 ESC/EACTS table unverified</td><td>Guideline surveillance preserved by jurisdiction</td></tr>
+              <tr><th scope="row">Open-weight LLMs reach about 99% accuracy detecting prosthetic valves and grading severity from echo reports</th><td>JAMIA 2025 benchmark</td><td>Extraction as the linking technology; LLM pass after rules</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Appendix B. Open data register</h3>
+        <p>Tier 1 means download now with no registration. All links were opened and checked in September 2026.</p>
+        <ul class="bullets tight">
+          <li><a href="https://accessgudid.nlm.nih.gov/download">FDA AccessGUDID full release</a>, tier 1: device identifiers, brands, models and sizes; about 500 MB.</li>
+          <li><a href="https://www.asecho.org/wp-content/uploads/2025/04/PIIS0894731723005333.pdf">ASE 2024 prosthetic valve guideline</a>, tier 1, copyrighted: appendix reference tables used as context only.</li>
+          <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10984572/">NOTION 10-year report</a>, tier 1: curves and numbers at risk.</li>
+          <li>FDA Summaries of Safety and Effectiveness Data, tier 1: <a href="https://www.accessdata.fda.gov/cdrh_docs/pdf14/P140031S162B.pdf">SAPIEN 3</a>, <a href="https://www.accessdata.fda.gov/cdrh_docs/pdf13/P130021S174B.pdf">CoreValve and Evolut</a>, <a href="https://www.accessdata.fda.gov/cdrh_docs/pdf15/p150048b.pdf">Inspiris RESILIA</a>, <a href="https://www.accessdata.fda.gov/cdrh_docs/pdf17/P170006B.pdf">Avalus</a>, <a href="https://www.accessdata.fda.gov/cdrh_docs/pdf15/p150036b.pdf">INTUITY</a>, <a href="https://www.accessdata.fda.gov/cdrh_docs/pdf18/P180029B.pdf">LOTUS Edge</a>. None located for Perceval, Mitroflow, the original Perimount approval, or Evolut R and PRO.</li>
+          <li><a href="https://clinicaltrials.gov/data-api/api">ClinicalTrials.gov API v2</a>, tier 1: structured outcomes by NCT number.</li>
+          <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8168323/">IPDfromKM</a>, tier 1: reconstruction of pseudo-individual times from digitised curves; output labelled reconstructed.</li>
+          <li><a href="https://open.fda.gov/apis/device/event/">openFDA device event API</a>, tier 1: reported counts by brand, passive surveillance without denominators; signal check only.</li>
+          <li>Not obtainable in time: any patient-level durability cohort; MIMIC-III and MIMIC-IV demo notes (empty or absent); ECHO-NOTE2NUM and MIMIC-IV-ECHO (credentialed); reconstructed individual patient data deposits; Synthea valve modules; UK Biobank (application-based, cardiac MRI).</li>
+        </ul>
+
+        <h3>Appendix C. Device hierarchy and classes</h3>
+        <p>Route: SAVR, TAVI. Design classes: stented bovine pericardial, internally mounted (Perimount, Magna, Magna Ease, Inspiris RESILIA, Avalus); externally mounted pericardial (Trifecta, Trifecta GT, Mitroflow, Crown PRT); stented porcine (Epic, Mosaic, Hancock II); stentless (Freestyle, Toronto SPV); sutureless and rapid-deployment (Perceval, INTUITY Elite); balloon-expandable intra-annular TAVI (SAPIEN, SAPIEN XT, SAPIEN 3, 3 Ultra, Ultra RESILIA, Myval); self-expanding supra-annular TAVI (CoreValve, Evolut R, PRO, PRO+, FX, ACURATE neo, neo2); self-expanding intra-annular TAVI (Portico, Navitor, JenaValve); mechanically expanded intra-annular TAVI (LOTUS, LOTUS Edge). Continuous covariates: label size within class, indexed effective orifice area, mismatch grade, tissue treatment, implant year. Partial pooling across models within class is planned.</p>
+
+        <h3>Appendix D. Exploratory future research</h3>
+        <ul class="bullets tight">
+          <li><b>Long horizons.</b> Older surgical design classes have real 15- to 25-year follow-up in published series; a future analysis could open the surgical implant window to the late 1990s, fit flexible parametric hazards anchored to published long-term curves, backtest extrapolation by censoring at five years and comparing with observed fifteen-year outcomes, and use a multi-state period analysis to estimate lifetime reintervention probability. Individual 15- to 20-year predictions remain research, not output.</li>
+          <li><b>Wearable triggers.</b> Watch ECG and activity decline as pre-specified triggers for earlier assessment, evaluated for lead time only after independent validation of the core model.</li>
+          <li><b>Public scale-up.</b> MIMIC-IV-ECHO joined to procedure codes, after credentialing and a feasibility audit.</li>
+          <li><b>Mechanism.</b> A nested CT and explant component to attribute calcification versus other dysfunction, since rising gradients alone cannot.</li>
+        </ul>
+      </section>
+
+      <section id="references">
+        <h2>References</h2>
+        <ul class="sources">
+          <li>Généreux P, Piazza N, Alu MC, et al. Valve Academic Research Consortium 3: updated endpoint definitions for aortic valve clinical research. <a href="https://academic.oup.com/eurheartj/article/42/19/1825/6237954">Eur Heart J 2021;42:1825–1857</a>; co-published in <a href="https://www.jacc.org/doi/10.1016/j.jacc.2021.02.038">J Am Coll Cardiol 2021;77:2717–2746</a>.</li>
+          <li>Pibarot P, Herrmann HC, Wu C, et al. Standardized definitions for bioprosthetic valve dysfunction following aortic or mitral valve replacement: JACC state-of-the-art review. <a href="https://www.sciencedirect.com/science/article/pii/S0735109722051622">J Am Coll Cardiol 2022;80:545–561</a>.</li>
+          <li>Salaun E, Mahjoub H, Girerd N, et al. Rate, timing, correlates, and outcomes of hemodynamic valve deterioration after bioprosthetic surgical aortic valve replacement. <a href="https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.118.035150">Circulation 2018;138:971–985</a>. Salaun E, Mahjoub H, Dahou A, et al. Hemodynamic deterioration of surgically implanted bioprosthetic aortic valves. <a href="https://www.jacc.org/doi/10.1016/j.jacc.2018.04.064">J Am Coll Cardiol 2018;72:241–251</a>.</li>
+          <li>Alaour B, Tomii D, Nakase M, et al. Hemodynamic valve deterioration after transcatheter aortic valve replacement: incidence, predictors, and clinical outcomes. <a href="https://www.jacc.org/doi/10.1016/j.jcin.2024.09.039">JACC Cardiovasc Interv 2025;18:72–85</a>.</li>
+          <li>Thyregod HGH, Jørgensen TH, Ihlemann N, et al. Transcatheter or surgical aortic valve implantation: 10-year outcomes of the NOTION trial. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10984572/">Eur Heart J 2024;45:1116–1124</a>.</li>
+          <li>Pibarot P, Ternacle J, Jaber WA, et al. Structural deterioration of transcatheter versus surgical aortic valve bioprostheses in the PARTNER-2 trial. <a href="https://www.jacc.org/doi/10.1016/j.jacc.2020.08.049">J Am Coll Cardiol 2020;76:1830–1843</a>.</li>
+          <li>O'Hair D, Yakubov SJ, Grubb KJ, et al. Structural valve deterioration after self-expanding transcatheter or surgical aortic valve implantation in patients at intermediate or high risk. <a href="https://www.acc.org/Latest-in-Cardiology/Journal-Scans/2023/02/23/15/47/structural-valve-deterioration">JAMA Cardiol 2023;8:111–119</a> (summary link).</li>
+          <li>Outcomes beyond 10 years after transcatheter aortic valve implantation in high-risk patients with severe aortic valve stenosis. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12336767/">J Am Heart Assoc 2025</a>.</li>
+          <li>Transcatheter aortic valve durability: focus on structural valve deterioration. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12450013/">J Am Heart Assoc 2025;14:e041505</a>.</li>
+          <li>Trifecta versus Perimount Magna Ease: <a href="https://www.frontiersin.org/journals/cardiovascular-medicine/articles/10.3389/fcvm.2021.822893/full">Front Cardiovasc Med 2022</a>; <a href="https://www.annalsthoracicsurgery.org/article/S0003-4975(20)30194-6/fulltext">Ann Thorac Surg 2020</a>; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9373186/">failure mechanisms, 2022</a>. FDA update on Abbott Trifecta valves, <a href="https://www.acc.org/Latest-in-Cardiology/Articles/2023/02/28/14/35/FDA-Update-Potential-Risk-of-Early-Structural-Valve-Deterioration-With-Abbott-Trifecta-Valves">ACC 2023</a>.</li>
+          <li>Outcomes of reoperative aortic valve surgery: data from a national registry over 23 years. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12373612/">Indian J Thorac Cardiovasc Surg 2025</a>; UK NICOR data 1996 to 2019.</li>
+          <li>Makkar RR, Thourani VH, Mack MJ, et al. Five-year outcomes of transcatheter or surgical aortic-valve replacement. <a href="https://www.nejm.org/doi/full/10.1056/NEJMoa1910555">N Engl J Med 2020;382:799–809</a>.</li>
+          <li>Johnston DR, Soltesz EG, Vakil N, et al. Long-term durability of bioprosthetic aortic valves: implications from 12,569 implants. <a href="https://www.annalsthoracicsurgery.org/article/S0003-4975(14)02091-8/fulltext">Ann Thorac Surg 2015;99:1239–1247</a>.</li>
+          <li>Lipoprotein(a) and long-term structural valve degeneration of aortic bioprostheses. <a href="https://pubmed.ncbi.nlm.nih.gov/41248067/">Eur Heart J Cardiovasc Imaging 2026</a>.</li>
+          <li>Senage T, Vadgama A, Bekhit M, et al. The role of antibody responses against glycans in bioprosthetic heart valve calcification and deterioration. Nat Med 2022;28:283–294.</li>
+          <li>Briand M, Pibarot P, Després JP, et al. Metabolic syndrome is associated with faster degeneration of bioprosthetic valves. Circulation 2006;114(1 Suppl):I512–I517.</li>
+          <li>Dangas GD, Tijssen JGP, Wöhrle J, et al. A controlled trial of rivaroxaban after transcatheter aortic-valve replacement. <a href="https://www.nejm.org/doi/full/10.1056/NEJMoa1911425">N Engl J Med 2020;382:120–129</a>. De Backer O, Dangas GD, Jilaihawi H, et al. Reduced leaflet motion after transcatheter aortic-valve replacement. <a href="https://www.nejm.org/doi/full/10.1056/NEJMoa1911426">N Engl J Med 2020;382:130–139</a>.</li>
+          <li>Van Mieghem NM, Unverdorben M, Hengstenberg C, et al. Edoxaban versus vitamin K antagonist for atrial fibrillation after TAVR. <a href="https://pubmed.ncbi.nlm.nih.gov/34449183/">N Engl J Med 2021;385:2150–2160</a>.</li>
+          <li>Park DW, Ahn JM, Kang DY, et al. Edoxaban versus dual antiplatelet therapy for leaflet thrombosis and cerebral thromboembolism after TAVR: the ADAPT-TAVR randomized clinical trial. <a href="https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.122.059512">Circulation 2022;146:466–479</a>.</li>
+          <li>Overtchouk P, Guedeney P, Rouanet S, et al. Long-term mortality and early valve dysfunction according to anticoagulation use: the FRANCE TAVI registry. <a href="https://www.jacc.org/doi/10.1016/j.jacc.2018.08.1045">J Am Coll Cardiol 2019;73:13–21</a>.</li>
+          <li>Vitamin K antagonists and structural valve deterioration in bioprosthetic aortic valves, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC13360424/">2026</a>; anticoagulation and long-term bioprosthesis durability after TAVR, <a href="https://pubmed.ncbi.nlm.nih.gov/41224073/">Can J Cardiol 2026</a>; anticoagulant class and durability after TAVR, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12810551/">Structural Heart 2025</a>.</li>
+          <li>Otto CM, Nishimura RA, Bonow RO, et al. 2020 ACC/AHA guideline for the management of patients with valvular heart disease. <a href="https://www.jacc.org/doi/10.1016/j.jacc.2020.11.018">J Am Coll Cardiol 2021;77:e25–e197</a>. Vahanian A, Beyersdorf F, Praz F, et al. 2021 ESC/EACTS guidelines for the management of valvular heart disease. <a href="https://academic.oup.com/eurheartj/article/43/7/561/6358470">Eur Heart J 2022;43:561–632</a>. 2025 ESC/EACTS guidelines for the management of valvular heart disease. <a href="https://academic.oup.com/ehjvshd/article/1/1/xwag001/8429937">EHJ 2025</a>.</li>
+          <li>Zoghbi WA, Jone PN, Chamsi-Pasha MA, et al. Guidelines for the evaluation of prosthetic valve function with cardiovascular imaging. <a href="https://www.asecho.org/wp-content/uploads/2025/04/PIIS0894731723005333.pdf">J Am Soc Echocardiogr 2024;37:2–63</a>.</li>
+          <li>Riley RD, Ensor J, Snell KIE, et al. Calculating the sample size required for developing a clinical prediction model. BMJ 2020;368:m441. Riley RD, Debray TPA, Collins GS, et al. Minimum sample size for external validation of a clinical prediction model with a binary outcome. Stat Med 2021;40:4230–4251.</li>
+          <li>Liu N, Zhou Y, Lee JJ. IPDfromKM: reconstruct individual patient data from published Kaplan-Meier survival curves. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8168323/">BMC Med Res Methodol 2021;21:111</a>.</li>
+          <li>LLM extraction from echocardiography reports. <a href="https://academic.oup.com/jamia/article/32/7/1120/8126598">J Am Med Inform Assoc 2025;32:1120</a>. MIMIC-IV-ECHO. <a href="https://physionet.org/content/mimic-iv-echo/1.0.1/">PhysioNet v1.0.1</a>.</li>
+        </ul>
+        <div class="foot"><p>KAIROS revised submission for the Dyania Health Hackathon 2026, 16 September 2026. The original proposal is preserved as a separate document; a change log and a list of unverified details accompany this revision.</p></div>
+      </section>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,82 @@
+table: device_table.csv
+sibling: device_aliases.csv
+purpose: >
+  Canonical bioprosthetic/TAVR aortic valve reference table for KAIROS (valve identity as
+  a hierarchical input: route -> design_class -> canonical_model -> generation -> size).
+built_by: src/kairos/build_gudid_extract.py (raw XML -> data/raw/gudid/gudid_valve_records.jsonl)
+          then src/kairos/build_device_table.py (jsonl -> device_table.csv + device_aliases.csv)
+retrieved_at: "see retrieved_at column, all rows built same session, 2026-09-16"
+row_grain: one row per canonical_model, collapsed across all generations that share a
+  brand-name family UNLESS the task's own design-class bucket list names a generation as
+  its own canonical model (e.g. CoreValve / Evolut R / Evolut PRO / Evolut PRO+ / Evolut FX
+  are five separate rows, matching how the task brief enumerates them; Perimount / Magna /
+  Magna Ease are likewise three separate rows). Sub-variants not called out by the task
+  brief (e.g. Perimount "RSR"/"Theon" refinements) are folded into the base row with the
+  sub-variant names listed in brand_name_gudid and generation notes rather than split
+  further -- a documented scoping decision, not an omission.
+column_definitions:
+  canonical_model: task-facing model name used as the join key from src/kairos/passport.py
+    and device_aliases.csv.
+  manufacturer: current commercial owner (note several brands changed corporate parent,
+    e.g. Trifecta/Epic St Jude Medical -> Abbott; Perceval/Mitroflow/Crown PRT Sorin ->
+    LivaNova -> Corcym).
+  brand_name_gudid: semicolon-separated list of every distinct GUDID brandName string
+    matched to this canonical_model in this session's extraction (empty if zero GUDID
+    matches were found -- see confidence/source for that row).
+  model_or_catalog_number: semicolon-separated GUDID versionModelNumber values observed.
+  primary_di: semicolon-separated list of every GUDID Primary DI (device identifier) found
+    for this canonical_model, ACROSS all its sizes -- i.e. this is a set, not a 1:1
+    positional pairing with sizes_mm (a given DI implies one specific size, but the two
+    semicolon lists are not guaranteed to be in the same order; join back to
+    data/raw/gudid/gudid_valve_records.jsonl by DI if a strict DI<->size mapping is needed).
+  product_code: FDA product code(s) seen for this row's matched GUDID records -- "SAVR"/
+    "TAVR" here are our own route-hint labels derived from whether the record's product
+    code was DYE (surgical) or NPT (TAVR), not the actual 3-letter FDA code (see the
+    `route` column of prosthetic_valve_reference_values / the FDA classification database
+    for the literal codes DYE / NPT, both verified via openFDA this session).
+  sizes_mm: semicolon-separated nominal sizes in mm, sorted ascending. Sourced from (in
+    priority order) GUDID deviceSizes sizeText/value, then a regex over deviceDescription,
+    then -- only when both of those are empty, which happened for several Corcym
+    (Mitroflow/Crown PRT/Perceval) DIs in this GUDID release -- a trailing 2-digit number
+    parsed from versionModelNumber/catalogNumber (e.g. "DLA27" -> 27mm). Perceval Plus uses
+    letter size codes (S/M/L/XL) in GUDID with no numeric mm anywhere in its DI record;
+    sizes_mm is intentionally left blank for that row rather than guessing an mm
+    equivalence -- see model_or_catalog_number (PVF-S/M/L/XL) for the manufacturer's own
+    codes.
+  market_status: free text, manually curated (domain knowledge), includes the reasoning
+    and, where known, the year/trigger of any withdrawal or discontinuation.
+  fda_pma: the FDA PMA number. Populated only where either (a) given directly in the task
+    brief's own SSED URLs, or (b) returned by an openFDA `/device/pma.json` lookup actually
+    run this session (see docs/data_build_log.md for the exact queries) -- never guessed.
+    "TODO" means neither source confirmed a number this session; do not treat a blank/TODO
+    as "no PMA exists".
+  source / confidence / retrieved_at: per NON-NEGOTIABLE RULE 5/6. confidence="high" only
+    when both a GUDID match AND a this-session PMA verification exist for that row;
+    "medium" when a GUDID match exists but the PMA/market-status facts are unverified
+    public-record domain knowledge; "low" when the row has zero GUDID match this session
+    (device may still be real and correct -- it just was not found in this particular
+    GUDID full-release snapshot under any brand/company/product-code heuristic tried; the
+    source column always says to verify manually at accessgudid.nlm.nih.gov).
+known_gaps_2026-09-16:
+  - "ACURATE neo / ACURATE neo2 (Boston Scientific/Symetis): zero records found anywhere in
+    the 12,976-record GUDID extraction pool under any brand-name or company-name variant
+    tried, despite Boston Scientific being confirmed present for other products (Lotus
+    Edge). Genuinely absent from this GUDID snapshot as far as this session could
+    determine -- flagged low confidence, needs manual accessgudid.nlm.nih.gov search."
+  - "Myval (Meril Life Sciences): zero GUDID records -- consistent with Myval being
+    CE-marked / India-market only and (to this session's knowledge) not FDA approved, so
+    a US GUDID listing would not be expected. Not a bug."
+  - "Trifecta GT: GUDID brandName does not distinguish 'Trifecta' from 'Trifecta GT' (both
+    register simply as 'Trifecta(TM)'), so GT-specific DIs/sizes cannot be separated from
+    the extracted data alone; the Trifecta GT row therefore has manufacturer/design-class/
+    tissue_treatment/market_status filled from domain knowledge but no sizes_mm/primary_di."
+  - "Epic Supra, Toronto SPV: zero GUDID brand-text matches found this session."
+  - "SAPIEN (original, discontinued) and SAPIEN XT have GUDID DIs but not the full
+    historical size range (e.g. original SAPIEN only 23/26mm found here) -- these are
+    long-superseded products and this GUDID release may not retain records for every
+    historically-distributed size."
+verification_note: >
+  10 cells of sizes_mm / primary_di were spot-checked by hand against the raw
+  gudid_valve_records.jsonl deviceSizes/deviceDescription/versionModelNumber fields during
+  development (see docs/data_build_log.md); no fabricated values -- every non-blank cell
+  traces to an actual GUDID record or a cited openFDA lookup.

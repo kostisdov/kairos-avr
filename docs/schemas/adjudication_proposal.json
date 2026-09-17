@@ -1,0 +1,160 @@
+{
+  "$defs": {
+    "CandidateFlagModel": {
+      "properties": {
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "phenotype": {
+          "enum": [
+            "stenotic",
+            "regurgitant",
+            "mixed",
+            "uncertain"
+          ],
+          "title": "Phenotype",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "stage",
+        "phenotype",
+        "reason"
+      ],
+      "title": "CandidateFlagModel",
+      "type": "object"
+    }
+  },
+  "description": "A proposal for reviewers, never a label (design section 4).",
+  "properties": {
+    "candidates": {
+      "items": {
+        "$ref": "#/$defs/CandidateFlagModel"
+      },
+      "title": "Candidates",
+      "type": "array"
+    },
+    "confidence": {
+      "default": "low",
+      "enum": [
+        "high",
+        "moderate",
+        "low"
+      ],
+      "title": "Confidence",
+      "type": "string"
+    },
+    "endpoint_date": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Endpoint Date"
+    },
+    "endpoint_met": {
+      "title": "Endpoint Met",
+      "type": "boolean"
+    },
+    "label": {
+      "default": "illustrative, unvalidated: model trained on synthetic scenarios",
+      "title": "Label",
+      "type": "string"
+    },
+    "llm_proposal": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Llm Proposal"
+    },
+    "mechanism": {
+      "default": "uncertain",
+      "enum": [
+        "svd",
+        "thrombosis",
+        "endocarditis",
+        "non_structural",
+        "uncertain"
+      ],
+      "title": "Mechanism",
+      "type": "string"
+    },
+    "passport_id": {
+      "title": "Passport Id",
+      "type": "string"
+    },
+    "phenotype": {
+      "anyOf": [
+        {
+          "enum": [
+            "stenotic",
+            "regurgitant",
+            "mixed",
+            "uncertain"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Phenotype"
+    },
+    "rationale": {
+      "default": "",
+      "title": "Rationale",
+      "type": "string"
+    },
+    "reference_source": {
+      "default": "none",
+      "title": "Reference Source",
+      "type": "string"
+    },
+    "stage": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Stage"
+    },
+    "status": {
+      "const": "proposal",
+      "default": "proposal",
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "passport_id",
+    "endpoint_met"
+  ],
+  "title": "AdjudicationProposal",
+  "type": "object"
+}

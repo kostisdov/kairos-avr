@@ -1,0 +1,14 @@
+table: medication_class_prevalence_by_year.csv
+source: medications_deidentified.xlsx via data/derived/private/medication_exposure_grid.csv
+  (private, not committed)
+definition: Count of distinct patients exposed to each drug class in each year (a
+  patient counts as exposed for every year from a medication row's Start Date through
+  the later of End Date/Discontinued Date, or Start Date only if neither is present).
+columns:
+- year
+- drug_class
+- n_patients_exposed
+row_count: 110
+small_cell_suppression: Cells with a true count under 5 are shown as the string '<5'.
+retrieved_at: '2026-09-16T12:09:19Z'
+privacy_note: No patient IDs or note text appear in this table.

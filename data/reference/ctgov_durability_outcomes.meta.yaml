@@ -1,0 +1,62 @@
+table: ctgov_durability_outcomes.csv
+built_by: src/kairos/build_ctgov_outcomes.py
+source: >
+  ClinicalTrials.gov API v2 (https://clinicaltrials.gov/api/v2/studies/{nct_id}), full JSON
+  per study saved to data/raw/ctgov/{nct_id}.json. The `nct_id` and `study_title` columns on
+  every row of ctgov_durability_outcomes.csv are that row's specific citation (look up the
+  matching .json file in data/raw/ctgov/ for the full protocol/results record).
+nct_ids_and_how_found: >
+  Found by searching the API's `query.titles` parameter for each trial family named in the
+  task brief (COMMENCE, Trifecta durability, Trifecta GT, PARTNER II/3, NOTION, CoreValve US
+  Pivotal, SURTAVI, Evolut Low Risk, Inspiris RESILIA post-market) rather than trusting a
+  pre-existing NCT list, per the task's explicit instruction. Exact queries run are logged in
+  docs/data_build_log.md. Selected: NCT01757665 (COMMENCE), NCT01256710 (Trifecta Durability
+  Study), NCT03016169 (Trifecta GT PMCF), NCT02675114 (PARTNER 3), NCT03222128 (PARTNER II S3
+  Intermediate), NCT01057173 (NOTION), NCT01240902 (CoreValve US Pivotal High/Very High
+  Risk), NCT01586910 (SURTAVI), NCT02701283 (Evolut Low Risk), NCT03666741 (Inspiris RESILIA
+  Durability Registry).
+definition: >
+  A row is included if its `outcome_title` or `outcome_description` (as posted by the trial
+  sponsor to ClinicalTrials.gov) matches a durability-related regex: structural valve
+  deterioration/SVD, reintervention/reoperation/explant, valve-in-valve, gradient/EOA/
+  hemodynamic, thrombosis, valve failure (BVF/BVD), durability, or regurgitation. `arm` and
+  `n_analysed` are resolved from that SPECIFIC outcome measure's own `groups`/`denoms`
+  sub-objects in the CT.gov API v2 schema (confirmed by inspecting the raw JSON during
+  development -- group/denominator definitions are stored per-outcome-measure, not in a
+  shared study-level lookup, which is easy to get wrong -- see docs/data_build_log.md).
+known_no_results: >
+  NOTION (NCT01057173) and the Inspiris RESILIA Durability Registry (NCT03666741) have NO
+  `resultsSection` posted on ClinicalTrials.gov at all as of this session (confirmed by
+  checking for the key's presence in the raw JSON) -- their results live in journal
+  publications instead (see data/reference/published_rates.csv for NOTION). This is not an
+  extraction failure.
+durability_related_column: >
+  Added coordinator Fix 3 (2026-09-16): a boolean column, true when outcome_title or
+  outcome_description matches structural valve deterioration, hemodynamic valve
+  deterioration, bioprosthetic valve dysfunction or failure, reintervention, explant, valve
+  thrombosis, mean gradient, effective orifice area, dimensionless index, or regurgitation
+  (the coordinator's exact category list). data/reference/ctgov_durability_outcomes.csv
+  keeps ALL 755 rows with this column added; data/reference/ctgov_durability_outcomes_filtered.csv
+  has only the True rows.
+durability_related_actual_result_differs_from_estimate: >
+  714 of 755 rows are durability_related=True (only 41 False), not the ~187 True (568
+  False) the coordinator's message implied. This was investigated, not silently accepted:
+  the majority of True rows come from COMMENCE's per-size/per-timepoint "Average Mean
+  Gradient"/"Average Effective Orifice Area"/"Total Valvular Regurgitation" measurements
+  (matches "mean gradient"/"effective orifice area"/"regurgitation" literally, as listed),
+  from CoreValve Pivotal's and COMMENCE's MACCE-component outcome (whose own description
+  explicitly lists "Reintervention (defined as any cardiac surgery or percutaneous
+  reintervention catheter procedure that repairs, otherwise alters or adjusts, or replaces
+  a previously implanted valve)" as a component -- matches "reintervention"), and from
+  "Prosthetic Valve Dysfunction (PVD)" outcomes whose own description defines PVD via "Mean
+  gradient >35 mmHg" / "EOA < 0.8 cm2" (matches both "mean gradient" and "effective orifice
+  area"). All three were spot-checked against their actual outcome_description text and are
+  genuinely, substantively durability-related by the coordinator's own stated criteria, not
+  a regex bug -- the discrepancy from the estimate appears to be because composite endpoints
+  (MACCE) and clinically-defined outcomes (PVD) that INCLUDE a durability criterion as one
+  component still count as durability_related=True under a literal reading of "outcome
+  title or description CONCERNS" one of the listed categories, whereas a stricter reading
+  requiring the outcome to be PRIMARILY/EXCLUSIVELY about durability would exclude them.
+  Flagging this interpretation choice explicitly rather than narrowing the regex to
+  artificially match the estimated count.
+retrieved_at: "2026-09-16, see the retrieved_at column (all rows same session)"

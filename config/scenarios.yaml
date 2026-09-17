@@ -1,0 +1,438 @@
+# KAIROS scenario-config skeleton (Task 8).
+#
+# Every numeric value here either (a) cites a row/table from data/reference/ (built in
+# Tasks 4-5) or open_data_research.md, with `source` + `definition_used` + `confidence`, or
+# (b) is TODO. No value in this file was invented -- where a scenario calls for a number we
+# do not have direct evidence for, that field is left `TODO` with a note on where such
+# evidence could plausibly be found, per the task's explicit "do not invent values" rule.
+#
+# `baseline hazard parameters` below are, where noted, a CONSTANT-HAZARD APPROXIMATION
+# derived from a published cumulative incidence at a fixed follow-up time via
+#   annual_hazard ~= -ln(1 - cumulative_incidence) / years
+# This is a standard simplifying transformation (not itself a published hazard rate), always
+# labelled as such in `definition_used`, and should be replaced by the modelling engineer
+# with a proper time-varying hazard fit once individual-level (real or reconstructed) event
+# times are available (see src/kairos/km_reconstruct.py once a real curve is digitised,
+# per docs/km_digitisation_instructions.md).
+
+version: 0.1
+generated: "2026-09-16, KAIROS Docathon data-plumbing pass"
+notes: >
+  This is a SKELETON for the modelling engineer to extend, not a finished parameterisation.
+  Every TODO is a genuine gap, not an oversight -- see the per-field notes.
+
+scenarios:
+
+  baseline:
+    description: >
+      Central-estimate scenario, anchored to the NOTION 10-year trial (the only openly
+      available head-to-head TAVI-vs-SAVR trial with both mortality and VARC-3 SVD/BVF
+      reported at a long horizon) plus device-specific hemodynamic reference ranges.
+    baseline_hazard:
+      all_cause_mortality:
+        TAVI:
+          value_type: annual_hazard_constant_approx
+          value: 0.0987
+          source: "data/reference/published_rates.csv (study=NOTION, arm=TAVI, outcome=all-cause mortality, time_years=10, estimate_pct=62.7)"
+          definition_used: "constant-hazard approx: -ln(1-0.627)/10 = 0.0987/yr; VARC-2, intention-to-treat"
+          confidence: medium
+        SAVR:
+          value_type: annual_hazard_constant_approx
+          value: 0.1023
+          source: "data/reference/published_rates.csv (study=NOTION, arm=SAVR, outcome=all-cause mortality, time_years=10, estimate_pct=64.0)"
+          definition_used: "constant-hazard approx: -ln(1-0.640)/10 = 0.1023/yr; VARC-2, intention-to-treat"
+          confidence: medium
+      severe_SVD:
+        TAVI:
+          value_type: annual_hazard_constant_approx
+          value: 0.00151
+          source: "data/reference/published_rates.csv (study=NOTION, arm=TAVI, outcome=severe SVD, time_years=10, estimate_pct=1.5)"
+          definition_used: "VARC-3 haemodynamic-only variant (see NOTION methods, no EOA/DVI component); constant-hazard approx -ln(1-0.015)/10"
+          confidence: medium
+        SAVR:
+          value_type: annual_hazard_constant_approx
+          value: 0.01054
+          source: "data/reference/published_rates.csv (study=NOTION, arm=SAVR, outcome=severe SVD, time_years=10, estimate_pct=10.0)"
+          definition_used: "VARC-3 haemodynamic-only variant; constant-hazard approx -ln(1-0.10)/10"
+          confidence: medium
+    hazard_ratios:
+      SVD_TAVI_vs_SAVR:
+        value: 0.2
+        ci_low: 0.04
+        ci_high: 0.7
+        source: "data/reference/published_rates.csv (NOTION severe SVD row)"
+        definition_used: "VARC-3 haemodynamic-only variant, Cox regression as reported in NOTION"
+        confidence: high
+      BVF_TAVI_vs_SAVR:
+        value: 0.7
+        ci_low: 0.4
+        ci_high: 1.5
+        source: "data/reference/published_rates.csv (NOTION BVF row)"
+        definition_used: "VARC-3 bioprosthetic valve failure"
+        confidence: high
+    follow_up_intensity:
+      protocol_driven_annual: true
+      note: "NOTION was protocol-driven yearly follow-up; real EHR-derived cohorts (our
+        passport.csv) are NOT protocol-driven -- see 'sparse_informative_followup' scenario
+        for the more realistic assumption to use for the actual modelling dataset."
+      source: "data/raw/papers/notion_10yr_PMC10984572_fulltext.txt (Methods: 'Follow-up
+        was yearly and life-long')"
+      confidence: high
+    missingness: "TODO -- no direct source found this session quantifying missingness
+      mechanism/rate for baseline; data/derived/aggregates/prosthetic_gradient_coverage.csv
+      and key_lab_availability_by_patient_year.csv give REAL observed coverage for the
+      117/17-patient cohort and are a legitimate empirical starting point, but that is
+      cohort-specific observed missingness, not a generative assumption -- flagging as TODO
+      rather than conflating the two."
+    measurement_noise:
+      mean_gradient_mmHg:
+        value_type: reported_SD_by_valve_and_size
+        source: "data/reference/prosthetic_valve_reference_values.csv and
+          data/reference/fda_ssed_hemodynamics.csv both give mean+/-SD by valve/size -- use
+          the SD column directly per device rather than one pooled number here."
+        confidence: high
+      note: "Do not use a single pooled noise SD across all devices -- gradient variability
+        differs materially by valve design (see design_class in device_table.csv); join on
+        canonical_model/size_mm against prosthetic_valve_reference_values.csv or
+        fda_ssed_hemodynamics.csv instead."
+
+  high_thrombosis_TAVR:
+    description: >
+      Stress-test scenario: elevated valve thrombosis / HALT (hypoattenuated leaflet
+      thickening) hazard specifically in the TAVR arm.
+    baseline_hazard:
+      valve_thrombosis:
+        TAVI: "TODO -- NOTION reported ZERO clinical valve thrombosis events in EITHER arm
+          at 10 years (data/reference/published_rates.csv, outcome='clinical valve
+          thrombosis', both arms 0.0%), which is the opposite of useful for parameterising a
+          HIGH-thrombosis stress scenario. No other source gathered this session reports a
+          thrombosis incidence rate with a usable denominator/time frame. A literature
+          search for subclinical leaflet thrombosis / HALT incidence (commonly discussed in
+          the TAVR durability literature, e.g. imaging substudies) would need to be run
+          separately -- do not populate this field from memory."
+        SAVR: "TODO -- same gap."
+    hazard_ratios:
+      thrombosis_TAVI_vs_SAVR: "TODO -- not sourced this session."
+    follow_up_intensity: "inherit baseline unless the modelling engineer wants denser
+      early-window echo/CT follow-up to detect subclinical HALT specifically (common in the
+      primary literature's own imaging substudy designs, e.g. Makkar et al 2015 NEJM
+      'Possible Subclinical Leaflet Thrombosis in Bioprosthetic Aortic Valves' -- cited by
+      title only, NOT independently verified or numerically sourced this session)."
+    missingness: "TODO"
+    measurement_noise: "inherit baseline"
+
+  externally_mounted_pericardial_early_failure:
+    description: >
+      Stress-test scenario: elevated early SVD/reoperation hazard specific to the
+      "externally mounted pericardial" design class (Trifecta/Trifecta GT/Mitroflow/Crown
+      PRT), reflecting the well-documented Trifecta durability signal that led to its US
+      market withdrawal.
+    baseline_hazard:
+      SVD_or_reoperation:
+        Trifecta_vs_MagnaEase:
+          hazard_ratio_reoperation_overall: 11.62
+          ci: [1.47, 90.9]
+          hazard_ratio_SVD: 20.815
+          ci_SVD: [4.079, 106.2]
+          hazard_ratio_reoperation_per_1mmHg_5yr_gradient: 1.135
+          ci_gradient: [1.034, 1.244]
+          source: "data/reference/published_rates.csv (study='Suzuki 2022 (Trifecta vs
+            Magna Ease)') and data/raw/papers/trifecta_vs_magnaease_PMC9373186_fulltext.txt
+            Table 4 (Cox regression)"
+          definition_used: "trial-specific SVD definition (Rodriguez-Gabella 2017-modified:
+            mTPG rise >20mmHg with EOA fall >0.6cm2), NOT VARC-3 -- see fulltext note"
+          confidence: medium
+          n: "Trifecta 137, CEP 133 (single-center, Japan)"
+        Trifecta_vs_Perceval:
+          hazard_ratio_overall_SVD: 22.4
+          ci: [3.01, 166]
+          hazard_ratio_initial_stage_SVD: 20.5
+          ci_initial: [2.73, 153]
+          source: "data/reference/published_rates.csv (study='Nardi 2026 / Perfecta study')
+            and data/raw/papers/trifecta_vs_perceval_PMC13122456_fulltext.txt Table IV/V"
+          definition_used: "VARC-3-style discrete staging (stages 1/2S/2SR/3), per source
+            paper's methods"
+          confidence: medium
+          n: "Trifecta 220, Perceval 60 (single-center, Italy)"
+      freedom_from_SVD_5yr:
+        Trifecta: {value_pct: 89.4, source: "Suzuki 2022, see published_rates.csv", confidence: medium}
+        MagnaEase: {value_pct: 100.0, source: "Suzuki 2022, see published_rates.csv", confidence: high}
+      freedom_from_overall_SVD_7yr:
+        Trifecta: {value_pct: 74.0, source: "Nardi 2026, see published_rates.csv", confidence: medium}
+        Perceval: {value_pct: 93.0, source: "Nardi 2026, see published_rates.csv", confidence: medium}
+    market_status_context: "Trifecta/Trifecta GT withdrawn from the US market (FDA
+      correspondence February 2023, market withdrawal completed July 2023 per the task
+      brief; manufacturer wind-down reported starting late 2022 per Nardi 2026 Discussion,
+      see data/reference/device_table.csv row for Trifecta/Trifecta GT)."
+    follow_up_intensity: "inherit baseline"
+    missingness: "TODO"
+    measurement_noise: "inherit baseline; note both source cohorts are single-center with
+      wide confidence intervals (e.g. HR 95%CI up to 106-166) -- reflect this uncertainty in
+      any prior distribution used for this scenario rather than treating the point estimate
+      as precise."
+
+  high_competing_mortality:
+    description: >
+      Elderly / high-comorbidity population where all-cause death competes heavily with
+      valve-durability events -- directly relevant to KAIROS's explicit use of death as a
+      competing risk.
+    baseline_hazard:
+      all_cause_mortality:
+        TAVI: {value_pct_10yr: 62.7, source: "published_rates.csv, NOTION", confidence: high}
+        SAVR: {value_pct_10yr: 64.0, source: "published_rates.csv, NOTION", confidence: high}
+      context: "NOTION's own cohort (mean age ~79) is already a high-competing-mortality
+        population by construction -- baseline scenario numbers above ARE this scenario's
+        numbers. A genuinely HIGHER-mortality variant (e.g. an inoperable/extreme-risk
+        cohort) was not sourced this session; TODO if a more extreme population is wanted."
+    hazard_ratios: "inherit baseline"
+    follow_up_intensity: "TODO -- informative dropout from death is a competing-risk
+      analysis question for the modelling engineer, not a number this data-plumbing pass
+      can supply."
+    missingness: "TODO"
+    measurement_noise: "inherit baseline"
+
+  sparse_informative_followup:
+    description: >
+      Real-world EHR-derived follow-up (like our own passport.csv cohort) is NOT
+      protocol-driven annual echocardiography -- patients return when symptomatic, after a
+      new event, or per ad hoc clinical judgment, which can make missingness informative
+      (i.e., NOT missing-at-random).
+    baseline_hazard: "inherit baseline"
+    hazard_ratios: "inherit baseline"
+    follow_up_intensity:
+      observed_cohort_reference: "data/derived/aggregates/prosthetic_gradient_coverage.csv
+        (real, cohort-specific: n patients with >=1 prosthetic gradient and n with
+        gradients in >=2 distinct years, <5-suppressed) and
+        key_lab_availability_by_patient_year.csv give the ACTUAL observed sparsity pattern
+        in our 117/17-patient extraction -- use as an empirical reference for how sparse
+        real follow-up is, not as a generative model."
+      confidence: medium
+    missingness: "TODO -- quantifying whether our cohort's missingness is informative (e.g.
+      whether patients with fewer follow-up echoes have systematically different SVD risk)
+      requires a joint model, not a single sourced number; flagged for the modelling
+      engineer."
+    measurement_noise: "inherit baseline"
+
+  opposite_direction_antithrombotic_effects:
+    description: >
+      Scenario where antithrombotic strategy affects TAVR and SAVR valve durability in
+      OPPOSITE directions (e.g. a regimen that reduces thrombosis-related dysfunction in one
+      route while not helping, or plausibly harming via bleeding-related complications, in
+      the other) -- explicitly flagged in open_data_research.md section 4 as a genuine
+      definitional/scientific caveat when pooling across sources.
+    baseline_hazard: "TODO -- not sourced this session. The antithrombotic class exposure
+      grid (data/derived/private/medication_exposure_grid.csv, aggregated in
+      data/derived/aggregates/medication_class_prevalence_by_year.csv) gives real VKA/DOAC/
+      antiplatelet/heparin exposure for our 17-patient labs/meds cohort, but no outcome
+      linkage or effect-direction data was gathered this session -- that would require a
+      dedicated literature pull (e.g. PARTNER 3's finding of more clinically significant
+      leaflet thrombosis in the SAPIEN 3/TAVR arm, mentioned only qualitatively in the
+      NOTION fulltext capture's Discussion citation of PARTNER 3, not independently
+      numerically verified this session)."
+    hazard_ratios: "TODO"
+    follow_up_intensity: "inherit baseline"
+    missingness: "inherit baseline"
+    measurement_noise: "inherit baseline"
+
+
+# =============================================================================================
+# Simulation section (added 2026-09-16 for the Azure build). Parameterises the six fixed
+# scenarios of the revised proposal. Every leaf is {value, label, source, definition_used}
+# with label in {literature_informed, assumed, varied}; scenarios override leaves by dotted
+# path. Values labelled `assumed` are prototype choices, not evidence, and the modelling
+# engineer should replace them as evidence arrives. The literature skeleton above is the
+# evidence base these values cite.
+# =============================================================================================
+simulation:
+  version: 0.1
+  common:
+    n_patients: {value: 2500, label: assumed, definition_used: "patients per synthetic cohort"}
+    followup_years_max: {value: 8, label: assumed}
+    implant_year_range: {value: [2012, 2020], label: assumed, definition_used: "synthetic implant dates, uniform"}
+    reference_echo_lag_days: {value: [30, 180], label: literature_informed, source: "proposal, study protocol section 2: time zero is the first adequate echo 30-180 days after implantation"}
+    p_tavr: {value: 0.5, label: assumed, source: "patients_by_route.csv shows 53 surgical vs 44 transcatheter implant notes; balanced here by design"}
+    age_at_implant:
+      value: {SAVR: [68, 9], TAVR: [79, 7]}
+      label: literature_informed
+      source: "NOTION mean age ~79 (published_rates.csv); surgical cohorts younger (Salaun 2018, Johnston 2015)"
+      definition_used: "normal(mean, sd) by route, clipped to 45-95"
+    p_female: {value: 0.42, label: assumed}
+    design_class_mix:
+      value:
+        SAVR: {"stented bovine pericardial, internally mounted": 0.55, "externally mounted pericardial": 0.25, "stented porcine": 0.10, "sutureless or rapid-deployment": 0.07, "stentless": 0.03}
+        TAVR: {"balloon-expandable intra-annular TAVR": 0.60, "self-expanding supra-annular TAVR": 0.33, "self-expanding intra-annular TAVR": 0.05, "mechanically expanded intra-annular TAVR": 0.02}
+      label: assumed
+      source: "patients_by_canonical_model_and_design_class.csv informs the ordering only (Perimount family 31, Trifecta family 29, SAPIEN 3 family 32 of 117)"
+    reference_echo_by_class:
+      value:
+        "stented bovine pericardial, internally mounted": {gradient: [12, 4], eoa: [1.6, 0.35], dvi: [0.45, 0.08]}
+        "externally mounted pericardial": {gradient: [10, 4], eoa: [1.8, 0.4], dvi: [0.5, 0.08]}
+        "stented porcine": {gradient: [14, 5], eoa: [1.5, 0.35], dvi: [0.42, 0.08]}
+        "sutureless or rapid-deployment": {gradient: [11, 4], eoa: [1.6, 0.35], dvi: [0.46, 0.08]}
+        "stentless": {gradient: [8, 3], eoa: [2.0, 0.4], dvi: [0.55, 0.08]}
+        "balloon-expandable intra-annular TAVR": {gradient: [11, 4], eoa: [1.7, 0.4], dvi: [0.5, 0.1]}
+        "self-expanding supra-annular TAVR": {gradient: [8, 3], eoa: [1.9, 0.45], dvi: [0.55, 0.1]}
+        "self-expanding intra-annular TAVR": {gradient: [9, 3], eoa: [1.8, 0.4], dvi: [0.52, 0.1]}
+        "mechanically expanded intra-annular TAVR": {gradient: [11, 4], eoa: [1.6, 0.4], dvi: [0.48, 0.1]}
+      label: literature_informed
+      source: "data/reference/prosthetic_valve_reference_values.csv (ASE 2024 appendix) is used directly where a canonical_model/size row exists; these class-level fallbacks are read from the same table's neighbouring rows"
+      definition_used: "normal(mean, sd) for the reference study; per-model/size rows take precedence"
+    measurement_noise:
+      mean_gradient_sd_mmhg: {value: 3.0, label: literature_informed, source: "proposal simulation design: measurement noise about 3 mmHg"}
+      eoa_sd_cm2: {value: 0.15, label: assumed}
+      dvi_sd: {value: 0.04, label: assumed}
+    svd_hazard:
+      baseline_annual:
+        value: {SAVR: 0.022, TAVR: 0.021}
+        label: literature_informed
+        source: "NOTION 10-year moderate-or-severe SVD SAVR 20.8% -> -ln(1-0.208)/10 = 0.023/yr; Bern TAVI registry VARC-3 moderate/severe HVD 10.8% at 5 years -> 0.023/yr (Alaour 2025)"
+        definition_used: "constant-hazard approximation for the primary endpoint (moderate or severe HVD attributable to SVD), redistributed over a Weibull shape so the hazard rises with valve age"
+      weibull_shape: {value: 1.8, label: assumed, definition_used: "shape k of the latent onset distribution; k>1 means an accelerating hazard"}
+      log_hr_design_class:
+        value: {"externally mounted pericardial": 1.4, "stented porcine": 0.25, "stentless": 0.0, "sutureless or rapid-deployment": 0.0, "stented bovine pericardial, internally mounted": 0.0, "balloon-expandable intra-annular TAVR": 0.0, "self-expanding supra-annular TAVR": -0.2, "self-expanding intra-annular TAVR": 0.0, "mechanically expanded intra-annular TAVR": 0.0}
+        label: literature_informed
+        source: "Trifecta vs Magna Ease HR 11.6-20.8 and Trifecta vs Perceval HR 22.4 in single-centre series (published_rates.csv), attenuated to HR ~4 for a class-level effect; PARTNER 2 / SURTAVI generation contrasts inform the TAVR signs"
+        definition_used: "log hazard ratio on the cause-specific SVD hazard, reference class internally mounted pericardial"
+      log_hr_age_per_10y: {value: -0.35, label: literature_informed, source: "younger recipients deteriorate faster (Salaun 2018; Johnston 2015)"}
+      log_hr_small_size_le21: {value: 0.3, label: assumed}
+      log_hr_egfr_per_minus10: {value: 0.10, label: literature_informed, source: "renal dysfunction associated with SVD (Salaun 2018; Bern registry)"}
+      log_hr_dialysis: {value: 0.7, label: literature_informed, source: "dialysis associated with deterioration in surgical and TAVI cohorts"}
+      log_hr_diabetes: {value: 0.3, label: literature_informed, source: "Briand 2006; Salaun 2018"}
+      log_hr_lpa_high:
+        value: 1.1
+        label: literature_informed
+        source: "174-patient incident-SVD cohort: adjusted sub-distribution HR 3.0 for Lp(a) > 125 nmol/L, stenotic or mixed phenotype only (kairos_unverified.md item 5)"
+        definition_used: "a sub-distribution HR is not a cause-specific parameter; used here as ln(3.0) on the cause-specific hazard, stenotic phenotype only, and labelled accordingly"
+      log_hr_phosphate_per_mgdl: {value: 0.4, label: assumed, source: "mechanistic only; small haemodialysis series (unverified)"}
+      log_hr_vka_from_implant:
+        value: 0.45
+        label: assumed
+        source: "conflicting observational signals: Bern HR 1.78 for oral anticoagulation, Salaun warfarin correlate, versus Quebec/FRANCE-TAVI protective associations"
+        definition_used: "true effect of vitamin K antagonist exposure from implantation on the calcific SVD hazard in this synthetic world only; no clinical claim"
+      log_hr_dp_ucmgp_per_log_unit:
+        value: 0.0
+        label: varied
+        definition_used: "log hazard ratio on the SVD hazard per natural-log unit of latent dp-ucMGP (pmol/L) at implantation, centred on the population mean; 0 outside the marker-mediated vitamin K antagonist variant"
+      log_hr_hscrp: {value: 0.0, label: assumed, definition_used: "no incremental information by design (inflammatory module)"}
+      log_hr_ntprobnp_high: {value: 0.0, label: assumed, definition_used: "NT-proBNP informs competing mortality, not SVD"}
+      biomarker_effect_multiplier: {value: 1.0, label: varied, definition_used: "multiplies every biomarker log hazard ratio; 1 meaningful, 0.3 weak, 0 absent"}
+    phenotype:
+      p_regurgitant: {value: {SAVR: 0.25, TAVR: 0.15}, label: assumed, source: "regurgitant/mixed phenotypes are a minority of SVD in surgical series (Salaun 2018)"}
+    progression:
+      gradient_slope_mmhg_per_year: {value: {median: 4.0, sigma: 0.5}, label: assumed, definition_used: "lognormal slope of the mean gradient after latent onset"}
+      eoa_fall_fraction_per_year_at_median_slope: {value: 0.08, label: assumed}
+    death_hazard:
+      annual_at_age_79: {value: 0.10, label: literature_informed, source: "NOTION 10-year all-cause mortality 62.7-64.0% -> constant approximation 0.099-0.102/yr at mean age 79 (config baseline section)"}
+      log_hr_per_year_of_age: {value: 0.085, label: assumed, definition_used: "Gompertz-type age gradient"}
+      log_hr_dialysis: {value: 0.8, label: assumed}
+      log_hr_diabetes: {value: 0.2, label: assumed}
+      log_hr_af: {value: 0.3, label: assumed}
+      log_hr_male: {value: 0.2, label: assumed}
+      log_hr_ntprobnp_high: {value: 0.5, label: assumed, source: "NT-proBNP is prognostic for death, not SVD-specific"}
+      multiplier: {value: 1.0, label: varied}
+    replacement_non_svd:
+      annual_hazard: {value: 0.004, label: assumed, definition_used: "index-valve explant or replacement for a non-SVD cause (endocarditis, other); competing event"}
+    thrombosis:
+      annual_hazard:
+        value: {"balloon-expandable intra-annular TAVR": 0.012, "self-expanding supra-annular TAVR": 0.006, "self-expanding intra-annular TAVR": 0.008, "mechanically expanded intra-annular TAVR": 0.010, default: 0.003}
+        label: assumed
+        source: "subclinical leaflet thrombosis is more frequent after TAVR and in intra-annular balloon-expandable designs (proposal model approach section 1); NOTION reported zero clinical events, so no rate is sourced"
+      log_hr_anticoagulated: {value: -0.9, label: literature_informed, source: "GALILEO-4D 12.4% vs 32.4%; ADAPT-TAVR 9.8% vs 18.4%; ATLANTIS-4D (imaging endpoints)"}
+      gradient_rise_mmhg: {value: 12, label: assumed}
+      duration_months: {value: [3, 9], label: assumed}
+      p_treated: {value: 0.8, label: assumed}
+      multiplier: {value: 1.0, label: varied}
+    anticoagulation:
+      p_af: {value: 0.30, label: assumed, source: "atrial fibrillation prevalence in AVR cohorts, roughly a third"}
+      p_vka_given_af: {value: 0.55, label: assumed}
+      p_post_suspicion_start: {value: 0.0, label: varied, definition_used: "probability that a suspicious echo (gradient rise >= 10 mmHg) triggers anticoagulation within 90 days"}
+    biomarkers:
+      measured_fraction:
+        value: {egfr: 0.95, hba1c: 0.8, ldl: 0.8, phosphate: 0.4, lpa: 0.3, ntprobnp: 0.5, hscrp: 0.4}
+        label: assumed
+        source: "key_lab_availability_overall.csv (17 structured patients: eGFR 17, HbA1c 11, lipids 15, NT-proBNP 10, phosphorus 4, Lp(a) 1) informs direction only"
+      p_lpa_high: {value: 0.2, label: assumed, source: "Lp(a) > 125 nmol/L in about one fifth of adults"}
+    vitamin_k:
+      dp_ucmgp_substudy_fraction: {value: 0.3, label: assumed, definition_used: "fraction of patients in the dp-ucMGP research-assay substudy; 0 measured in the supplied records"}
+      dp_ucmgp_p_measured_per_visit: {value: 0.9, label: assumed, definition_used: "substudy patients: probability of a draw at the reference echo and at each later (annual) visit"}
+      dp_ucmgp_log_mean_pmol_l: {value: 6.1, label: assumed, definition_used: "population mean of ln dp-ucMGP off vitamin K antagonists (about 450 pmol/L)"}
+      dp_ucmgp_log_sd_between: {value: 0.5, label: assumed, definition_used: "between-patient SD of ln dp-ucMGP off VKA (vitamin K intake, renal function)"}
+      dp_ucmgp_log_rise_on_vka:
+        value: 0.9
+        label: assumed
+        source: "dp-ucMGP rises on vitamin K antagonists (direction from the literature summarised in the proposal; magnitude, about 2.5-fold, assumed)"
+        definition_used: "additive shift in ln dp-ucMGP while a VKA episode is active at the draw"
+      dp_ucmgp_log_rise_dialysis: {value: 0.4, label: assumed, definition_used: "additive shift in ln dp-ucMGP on dialysis, so the marker is not a relabelled drug indicator"}
+      dp_ucmgp_measurement_log_sd: {value: 0.15, label: assumed}
+    surveillance:
+      interval_years: {value: 1.0, label: literature_informed, source: "ESC/EACTS yearly clinical review with imaging"}
+      jitter_days_sd: {value: 45, label: assumed}
+      p_missed_visit: {value: 0.10, label: assumed}
+      informative: {value: false, label: varied, definition_used: "when true, patients with a rising gradient attend more and others less"}
+      missing_multiplier_symptomatic: {value: 0.4, label: assumed}
+      missing_multiplier_asymptomatic: {value: 1.3, label: assumed}
+  scenarios:
+    gradual_stenotic:
+      description: "Rising gradient with falling area over years; measurement noise about 3 mmHg; competing mortality by age."
+      evaluates: "Whether serial echo adds to baseline; calibration of 1-, 3- and 5-year SVD-before-death."
+      overrides:
+        phenotype.p_regurgitant: {value: {SAVR: 0.0, TAVR: 0.0}, label: varied}
+    regurgitant_abrupt:
+      description: "Leaflet tear with little preceding gradient signal; regurgitant endpoint without area criteria."
+      evaluates: "Whether the model correctly reports low predictability and the reliability statement flags it; phenotype-specific calibration."
+      overrides:
+        phenotype.p_regurgitant: {value: {SAVR: 0.6, TAVR: 0.5}, label: varied}
+    high_competing_mortality:
+      description: "Elderly TAVI-like cohort; death hazard several times the SVD hazard."
+      evaluates: "Whether the three probabilities are reported correctly and the complement is never misread."
+      overrides:
+        p_tavr: {value: 0.9, label: varied}
+        age_at_implant: {value: {SAVR: [80, 5], TAVR: [84, 5]}, label: varied}
+        death_hazard.multiplier: {value: 2.5, label: varied}
+    irregular_surveillance:
+      description: "Informative visit process; 25 to 35% missing at five years; interval-censored onset."
+      evaluates: "Detection versus onset bias; overdue flag behaviour; sensitivity analyses."
+      overrides:
+        surveillance.p_missed_visit: {value: 0.28, label: literature_informed, source: "five-year echo follow-up missing in 30.4% of TAVR and 35.7% of surgical patients (PARTNER 3 five-year report)"}
+        surveillance.informative: {value: true, label: varied}
+    biomarker_information:
+      description: "Three versions of the biomarker module effect (meaningful, weak, absent) plus a marker essentially unmeasured."
+      evaluates: "Whether incremental Brier and calibration gains appear only where information exists, and whether the pipeline degrades gracefully when a marker is absent."
+      variants:
+        meaningful:
+          description: "Biomarker effects at their literature-informed size."
+          overrides:
+            svd_hazard.biomarker_effect_multiplier: {value: 1.0, label: varied}
+        weak:
+          description: "Biomarker effects at 30% of their literature-informed size."
+          overrides:
+            svd_hazard.biomarker_effect_multiplier: {value: 0.3, label: varied}
+        absent:
+          description: "Biomarkers carry no information about SVD."
+          overrides:
+            svd_hazard.biomarker_effect_multiplier: {value: 0.0, label: varied}
+        unmeasured:
+          description: "Meaningful effects, but Lp(a) and phosphate are essentially unmeasured; the module must switch off rather than impute."
+          overrides:
+            svd_hazard.biomarker_effect_multiplier: {value: 1.0, label: varied}
+            biomarkers.measured_fraction: {value: {egfr: 0.95, hba1c: 0.8, ldl: 0.8, phosphate: 0.03, lpa: 0.02, ntprobnp: 0.5, hscrp: 0.4}, label: varied}
+    anticoagulant_mechanism_confounding:
+      description: "Vitamin K antagonist raising calcific hazard and any anticoagulant lowering thrombosis hazard; confounding by indication; treatment started after a suspicious echo; dp-ucMGP generated from VKA exposure plus noise, with the SVD hazard depending on the marker rather than the drug, and a variant where the marker is pure noise."
+      evaluates: "Whether opposite-direction effects are recovered rather than averaged; whether the post-suspicion indicator isolates reverse causation; whether the VKA coefficient shrinks toward zero when dp-ucMGP is present and the model stays quiet when the marker is noise."
+      overrides:
+        anticoagulation.p_af: {value: 0.45, label: varied}
+        anticoagulation.p_post_suspicion_start: {value: 0.4, label: varied}
+        thrombosis.multiplier: {value: 2.0, label: varied}
+        vitamin_k.dp_ucmgp_substudy_fraction: {value: 0.5, label: varied}
+      variants:
+        marker_mediated:
+          description: "The VKA signal runs through dp-ucMGP: the marker is generated from VKA exposure (and dialysis) plus noise, and the SVD hazard depends on the latent marker, not on the drug."
+          overrides:
+            svd_hazard.log_hr_vka_from_implant: {value: 0.0, label: varied, definition_used: "no direct drug effect; the whole VKA association is carried by the marker"}
+            svd_hazard.log_hr_dp_ucmgp_per_log_unit: {value: 0.9, label: varied, definition_used: "implies a VKA log hazard ratio of about 0.9 x 0.9 = 0.81 through the marker"}
+        marker_noise:
+          description: "The drug acts directly on the SVD hazard and dp-ucMGP is pure noise, unrelated to VKA exposure, dialysis or SVD; the offset model must stay quiet."
+          overrides:
+            svd_hazard.log_hr_dp_ucmgp_per_log_unit: {value: 0.0, label: varied}
+            vitamin_k.dp_ucmgp_log_rise_on_vka: {value: 0.0, label: varied}
+            vitamin_k.dp_ucmgp_log_rise_dialysis: {value: 0.0, label: varied}

@@ -1,0 +1,51 @@
+# Proposed service configuration; the standardization worker is not implemented yet.
+# This file is a versioned configuration contract, not an active training switch.
+version: 1
+profile: omop_style_research_v1
+
+training_export:
+  enable_training_defaults: false
+  defaults:
+    policy_version: training_scaffold_v1
+    seed: 20260917
+    purpose: pipeline_test
+    source_kind: real_with_synthetic_defaults
+    output_namespace: training_scaffold
+    allowed_export_profile: kairos_model_inputs
+    clinical_training_allowed: false
+    automatic_model_promotion: false
+    preserve_source_tables: true
+    preserve_valid_observed_values: true
+    record_field_provenance: true
+    learn_defaults_from_dataset: false
+    generate_standard_concept_ids: false
+    overwrite_invalid_values: false
+    expand_cohort_to_meet_event_thresholds: false
+    schema_policy: add_required_columns_with_typed_missing_values
+    missing_category_policy: explicit_unknown_if_contract_allows
+    missing_numeric_policy: versioned_synthetic_scenario
+    unresolved_timeline_policy: separate_coherent_synthetic_episode
+    missing_outcome_policy: derive_from_synthetic_episode_only
+    missing_unit_or_concept_policy: exclude_from_affected_feature_and_report
+    scenario: gradual_stenotic
+    scenario_version_policy: pin_effective_config_hash_and_generator_version
+    # Future optional integration with kairos.calibration; never an implicit fallback.
+    generator_backend: scenario
+    calibration_bundle_manifest: null
+    require_accepted_calibration_bundle: true
+    structural_checks_required:
+      - schema_and_types
+      - primary_and_foreign_keys
+      - concept_and_unit_validity
+      - temporal_consistency
+      - exposure_overlap
+      - reference_echo_selection
+      - endpoint_and_predictor_separation
+      - finite_eligible_features
+      - source_and_default_lineage
+    quality_report_separate_dimensions:
+      - structural_validity
+      - observed_completeness
+      - synthetic_completion
+      - clinical_readiness
+      - statistical_support

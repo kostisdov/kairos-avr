@@ -1,0 +1,76 @@
+canonical_model,alias,alias_type,notes
+Avalus,Avalus™,gudid_brand,brandName observed in GUDID this session
+Avalus Ultra,Avalus Ultra™,gudid_brand,brandName observed in GUDID this session
+CoreValve,CoreValue,abbreviation,common misspelling seen in real notes
+CoreValve,CoreValve™,gudid_brand,brandName observed in GUDID this session
+CoreValve,CoreValve™ Evolut™,gudid_brand,brandName observed in GUDID this session
+Crown PRT,CROWN PRT,gudid_brand,brandName observed in GUDID this session
+Epic,Epic™,gudid_brand,brandName observed in GUDID this session
+Evolut FX,Evolut™ FX,gudid_brand,brandName observed in GUDID this session
+Evolut FX+,Evolut™ FX+,gudid_brand,brandName observed in GUDID this session
+Evolut PRO,CoreValve™ Evolut™ PRO,gudid_brand,brandName observed in GUDID this session
+Evolut PRO,EnVeo™ PRO,gudid_brand,brandName observed in GUDID this session
+Evolut PRO+,Evolut Corevalue Pro+,regex,misspelling ('Corevalue' for CoreValve) observed in real notes
+Evolut PRO+,Evolut™ PRO+,gudid_brand,brandName observed in GUDID this session
+Evolut R,CoreValve™ Evolut™ R,gudid_brand,brandName observed in GUDID this session
+Evolut R,EnVeo™ R,gudid_brand,brandName observed in GUDID this session
+Evolut R,Evolut Corevalue R,regex,misspelling variant
+Evolut R,R\s?34\s*mm,regex,"size-suffixed shorthand, R-series 34mm"
+Freestyle,FREESTYLE®,gudid_brand,brandName observed in GUDID this session
+Hancock II,HANCOCK® II,gudid_brand,brandName observed in GUDID this session
+Hancock II Ultra,HANCOCK II ULTRA®,gudid_brand,brandName observed in GUDID this session
+INTUITY Elite,EDWARDS INTUITY ELITE AORTIC VALVE,gudid_brand,brandName observed in GUDID this session
+INTUITY Elite,EDWARDS INTUITY ELITE VALVE SYSTEM,gudid_brand,brandName observed in GUDID this session
+Inspiris RESILIA,INSPIRIS RESILIA AORTIC VALVE,gudid_brand,brandName observed in GUDID this session
+Inspiris RESILIA,Inspiris,abbreviation,bare 'Inspiris' free-text form
+JenaValve (Trilogy),Trilogy Transcatheter Heart Valve,gudid_brand,brandName observed in GUDID this session
+Konect (legacy pre-RESILIA),CARPENTIER-EDWARDS BIOPROSTHETIC VALVED CONDUIT,gudid_brand,brandName observed in GUDID this session
+Konect RESILIA,Carpentier-Edwards Bioprosthetic Valved Conduit,gudid_brand,"legacy/predecessor GUDID brand name for the same Edwards valved-conduit product line, pre-RESILIA rebrand -- sizes not pooled into the main Konect RESILIA row to avoid mixing tissue generations"
+Konect RESILIA,KONECT RESILIA,gudid_brand,brandName observed in GUDID this session
+Konect RESILIA,Konect,abbreviation,"BioBentall conduit, bare 'Konect' free-text form"
+Lotus,LOTUS Edge™ Valve System,gudid_brand,brandName observed in GUDID this session
+Magna,#?\s?\d{2}\s?mm\s+Magna\b|Magna\s+valve,regex,sized or bare 'Magna valve' free-text forms
+Magna,CARPENTIER-EDWARDS PERIMOUNT MAGNA PERICARDIAL BIOPROSTHESIS - AORTIC,gudid_brand,brandName observed in GUDID this session
+Magna,Magna,gudid_brand,bare 'Magna' free-text form (disambiguate from Magna Ease by absence of 'Ease')
+Magna Ease,CARPENTIER-EDWARDS PERIMOUNT MAGNA EASE PERICARDIAL BIOPROSTHESIS - AORTIC,gudid_brand,brandName observed in GUDID this session
+Mitroflow,MITROFLOW,gudid_brand,brandName observed in GUDID this session
+Mitroflow,MITROFLOW VALSALVA CONDUIT,gudid_brand,brandName observed in GUDID this session
+Mosaic,MOSAIC®,gudid_brand,brandName observed in GUDID this session
+Mosaic Ultra,MOSAIC ULTRA®,gudid_brand,brandName observed in GUDID this session
+Navitor,Navitor Titan™,gudid_brand,brandName observed in GUDID this session
+Navitor,Navitor™,gudid_brand,brandName observed in GUDID this session
+Perceval,PERCEVAL,gudid_brand,brandName observed in GUDID this session
+Perceval Plus,PERCEVAL PLUS,gudid_brand,brandName observed in GUDID this session
+Perimount,#?\s?\d{2}\s?(?:-?\s?mm)?\s*CE\b,regex,"size before 'CE', e.g. '#25 CE' or '25 mm CE' (Carpentier-Edwards Perimount)"
+Perimount,CARPENTIER-EDWARDS BIOPROSTHESIS - AORTIC,gudid_brand,brandName observed in GUDID this session
+Perimount,CARPENTIER-EDWARDS PERIMOUNT BIOPROSTHESIS AORTIC,gudid_brand,brandName observed in GUDID this session
+Perimount,CARPENTIER-EDWARDS PERIMOUNT PERICARDIAL BIOPROSTHESIS - AORTIC,gudid_brand,brandName observed in GUDID this session
+Perimount,CARPENTIER-EDWARDS PERIMOUNT RSR PERICARDIAL AORTIC BIOPROSTHESIS,gudid_brand,brandName observed in GUDID this session
+Perimount,CARPENTIER-EDWARDS PERIMOUNT RSR PERICARDIAL BIOPROSTHESIS – AORTIC,gudid_brand,brandName observed in GUDID this session
+Perimount,CARPENTIER-EDWARDS PERIMOUNT RSRPERICARDIAL BIOPROSTHESIS - AORTIC,gudid_brand,brandName observed in GUDID this session
+Perimount,CARPENTIER-EDWARDS PERIMOUNT THEON PERICARDIAL BIOPROSTHESIS - AORTIC,gudid_brand,brandName observed in GUDID this session
+Perimount,CARPENTIER-EDWARDS Perimount Pericardial Aortic Prosthesis,gudid_brand,brandName observed in GUDID this session
+Perimount,CARPENTIER-EDWARDS S.A.VBIOPROSTHESIS - AORTIC,gudid_brand,brandName observed in GUDID this session
+Perimount,CE\s*#?\s?\d{2},regex,'CE' + size for Carpentier-Edwards Perimount
+Perimount,\bCarpentier\b,regex,"bare 'Carpentier(-Edwards)' aortic bioprosthesis resolves to Perimount, the closest canonical model"
+Portico,Portico™,gudid_brand,brandName observed in GUDID this session
+Prima Plus,EDWARDS PRIMA PLUS STENTLESS BIOPROSTHESIS - AORTIC,gudid_brand,brandName observed in GUDID this session
+SAPIEN,EDWARDS SAPIEN TRANSCATHETER HEART VALVE (THV),gudid_brand,brandName observed in GUDID this session
+SAPIEN 3,EDWARDS SAPIEN 3 TRANSCATHETER HEART VALVE (THV),gudid_brand,brandName observed in GUDID this session
+SAPIEN 3,Edwards S3,abbreviation,colloquial op-note shorthand
+SAPIEN 3,Sapien S3,abbreviation,colloquial op-note shorthand
+SAPIEN 3,\bS3\b,regex_guarded,"bare 'S3' accepted only with nearby valve/TAVR context (guarded, like 'Epic')"
+SAPIEN 3 Ultra,Edwards SAPIEN 3 Ultra Transcatheter Heart Valve,gudid_brand,brandName observed in GUDID this session
+SAPIEN 3 Ultra,S3 Ultra,abbreviation,colloquial op-note shorthand
+SAPIEN 3 Ultra,SAPIEN 3 Ultra System,gudid_brand,brandName observed in GUDID this session
+SAPIEN 3 Ultra,"Sapien\b[^.\n]{0,60}?\bUltra\b",regex,"'Ultra' in the same sentence as Sapien, e.g. 'Sapien platform, Ultra generation'"
+SAPIEN 3 Ultra,Size:\s*Ultra\s*26\s*mm,regex,field-label free-text form
+SAPIEN 3 Ultra RESILIA,SAPIEN 3 Ultra RESILIA,gudid_brand,brandName observed in GUDID this session
+SAPIEN 3 Ultra RESILIA,\bUltra\s+RESILIA\b,regex,bare 'Ultra RESILIA' without the SAPIEN 3 prefix
+SAPIEN XT,EDWARDS SAPIEN XT TRANSCATHETER HEART VALVE (THV),gudid_brand,brandName observed in GUDID this session
+SAPIEN XT,\bXT\b,regex_guarded,bare 'XT' accepted only with nearby valve/TAVR context (guarded)
+Trifecta,#\s?21\s*Trifecta,regex,"size-prefixed free-text form, e.g. '#21 Trifecta'"
+Trifecta,21-mm Trifecta,regex,size-suffixed free-text form
+Trifecta,Trifecta GT,abbreviation,note: Trifecta GT is tracked as its own canonical_model row; this alias captures notes that just say 'Trifecta' generically for GT implants
+Trifecta,Trifecta™,gudid_brand,brandName observed in GUDID this session
+Trifecta,\d{2}[\s-]?mm\s*Trifecta,regex,general size + Trifecta free-text form

@@ -1,0 +1,34 @@
+# Population specifications for kairos.calibration (docs/kairos_calibrated_generator_design.md section 4.3).
+# No calibration runs without one. Values are declared assumptions until reviewed.
+populations:
+  local_export_like:
+    preset: local_export_like
+    description: >
+      What is estimable about the supplied de-identified export. It may be a selected sample (117 note patients,
+      17 with structured medication and laboratory records) and cannot establish general AVR prevalence.
+    base_scenario: gradual_stenotic
+    routes: {}                      # scenario default; the export's route mix is descriptive, not a sampling frame
+    implant_years: [2012, 2020]
+    study_end: "2026-06-30"
+    max_followup_years: 8
+    scope_statement: "local export description; most dependencies remain prior-driven"
+  external_population_notion_like:
+    preset: external_population
+    description: >
+      Low-surgical-risk TAVI and SAVR population patterned on the NOTION trial design (implantation-origin,
+      intention-to-treat views). Targets from the trial remain proposed until reviewed.
+    base_scenario: gradual_stenotic
+    routes: {SAVR: 0.48, TAVR: 0.52}
+    implant_years: [2009, 2013]
+    study_end: "2024-12-31"
+    max_followup_years: 10
+    scope_statement: "external study-population view; local export informs only transportable components"
+  synthetic_recovery:
+    preset: external_population
+    description: "Population for parameter-recovery tests of the calibration machinery (synthetic truth only)."
+    base_scenario: gradual_stenotic
+    routes: {SAVR: 0.5, TAVR: 0.5}
+    implant_years: [2012, 2020]
+    study_end: "2026-06-30"
+    max_followup_years: 8
+    scope_statement: "machinery test; not evidence about patients"

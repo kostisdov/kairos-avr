@@ -1,0 +1,11 @@
+OPERATIVE REPORT
+
+Procedure: Aortic valve replacement with bioprosthesis.
+
+Note entered in error and subsequently deleted by the authoring provider; superseded by a
+corrected operative report. This entry's Signed Status is "Deleted" in the accompanying
+test harness DataFrame and must be excluded from extraction -- if this note's Trifecta
+mention below is ever counted by the extractor, the exclusion test has failed.
+
+Valve Type Used: Trifecta
+Implant Size: 27

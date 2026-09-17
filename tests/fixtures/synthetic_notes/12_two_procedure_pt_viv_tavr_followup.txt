@@ -1,0 +1,24 @@
+TRANSCATHETER AORTIC VALVE REPLACEMENT PROCEDURE NOTE
+
+Procedure Date: fictional follow-up year, several years after the index surgical valve
+replacement (see accompanying test harness for the assigned Service Date)
+
+Indication: The patient, status post surgical aortic valve replacement with a Magna Ease
+bioprosthesis placed several years earlier, now presents with structural valve
+deterioration of the surgical bioprosthesis and worsening heart failure symptoms. Given
+prohibitive surgical risk for redo sternotomy, the heart team recommended a valve-in-valve
+transcatheter approach.
+
+Procedure: Valve-in-valve TAVR was performed via right femoral arterial access. A balloon-
+expandable transcatheter valve was advanced across the failing surgical bioprosthesis and
+deployed under rapid pacing in good position within the existing surgical valve frame.
+
+Device: SAPIEN 3
+Implant Size: 23
+
+Final angiography and echocardiography confirmed good valve position with no significant
+paravalvular leak. Post-procedure hemodynamics showed a mean gradient of 10 mmHg across the
+new transcatheter valve, substantially improved from the pre-procedure gradient of 41 mmHg
+across the deteriorated surgical bioprosthesis.
+
+Disposition: The patient was transferred to the recovery unit in stable condition.

@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kairos-core"
+version = "0.1.0"
+description = "KAIROS research prototype: dynamic, competing-risk prediction of bioprosthetic aortic valve deterioration. Trained on synthetic scenarios; illustrative and unvalidated."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary - research prototype" }
+dependencies = [
+    "numpy>=1.26,<3",
+    "pandas>=2.2",
+    "scipy>=1.11",
+    "scikit-learn>=1.5",
+    "lifelines>=0.29",
+    "scikit-survival>=0.28,<0.29",
+    "pyarrow>=15",
+    "pyyaml>=6",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.5",
+    "joblib>=1.4",
+    "matplotlib>=3.8",
+    "httpx>=0.27",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "openai>=1.50",
+    "azure-identity>=1.19",
+    "azure-storage-blob>=12.23",
+    "azure-keyvault-secrets>=4.8",
+    "azure-monitor-opentelemetry>=1.6",
+    "psycopg[binary]>=3.2",
+    "sqlalchemy>=2.0",
+]
+
+[project.optional-dependencies]
+demo = ["streamlit>=1.40"]
+local = ["openpyxl>=3.1"]
+dev = ["pytest>=8", "ruff>=0.6", "openpyxl>=3.1", "streamlit>=1.40"]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+kairos = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::pydantic.warnings.PydanticDeprecatedSince20",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "services", "scripts", "tests"]
+extend-exclude = ["tmp", "data", "docs", ".venv", "artifacts"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["kairos", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501", "B008", "UP007", "UP035", "UP006", "B905"]
+# Existing data-build scripts predate the lint config; they are checked more leniently.
+per-file-ignores = { "src/kairos/build_*.py" = ["E", "F", "W", "I", "B", "UP"], "src/kairos/extract_passport_v0.py" = ["E", "F", "W", "I", "B", "UP"], "src/kairos/km_reconstruct.py" = ["E", "F", "W", "I", "B", "UP"], "src/kairos/agg_io.py" = ["E", "F", "W", "I", "B", "UP"], "src/kairos/verify_aggregates.py" = ["E", "F", "W", "I", "B", "UP"], "src/kairos/passport.py" = ["E", "F", "W", "I", "B", "UP"], "src/kairos/varc3.py" = ["E", "F", "W", "I", "B", "UP"], "tests/test_passport.py" = ["E", "F", "W", "I", "B", "UP"], "tests/test_varc3.py" = ["E", "F", "W", "I", "B", "UP"] }

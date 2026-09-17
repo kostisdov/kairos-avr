@@ -1,0 +1,56 @@
+# KAIROS application configuration contract.
+#
+# Every service (extract, predict, jobs, demo) reads its settings from environment
+# variables through src/kairos/io/config.py (pydantic-settings). This file documents the
+# contract that the Bicep templates in infra/ and the local developer set-up both satisfy.
+# Values here are the LOCAL defaults; Azure Container Apps override them with env vars.
+#
+# Rule 0.3 of docs/kairos_azure_build_design.md: ALLOW_REAL_NOTES_TO_LLM is read from
+# configuration only, never from a request.
+
+env_vars:
+  KAIROS_ENV: { default: "local", description: "local | dev" }
+  ALLOW_REAL_NOTES_TO_LLM: { default: "true", description: "Single switch permitting de-identified real note text to be sent to Azure OpenAI. Owner-confirmed 2026-09-16." }
+  KAIROS_STORAGE_ACCOUNT_URL: { default: "", description: "https://<account>.blob.core.windows.net ; empty = local filesystem under artifacts/" }
+  KAIROS_LOCAL_ARTIFACTS_DIR: { default: "artifacts", description: "Local stand-in for Blob containers when KAIROS_STORAGE_ACCOUNT_URL is empty" }
+  KAIROS_PG_HOST: { default: "", description: "PostgreSQL Flexible Server FQDN; empty = SQLite file under artifacts/kairos.db" }
+  KAIROS_PG_DB: { default: "kairos" }
+  KAIROS_PG_USER: { default: "", description: "Entra principal name used for token auth (the user-assigned managed identity name)" }
+  KAIROS_PG_AUTH: { default: "entra", description: "entra (access token as password) | password (KAIROS_PG_PASSWORD, local only)" }
+  KAIROS_OPENAI_ENDPOINT: { default: "", description: "https://<account>.openai.azure.com/ ; empty disables the hosted-model path" }
+  KAIROS_OPENAI_API_VERSION: { default: "2025-04-01-preview", description: "Dated version for the classic deployments path, or v1 for the version-free /openai/v1/ path" }
+  KAIROS_OPENAI_EXTRACT_DEPLOYMENT: { default: "kairos-extract", description: "Structured-output extraction deployment" }
+  KAIROS_OPENAI_PRESCREEN_DEPLOYMENT: { default: "", description: "Cheap pre-screen deployment; empty = rules-only pre-screen (design fallback)" }
+  KAIROS_OPENAI_ADJUDICATE_DEPLOYMENT: { default: "", description: "Optional adjudication-assist deployment; empty disables the endpoint" }
+  KAIROS_OPENAI_SUMMARY_DEPLOYMENT: { default: "", description: "Explicit deployment for the Patient Summary writer; empty disables narrative generation" }
+  KAIROS_OPENAI_EXTRACT_REASONING_EFFORT: { default: "low", description: "reasoning_effort for the extraction model (GPT-5.1); empty for a non-reasoning model, which then receives temperature 0" }
+  KAIROS_OPENAI_PRESCREEN_REASONING_EFFORT: { default: "", description: "reasoning_effort for the pre-screen model; empty for a non-reasoning model" }
+  KAIROS_OPENAI_ADJUDICATE_REASONING_EFFORT: { default: "medium", description: "reasoning_effort for the adjudication-assist model (GPT-5.1)" }
+  KAIROS_OPENAI_SUMMARY_REASONING_EFFORT: { default: "low", description: "reasoning_effort for the Patient Summary writer; empty sends temperature 0" }
+  KAIROS_SUMMARY_MAX_COMPLETION_TOKENS: { default: "4000", description: "Bound covering reasoning and visible tokens for one findings draft" }
+  KAIROS_KEYVAULT_URL: { default: "" }
+  KAIROS_EXTRACT_URL: { default: "http://127.0.0.1:8001", description: "Demo -> extract service" }
+  KAIROS_PREDICT_URL: { default: "http://127.0.0.1:8002", description: "Demo -> predict service" }
+  KAIROS_DEMO_BACKEND: { default: "http", description: "http calls the extract and predict services; inprocess runs both apps inside the demo process (local use and tests)" }
+  KAIROS_MODEL_BLOB_PREFIX: { default: "latest", description: "Which model bundle the predict service loads from the models container" }
+  KAIROS_GIT_SHA: { default: "", description: "Baked into images at build time; part of model_version" }
+  AZURE_CLIENT_ID: { default: "", description: "Client id of the user-assigned managed identity (DefaultAzureCredential)" }
+  APPLICATIONINSIGHTS_CONNECTION_STRING: { default: "", description: "Telemetry; empty disables Azure Monitor export" }
+
+ports:
+  extract: 8000
+  predict: 8000
+  demo: 8501
+
+health_paths:
+  extract: /healthz
+  predict: /healthz
+  demo: /_stcore/health
+
+blob_containers: [scenarios, models, metrics, figures, reference, aggregates, raw]
+
+jobs:
+  # The jobs image ENTRYPOINT is `python services/jobs/cli.py`; Container Apps Jobs pass args.
+  scenarios: ["scenarios", "--all"]
+  train: ["train"]
+  evaluate: ["evaluate", "--all"]

@@ -1,0 +1,19 @@
+OPERATIVE REPORT
+
+Procedure Date: fictional index year (see accompanying test harness for the assigned
+Service Date)
+
+Preoperative Diagnosis: Severe native aortic stenosis.
+Procedure: Aortic valve replacement with bioprosthesis via median sternotomy.
+
+The patient underwent an uncomplicated median sternotomy and was placed on cardiopulmonary
+bypass. The heavily calcified native trileaflet valve was excised. A Magna Ease valve was
+selected after annular sizing.
+
+Tissue Implant Type: Bioprosthesis
+Valve Type Used: Magna Ease
+Implant Size: 21
+
+Separation from bypass was uneventful. Intraoperative echocardiography demonstrated the
+mean gradient is 10 mmHg with no significant paravalvular leak. The patient was transferred
+to the intensive care unit in stable condition.

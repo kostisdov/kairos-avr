@@ -1,0 +1,4 @@
+metric,n_patients
+patients_with_ge1_prosthetic_gradient,46
+patients_with_gradients_in_ge2_distinct_years,<5
+total_patients,117

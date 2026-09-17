@@ -1,0 +1,321 @@
+# KAIROS frozen evaluation plan (detailed design WP-B2). Values proposed by the sizing pilot are
+# assumptions until reviewed; see docs/runbook.md.
+frozen: false
+review_note: 'Proposed by the sizing pilot. Review sizes and unmet gates, set n per scenario, then set frozen: true. Evaluations
+  run either way and record whether they matched a frozen plan.'
+generated_at: '2026-09-17T08:34:34.955543+00:00'
+safety_factor: 1.25
+gates:
+  fit_min_unique_events: 30
+  baseline_min_unique_events: 5
+  metric_min_event_patients: 20
+  metric_min_control_patients: 20
+  slope_min_events: 50
+  bootstrap_min_valid: 100
+  bootstrap_min_success_fraction: 0.8
+  min_censoring_survival: 0.05
+  min_at_risk: 10
+  mode: full
+development:
+  seed: 20260916
+  scenarios:
+    gradual_stenotic:
+      proposed_n: 12500
+      effective_config_hash: 8ba17a9680cf
+      required_n:
+        'svd: covariate model (pooled Cox), 30 in every training fold': 1200
+        'svd SAVR: route baseline, 5 in every training fold': 300
+        'svd SAVR: per-route model (gradient boosting), 30': 1600
+        'svd TAVR: route baseline, 5 in every training fold': 1100
+        'svd TAVR: per-route model (gradient boosting), 30': 6300
+        'svd: AUC and intercept at 1 y, 20 case patients in a held-out fold': 12500
+        'svd: calibration slope at 5 y, 50 case patients in a held-out fold': 9100
+        'death: covariate model (pooled Cox), 30 in every training fold': 100
+        'death SAVR: route baseline, 5 in every training fold': 100
+        'death SAVR: per-route model (gradient boosting), 30': 300
+        'death TAVR: route baseline, 5 in every training fold': 100
+        'death TAVR: per-route model (gradient boosting), 30': 200
+        'death: AUC and intercept at 1 y, 20 case patients in a held-out fold': 300
+        'death: calibration slope at 5 y, 50 case patients in a held-out fold': 600
+        'replacement: covariate model (pooled Cox), 30 in every training fold': 4300
+        'replacement SAVR: route baseline, 5 in every training fold': 1500
+        'replacement SAVR: per-route model (gradient boosting), 30': 9000
+        'replacement TAVR: route baseline, 5 in every training fold': 1400
+        'replacement TAVR: per-route model (gradient boosting), 30': 8000
+        'replacement: AUC and intercept at 1 y, 20 case patients in a held-out fold': 20900
+        'replacement: calibration slope at 5 y, 50 case patients in a held-out fold': 36800
+      pilot_n: 2000
+      timings:
+        generate_seconds: 4.222333272298177
+        cox_fit_seconds_one_fold: 10.359194278717041
+    regurgitant_abrupt:
+      proposed_n: 5600
+      effective_config_hash: f59f7767feff
+      required_n:
+        'svd: covariate model (pooled Cox), 30 in every training fold': 700
+        'svd SAVR: route baseline, 5 in every training fold': 200
+        'svd SAVR: per-route model (gradient boosting), 30': 800
+        'svd TAVR: route baseline, 5 in every training fold': 600
+        'svd TAVR: per-route model (gradient boosting), 30': 3600
+        'svd: AUC and intercept at 1 y, 20 case patients in a held-out fold': 5600
+        'svd: calibration slope at 5 y, 50 case patients in a held-out fold': 4700
+        'death: covariate model (pooled Cox), 30 in every training fold': 100
+        'death SAVR: route baseline, 5 in every training fold': 100
+        'death SAVR: per-route model (gradient boosting), 30': 300
+        'death TAVR: route baseline, 5 in every training fold': 100
+        'death TAVR: per-route model (gradient boosting), 30': 200
+        'death: AUC and intercept at 1 y, 20 case patients in a held-out fold': 300
+        'death: calibration slope at 5 y, 50 case patients in a held-out fold': 700
+        'replacement: covariate model (pooled Cox), 30 in every training fold': 4300
+        'replacement SAVR: route baseline, 5 in every training fold': 1500
+        'replacement SAVR: per-route model (gradient boosting), 30': 9000
+        'replacement TAVR: route baseline, 5 in every training fold': 1400
+        'replacement TAVR: per-route model (gradient boosting), 30': 8000
+        'replacement: AUC and intercept at 1 y, 20 case patients in a held-out fold': 20900
+        'replacement: calibration slope at 5 y, 50 case patients in a held-out fold': 36800
+      pilot_n: 2000
+      timings:
+        generate_seconds: 4.0366958777109785
+        cox_fit_seconds_one_fold: 10.85954213142395
+    high_competing_mortality:
+      proposed_n: null
+      effective_config_hash: e3b65bbaa894
+      required_n:
+        'svd: covariate model (pooled Cox), 30 in every training fold': 15000
+        'svd SAVR: route baseline, 5 in every training fold': null
+        'svd SAVR: per-route model (gradient boosting), 30': null
+        'svd TAVR: route baseline, 5 in every training fold': 6300
+        'svd TAVR: per-route model (gradient boosting), 30': 37500
+        'svd: AUC and intercept at 1 y, 20 case patients in a held-out fold': null
+        'svd: calibration slope at 5 y, 50 case patients in a held-out fold': 312500
+        'death: covariate model (pooled Cox), 30 in every training fold': 100
+        'death SAVR: route baseline, 5 in every training fold': 200
+        'death SAVR: per-route model (gradient boosting), 30': 700
+        'death TAVR: route baseline, 5 in every training fold': 100
+        'death TAVR: per-route model (gradient boosting), 30': 100
+        'death: AUC and intercept at 1 y, 20 case patients in a held-out fold': 200
+        'death: calibration slope at 5 y, 50 case patients in a held-out fold': 500
+        'replacement: covariate model (pooled Cox), 30 in every training fold': 15000
+        'replacement SAVR: route baseline, 5 in every training fold': 12500
+        'replacement SAVR: per-route model (gradient boosting), 30': 75000
+        'replacement TAVR: route baseline, 5 in every training fold': 3200
+        'replacement TAVR: per-route model (gradient boosting), 30': 18800
+        'replacement: AUC and intercept at 1 y, 20 case patients in a held-out fold': 50000
+        'replacement: calibration slope at 5 y, 50 case patients in a held-out fold': 125000
+      pilot_n: 2000
+      timings:
+        generate_seconds: 3.1314390500386557
+        cox_fit_seconds_one_fold: 3.5032808780670166
+    irregular_surveillance:
+      proposed_n: 16700
+      effective_config_hash: a63fa1f185c1
+      required_n:
+        'svd: covariate model (pooled Cox), 30 in every training fold': 1000
+        'svd SAVR: route baseline, 5 in every training fold': 300
+        'svd SAVR: per-route model (gradient boosting), 30': 1300
+        'svd TAVR: route baseline, 5 in every training fold': 1100
+        'svd TAVR: per-route model (gradient boosting), 30': 6400
+        'svd: AUC and intercept at 1 y, 20 case patients in a held-out fold': 16700
+        'svd: calibration slope at 5 y, 50 case patients in a held-out fold': 7400
+        'death: covariate model (pooled Cox), 30 in every training fold': 100
+        'death SAVR: route baseline, 5 in every training fold': 100
+        'death SAVR: per-route model (gradient boosting), 30': 300
+        'death TAVR: route baseline, 5 in every training fold': 100
+        'death TAVR: per-route model (gradient boosting), 30': 200
+        'death: AUC and intercept at 1 y, 20 case patients in a held-out fold': 400
+        'death: calibration slope at 5 y, 50 case patients in a held-out fold': 600
+        'replacement: covariate model (pooled Cox), 30 in every training fold': 4300
+        'replacement SAVR: route baseline, 5 in every training fold': 1500
+        'replacement SAVR: per-route model (gradient boosting), 30': 9000
+        'replacement TAVR: route baseline, 5 in every training fold': 1400
+        'replacement TAVR: per-route model (gradient boosting), 30': 8000
+        'replacement: AUC and intercept at 1 y, 20 case patients in a held-out fold': 20900
+        'replacement: calibration slope at 5 y, 50 case patients in a held-out fold': 36800
+      pilot_n: 2000
+      timings:
+        generate_seconds: 3.9349525769551597
+        cox_fit_seconds_one_fold: 7.682542085647583
+    biomarker_information/meaningful:
+      proposed_n: 9700
+      effective_config_hash: 9c47e3899a62
+      required_n:
+        'svd: covariate model (pooled Cox), 30 in every training fold': 900
+        'svd SAVR: route baseline, 5 in every training fold': 200
+        'svd SAVR: per-route model (gradient boosting), 30': 1100
+        'svd TAVR: route baseline, 5 in every training fold': 900
+        'svd TAVR: per-route model (gradient boosting), 30': 5000
+        'svd: AUC and intercept at 1 y, 20 case patients in a held-out fold': 9700
+        'svd: calibration slope at 5 y, 50 case patients in a held-out fold': 6500
+        'death: covariate model (pooled Cox), 30 in every training fold': 100
+        'death SAVR: route baseline, 5 in every training fold': 100
+        'death SAVR: per-route model (gradient boosting), 30': 300
+        'death TAVR: route baseline, 5 in every training fold': 100
+        'death TAVR: per-route model (gradient boosting), 30': 200
+        'death: AUC and intercept at 1 y, 20 case patients in a held-out fold': 300
+        'death: calibration slope at 5 y, 50 case patients in a held-out fold': 600
+        'replacement: covariate model (pooled Cox), 30 in every training fold': 4300
+        'replacement SAVR: route baseline, 5 in every training fold': 1500
+        'replacement SAVR: per-route model (gradient boosting), 30': 9000
+        'replacement TAVR: route baseline, 5 in every training fold': 1400
+        'replacement TAVR: per-route model (gradient boosting), 30': 8000
+        'replacement: AUC and intercept at 1 y, 20 case patients in a held-out fold': 20900
+        'replacement: calibration slope at 5 y, 50 case patients in a held-out fold': 36800
+      pilot_n: 2000
+      timings:
+        generate_seconds: 4.191769520441691
+        cox_fit_seconds_one_fold: 9.942170858383179
+    biomarker_information/weak:
+      proposed_n: 9300
+      effective_config_hash: 19bd92ca07e8
+      required_n:
+        'svd: covariate model (pooled Cox), 30 in every training fold': 1100
+        'svd SAVR: route baseline, 5 in every training fold': 300
+        'svd SAVR: per-route model (gradient boosting), 30': 1300
+        'svd TAVR: route baseline, 5 in every training fold': 1300
+        'svd TAVR: per-route model (gradient boosting), 30': 7300
+        'svd: AUC and intercept at 1 y, 20 case patients in a held-out fold': 9300
+        'svd: calibration slope at 5 y, 50 case patients in a held-out fold': 8000
+        'death: covariate model (pooled Cox), 30 in every training fold': 100
+        'death SAVR: route baseline, 5 in every training fold': 100
+        'death SAVR: per-route model (gradient boosting), 30': 300
+        'death TAVR: route baseline, 5 in every training fold': 100
+        'death TAVR: per-route model (gradient boosting), 30': 200
+        'death: AUC and intercept at 1 y, 20 case patients in a held-out fold': 300
+        'death: calibration slope at 5 y, 50 case patients in a held-out fold': 600
+        'replacement: covariate model (pooled Cox), 30 in every training fold': 4200
+        'replacement SAVR: route baseline, 5 in every training fold': 1500
+        'replacement SAVR: per-route model (gradient boosting), 30': 8600
+        'replacement TAVR: route baseline, 5 in every training fold': 1400
+        'replacement TAVR: per-route model (gradient boosting), 30': 8000
+        'replacement: AUC and intercept at 1 y, 20 case patients in a held-out fold': 20900
+        'replacement: calibration slope at 5 y, 50 case patients in a held-out fold': 36800
+      pilot_n: 2000
+      timings:
+        generate_seconds: 3.9362337589263916
+        cox_fit_seconds_one_fold: 10.36869215965271
+    biomarker_information/absent:
+      proposed_n: 10000
+      effective_config_hash: 219891392ad5
+      required_n:
+        'svd: covariate model (pooled Cox), 30 in every training fold': 1300
+        'svd SAVR: route baseline, 5 in every training fold': 300
+        'svd SAVR: per-route model (gradient boosting), 30': 1500
+        'svd TAVR: route baseline, 5 in every training fold': 1400
+        'svd TAVR: per-route model (gradient boosting), 30': 8000
+        'svd: AUC and intercept at 1 y, 20 case patients in a held-out fold': 10000
+        'svd: calibration slope at 5 y, 50 case patients in a held-out fold': 9400
+        'death: covariate model (pooled Cox), 30 in every training fold': 100
+        'death SAVR: route baseline, 5 in every training fold': 100
+        'death SAVR: per-route model (gradient boosting), 30': 300
+        'death TAVR: route baseline, 5 in every training fold': 100
+        'death TAVR: per-route model (gradient boosting), 30': 200
+        'death: AUC and intercept at 1 y, 20 case patients in a held-out fold': 300
+        'death: calibration slope at 5 y, 50 case patients in a held-out fold': 600
+        'replacement: covariate model (pooled Cox), 30 in every training fold': 4200
+        'replacement SAVR: route baseline, 5 in every training fold': 1500
+        'replacement SAVR: per-route model (gradient boosting), 30': 8600
+        'replacement TAVR: route baseline, 5 in every training fold': 1400
+        'replacement TAVR: per-route model (gradient boosting), 30': 8000
+        'replacement: AUC and intercept at 1 y, 20 case patients in a held-out fold': 20900
+        'replacement: calibration slope at 5 y, 50 case patients in a held-out fold': 36800
+      pilot_n: 2000
+      timings:
+        generate_seconds: 4.050321976343791
+        cox_fit_seconds_one_fold: 10.159783840179443
+    biomarker_information/unmeasured:
+      proposed_n: 9700
+      effective_config_hash: 38d1876ce0a1
+      required_n:
+        'svd: covariate model (pooled Cox), 30 in every training fold': 900
+        'svd SAVR: route baseline, 5 in every training fold': 200
+        'svd SAVR: per-route model (gradient boosting), 30': 1100
+        'svd TAVR: route baseline, 5 in every training fold': 900
+        'svd TAVR: per-route model (gradient boosting), 30': 5000
+        'svd: AUC and intercept at 1 y, 20 case patients in a held-out fold': 9700
+        'svd: calibration slope at 5 y, 50 case patients in a held-out fold': 6500
+        'death: covariate model (pooled Cox), 30 in every training fold': 100
+        'death SAVR: route baseline, 5 in every training fold': 100
+        'death SAVR: per-route model (gradient boosting), 30': 300
+        'death TAVR: route baseline, 5 in every training fold': 100
+        'death TAVR: per-route model (gradient boosting), 30': 200
+        'death: AUC and intercept at 1 y, 20 case patients in a held-out fold': 300
+        'death: calibration slope at 5 y, 50 case patients in a held-out fold': 600
+        'replacement: covariate model (pooled Cox), 30 in every training fold': 4300
+        'replacement SAVR: route baseline, 5 in every training fold': 1500
+        'replacement SAVR: per-route model (gradient boosting), 30': 9000
+        'replacement TAVR: route baseline, 5 in every training fold': 1400
+        'replacement TAVR: per-route model (gradient boosting), 30': 8000
+        'replacement: AUC and intercept at 1 y, 20 case patients in a held-out fold': 20900
+        'replacement: calibration slope at 5 y, 50 case patients in a held-out fold': 36800
+      pilot_n: 2000
+      timings:
+        generate_seconds: 3.6631364822387695
+        cox_fit_seconds_one_fold: 9.807078123092651
+    anticoagulant_mechanism_confounding/marker_mediated:
+      proposed_n: 6800
+      effective_config_hash: 9f6be828b0c0
+      required_n:
+        'svd: covariate model (pooled Cox), 30 in every training fold': 800
+        'svd SAVR: route baseline, 5 in every training fold': 200
+        'svd SAVR: per-route model (gradient boosting), 30': 1000
+        'svd TAVR: route baseline, 5 in every training fold': 800
+        'svd TAVR: per-route model (gradient boosting), 30': 4300
+        'svd: AUC and intercept at 1 y, 20 case patients in a held-out fold': 6800
+        'svd: calibration slope at 5 y, 50 case patients in a held-out fold': 5900
+        'death: covariate model (pooled Cox), 30 in every training fold': 100
+        'death SAVR: route baseline, 5 in every training fold': 100
+        'death SAVR: per-route model (gradient boosting), 30': 300
+        'death TAVR: route baseline, 5 in every training fold': 100
+        'death TAVR: per-route model (gradient boosting), 30': 200
+        'death: AUC and intercept at 1 y, 20 case patients in a held-out fold': 300
+        'death: calibration slope at 5 y, 50 case patients in a held-out fold': 600
+        'replacement: covariate model (pooled Cox), 30 in every training fold': 4500
+        'replacement SAVR: route baseline, 5 in every training fold': 1600
+        'replacement SAVR: per-route model (gradient boosting), 30': 9400
+        'replacement TAVR: route baseline, 5 in every training fold': 1600
+        'replacement TAVR: per-route model (gradient boosting), 30': 9400
+        'replacement: AUC and intercept at 1 y, 20 case patients in a held-out fold': 20900
+        'replacement: calibration slope at 5 y, 50 case patients in a held-out fold': 28500
+      pilot_n: 2000
+      timings:
+        generate_seconds: 4.070500532786052
+        cox_fit_seconds_one_fold: 7.4215497970581055
+    anticoagulant_mechanism_confounding/marker_noise:
+      proposed_n: 6800
+      effective_config_hash: ff0591230627
+      required_n:
+        'svd: covariate model (pooled Cox), 30 in every training fold': 900
+        'svd SAVR: route baseline, 5 in every training fold': 200
+        'svd SAVR: per-route model (gradient boosting), 30': 1100
+        'svd TAVR: route baseline, 5 in every training fold': 900
+        'svd TAVR: per-route model (gradient boosting), 30': 5000
+        'svd: AUC and intercept at 1 y, 20 case patients in a held-out fold': 6300
+        'svd: calibration slope at 5 y, 50 case patients in a held-out fold': 6800
+        'death: covariate model (pooled Cox), 30 in every training fold': 100
+        'death SAVR: route baseline, 5 in every training fold': 100
+        'death SAVR: per-route model (gradient boosting), 30': 300
+        'death TAVR: route baseline, 5 in every training fold': 100
+        'death TAVR: per-route model (gradient boosting), 30': 200
+        'death: AUC and intercept at 1 y, 20 case patients in a held-out fold': 300
+        'death: calibration slope at 5 y, 50 case patients in a held-out fold': 600
+        'replacement: covariate model (pooled Cox), 30 in every training fold': 4500
+        'replacement SAVR: route baseline, 5 in every training fold': 1600
+        'replacement SAVR: per-route model (gradient boosting), 30': 9400
+        'replacement TAVR: route baseline, 5 in every training fold': 1500
+        'replacement TAVR: per-route model (gradient boosting), 30': 9000
+        'replacement: AUC and intercept at 1 y, 20 case patients in a held-out fold': 20900
+        'replacement: calibration slope at 5 y, 50 case patients in a held-out fold': 28500
+      pilot_n: 2000
+      timings:
+        generate_seconds: 4.129560391108195
+        cox_fit_seconds_one_fold: 7.407708644866943
+final_test:
+  seeds:
+  - 20261001
+  - 20261002
+  note: generated only after freeze-candidate (phase C)
+promotion_tolerances:
+  mean_brier_ci_excludes_zero: true
+  max_horizon_brier_worsening: 0.005
+  max_abs_obs_minus_pred_worsening: 0.01
+plan_hash: 1f36d79dea7db6e1

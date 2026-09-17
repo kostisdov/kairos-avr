@@ -1,0 +1,14 @@
+comparator:
+  id: varc3_hvd_comparator_v1
+  label: VARC-3-derived HVD criteria using the KAIROS reference window
+  reference_policy: kairos_30_180_days
+evaluation:
+  horizon_days: 365.25
+  existing_threshold: 0.05
+  threshold_status: assumed_unchanged
+  bootstrap_replicates: 200
+  bootstrap_seed: 20260917
+output:
+  root: artifacts/clinical_comparison
+  scope: comparison_only
+  row_level_private: true

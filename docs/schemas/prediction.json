@@ -1,0 +1,467 @@
+{
+  "$defs": {
+    "Driver": {
+      "properties": {
+        "delta_probability": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Delta Probability"
+        },
+        "direction": {
+          "enum": [
+            "up",
+            "down"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "feature": {
+          "title": "Feature",
+          "type": "string"
+        },
+        "method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Method"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "feature",
+        "value",
+        "direction"
+      ],
+      "title": "Driver",
+      "type": "object"
+    },
+    "Messages": {
+      "properties": {
+        "current_abnormality": {
+          "title": "Current Abnormality",
+          "type": "boolean"
+        },
+        "earlier_assessment": {
+          "title": "Earlier Assessment",
+          "type": "boolean"
+        },
+        "overdue_surveillance": {
+          "title": "Overdue Surveillance",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "current_abnormality",
+        "earlier_assessment",
+        "overdue_surveillance"
+      ],
+      "title": "Messages",
+      "type": "object"
+    },
+    "ModuleStatus": {
+      "properties": {
+        "excluded": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Excluded",
+          "type": "object"
+        },
+        "included": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Included",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "full",
+            "partial",
+            "unavailable"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "ModuleStatus",
+      "type": "object"
+    },
+    "Reliability": {
+      "properties": {
+        "applicable_scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Applicable Scope"
+        },
+        "data_completeness": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Data Completeness",
+          "type": "number"
+        },
+        "device_evidence": {
+          "enum": [
+            "model-level",
+            "class-level",
+            "route-level",
+            "none"
+          ],
+          "title": "Device Evidence",
+          "type": "string"
+        },
+        "evaluation_support": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evaluation Support"
+        },
+        "excluded_features": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Excluded Features",
+          "type": "array"
+        },
+        "label": {
+          "default": "illustrative, unvalidated: model trained on synthetic scenarios",
+          "title": "Label",
+          "type": "string"
+        },
+        "model_family": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Family"
+        },
+        "modules": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ModuleStatus"
+          },
+          "title": "Modules",
+          "type": "object"
+        },
+        "reasons": {
+          "items": {
+            "$ref": "#/$defs/ReliabilityReason"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "stale_echo": {
+          "title": "Stale Echo",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "device_evidence",
+        "data_completeness",
+        "stale_echo"
+      ],
+      "title": "Reliability",
+      "type": "object"
+    },
+    "ReliabilityReason": {
+      "properties": {
+        "code": {
+          "enum": [
+            "abrupt_failure_not_reliably_anticipated",
+            "phenotype_performance_unestablished",
+            "insufficient_event_support",
+            "outside_training_followup",
+            "unknown_device_or_route",
+            "stale_echo",
+            "module_unavailable",
+            "prior_uncertain_finding",
+            "exposure_coverage_unknown"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "detail": {
+          "additionalProperties": true,
+          "title": "Detail",
+          "type": "object"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "bundle",
+            "patient"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "blocking"
+          ],
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "scope",
+        "message"
+      ],
+      "title": "ReliabilityReason",
+      "type": "object"
+    },
+    "VitaminKStatus": {
+      "description": "Whether a measured dp-ucMGP value entered this prediction (stated on every prediction).",
+      "properties": {
+        "assay": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assay"
+        },
+        "marker": {
+          "const": "dp-ucMGP",
+          "default": "dp-ucMGP",
+          "title": "Marker",
+          "type": "string"
+        },
+        "measured_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Measured On"
+        },
+        "measured_value_used": {
+          "title": "Measured Value Used",
+          "type": "boolean"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "used",
+            "not_measured",
+            "stale",
+            "not_in_model"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "value_pmol_l": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Pmol L"
+        }
+      },
+      "required": [
+        "measured_value_used",
+        "status"
+      ],
+      "title": "VitaminKStatus",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "bundle_schema_version": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Bundle Schema Version"
+    },
+    "conditioning": {
+      "default": "alive, index valve in place, SVD-free",
+      "title": "Conditioning",
+      "type": "string"
+    },
+    "dp_ucmgp": {
+      "$ref": "#/$defs/VitaminKStatus"
+    },
+    "drivers": {
+      "items": {
+        "$ref": "#/$defs/Driver"
+      },
+      "title": "Drivers",
+      "type": "array"
+    },
+    "horizons_years": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Horizons Years",
+      "type": "array"
+    },
+    "integration_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Integration Version"
+    },
+    "message_explanations": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Message Explanations",
+      "type": "object"
+    },
+    "messages": {
+      "$ref": "#/$defs/Messages"
+    },
+    "model_family": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Family"
+    },
+    "model_version": {
+      "title": "Model Version",
+      "type": "string"
+    },
+    "p_alive_intact": {
+      "items": {
+        "type": "number"
+      },
+      "title": "P Alive Intact",
+      "type": "array"
+    },
+    "p_death_before_svd": {
+      "items": {
+        "type": "number"
+      },
+      "title": "P Death Before Svd",
+      "type": "array"
+    },
+    "p_replaced_non_svd": {
+      "items": {
+        "type": "number"
+      },
+      "title": "P Replaced Non Svd",
+      "type": "array"
+    },
+    "p_svd_12m": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "P Svd 12M",
+      "type": "number"
+    },
+    "p_svd_before_death": {
+      "items": {
+        "type": "number"
+      },
+      "title": "P Svd Before Death",
+      "type": "array"
+    },
+    "passport_id": {
+      "title": "Passport Id",
+      "type": "string"
+    },
+    "prediction_time": {
+      "title": "Prediction Time",
+      "type": "string"
+    },
+    "reliability": {
+      "$ref": "#/$defs/Reliability"
+    },
+    "scenario_set": {
+      "title": "Scenario Set",
+      "type": "string"
+    }
+  },
+  "required": [
+    "passport_id",
+    "prediction_time",
+    "p_svd_before_death",
+    "p_death_before_svd",
+    "p_alive_intact",
+    "p_replaced_non_svd",
+    "p_svd_12m",
+    "reliability",
+    "messages",
+    "model_version",
+    "scenario_set"
+  ],
+  "title": "Prediction",
+  "type": "object"
+}

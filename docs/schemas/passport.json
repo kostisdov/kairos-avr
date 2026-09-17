@@ -1,0 +1,273 @@
+{
+  "$defs": {
+    "Confidence": {
+      "properties": {
+        "canonical_model": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Canonical Model",
+          "type": "number"
+        },
+        "route": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Route",
+          "type": "number"
+        },
+        "size_mm": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Size Mm",
+          "type": "number"
+        }
+      },
+      "title": "Confidence",
+      "type": "object"
+    },
+    "Evidence": {
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "rule",
+            "llm"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "span": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Span",
+          "type": "array"
+        },
+        "text": {
+          "maxLength": 160,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "span",
+        "text",
+        "method"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "PassportEvent": {
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "span": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Span"
+        },
+        "type": {
+          "enum": [
+            "valve_in_valve",
+            "redo",
+            "dysfunction",
+            "endocarditis",
+            "thrombosis"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "PassportEvent",
+      "type": "object"
+    },
+    "PassportSource": {
+      "properties": {
+        "date": {
+          "description": "YYYY-MM-DD or YYYY",
+          "title": "Date",
+          "type": "string"
+        },
+        "note_ref": {
+          "description": "opaque note reference; never note text",
+          "title": "Note Ref",
+          "type": "string"
+        },
+        "note_type": {
+          "enum": [
+            "operative",
+            "procedure",
+            "progress",
+            "discharge"
+          ],
+          "title": "Note Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "note_ref",
+        "note_type",
+        "date"
+      ],
+      "title": "PassportSource",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "canonical_model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Canonical Model"
+    },
+    "confidence": {
+      "$ref": "#/$defs/Confidence"
+    },
+    "design_class": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Design Class"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/PassportEvent"
+      },
+      "title": "Events",
+      "type": "array"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "generation": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Generation"
+    },
+    "implant_date": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Implant Date"
+    },
+    "market_status": {
+      "default": "unknown",
+      "enum": [
+        "active",
+        "withdrawn",
+        "discontinued",
+        "unknown"
+      ],
+      "title": "Market Status",
+      "type": "string"
+    },
+    "passport_id": {
+      "title": "Passport Id",
+      "type": "string"
+    },
+    "route": {
+      "default": "unknown",
+      "enum": [
+        "SAVR",
+        "TAVR",
+        "unknown"
+      ],
+      "title": "Route",
+      "type": "string"
+    },
+    "size_mm": {
+      "anyOf": [
+        {
+          "maximum": 36,
+          "minimum": 15,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Size Mm"
+    },
+    "source": {
+      "$ref": "#/$defs/PassportSource"
+    }
+  },
+  "required": [
+    "source"
+  ],
+  "title": "Passport",
+  "type": "object"
+}

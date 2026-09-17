@@ -1,0 +1,11 @@
+table: dvi_eoa_regurg_coverage.csv
+source: data/derived/private/passport.csv (private, not committed)
+definition: Count of patients with >=1 extracted dimensionless-index / effective-orifice-area
+  / regurgitation-grade value anywhere in their notes.
+columns:
+- field
+- n_patients_with_ge1_value
+row_count: 3
+small_cell_suppression: Cells with a true count under 5 are shown as the string '<5'.
+retrieved_at: '2026-09-17T11:56:44Z'
+privacy_note: No patient IDs or note text appear in this table.

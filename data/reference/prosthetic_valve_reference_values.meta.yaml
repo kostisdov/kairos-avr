@@ -1,0 +1,117 @@
+table: prosthetic_valve_reference_values.csv
+built_by: src/kairos/build_reference_values.py
+source: >
+  Zoghbi WA et al. Guidelines for the Evaluation of Prosthetic Valve Function With
+  Cardiovascular Imaging. J Am Soc Echocardiogr 2024;37:2-63. Appendix Tables A1-A4
+  (aortic position only -- A1/A2 percutaneous/TAVR native AS, A3 percutaneous aortic
+  valve-in-valve, A4 surgical aortic). Tables A5 onward (mitral/pulmonary/tricuspid) are
+  out of scope for KAIROS and were not extracted. PDF retained at
+  data/raw/papers/ASE2024_prosthetic_valve_guideline.pdf -- not redistributed elsewhere;
+  this CSV contains only extracted numeric values with citation, per NON-NEGOTIABLE RULE 4.
+row_count: 256
+extraction_method: pdfplumber page.extract_text(), NOT extract_tables() (extract_tables()
+  silently dropped/misordered rows on this PDF's borderless tables; the text-stream order
+  proved complete and reliable once a PDF-specific quirk was understood -- see below).
+pdf_quirk: >
+  This PDF's font encoding renders the "+/-" (mean+/-SD) glyph as a literal ASCII "6"
+  digit sitting between two numbers, e.g. the printed "19.1 +/- 8.2" extracts as the text
+  "19.168.2". Confirmed by (a) every appendix table's caption reading "Data are expressed
+  as mean +/- SD", and (b) every recovered SD being small relative to its mean and of a
+  plausible clinical magnitude across all 252 rows. build_reference_values.py splits each
+  whitespace-delimited table cell with a regex requiring the text AFTER the candidate "6"
+  to itself be a syntactically clean number up to the end of the token -- this correctly
+  disambiguates the separator "6" from a literal digit "6" that is part of the mean itself
+  (spot-checked against e.g. "16.062.0" -> mean=16.0, sd=2.0, not mean=1, sd=... -- see the
+  10-cell verification below).
+table_a4_missing_value_handling: >
+  Table A4 (surgical aortic, ~104 distinct valve/descriptor combinations) reports Peak
+  gradient, Mean gradient, and EOA per valve+size, but a large fraction of source rows are
+  missing one or more of those three values (sparse pooling across the underlying cited
+  studies). Each row's present values are classified by magnitude: any value < 4.5 is EOA
+  (cm2 never exceeds ~3.9 anywhere in this table); values >= 4.5 are a gradient (mmHg,
+  never below ~4.0). When two gradient-magnitude values are present, the larger is peak and
+  the smaller is mean (definitionally true: peak instantaneous gradient >= mean gradient).
+  When only ONE gradient-magnitude value is present (101 of 252 rows), it is recorded as
+  mean_gradient_mmHg_mean/sd (the more consistently-reported clinical metric, and the one
+  our schema requires) but confidence is set to "low" and this file documents the
+  ambiguity -- it could be a peak-only value in a small number of cases. No row's numbers
+  were invented; a fully unparseable row would have been dropped and counted (zero were,
+  this session).
+columns_beyond_task_schema: >
+  peak_gradient_mmHg_mean / peak_gradient_mmHg_sd were added beyond the requested column
+  list because Table A4's primary content is peak+mean+EOA and dropping peak gradient
+  would discard roughly a third of the table's real informational value; peak_velocity
+  (m/sec) was requested but is not reported in any of Tables A1-A4 (only DVI, a
+  dimensionless ratio, is given for the TAVR tables; surgical Table A4 gives no velocity or
+  DVI at all) so that column is left blank throughout rather than back-calculated via the
+  simplified Bernoulli equation, which would be a derived value, not an extracted one.
+canonical_model_mapping: >
+  92 of 256 rows map to a task-2 canonical_model (blank otherwise, as explicitly permitted
+  by the task brief) -- up from 85/252, per coordinator Fix 2 (2026-09-16). Most unmapped
+  rows are historical or mechanical valves out of device_table.csv's bioprosthetic/TAVR
+  scope by design (Bjork-Shiley, Starr-Edwards, Omnicarbon, St Jude Medical Standard/Regent
+  [mechanical], ATS, Carbomedics, etc.) -- not an extraction gap. Two mappings are labelled
+  low-confidence approximations rather than left unmapped (via UNCERTAIN_CANONICAL_MAPPINGS
+  in build_reference_values.py, which maps to the exact device_table.csv canonical_model
+  name but sets confidence="low" regardless of how cleanly the numbers were read off the
+  page): bare "Hancock" (without "II") -> "Hancock II", and bare "Prima" -> "Prima Plus"
+  (device_table.csv's bonus GUDID-sourced canonical model) -- neither generational
+  relationship (Hancock vs Hancock II; Prima vs Prima Plus) was independently verified this
+  session.
+valve_model_clean_column: >
+  Added (coordinator Fix 2): a readable version of valve_model, which otherwise inherits
+  pdfplumber's word-concatenation artifact from this PDF's borderless table (e.g.
+  "BaxterPerimount (Stentedbovinepericardial)" -> "Baxter Perimount (Stented bovine
+  pericardial)"). Built by inserting spaces at lower-to-upper letter transitions and before
+  parentheses, with a small preserve-list (CoreValve, MedtronicHall, OnX, LivaNova) for
+  brand names that are genuinely, intentionally camelCase and must not be split. This is a
+  display aid only, not a new extraction -- valve_model (the raw string) remains the
+  authoritative field for programmatic matching.
+gap_found_and_fixed_perceval: >
+  Coordinator Fix 2 found that Perceval's 4 data rows (sizes S/M/L/XL, printed in the PDF as
+  "S(21)", "M(23)", "L(25)", "XL(27)" -- a letter-code-with-parenthesized-mm format unique
+  to this valve in Table A4) were being silently discarded before this fix: the block parser
+  only recognised a bare 2-digit number as a valid "size" token, so "SorinPercevalSutureless
+  S(21) 10.164.2 1.360.3" matched neither the name+first-row regex nor the pure-size-row
+  regex and fell through to the "name-continuation" branch, silently appending onto whatever
+  valve preceded it in the table until the next valid entry reset parser state -- producing
+  zero emitted rows for Perceval, not merely mismapped ones. Fixed by extending the size-
+  token regex to accept `[A-Za-z]{1,3}\(\d{2}\)` and converting it to the bare mm number for
+  the size_mm column (e.g. "S(21)" -> "21"). Confirmed no other valve in Table A4 uses this
+  size format (only Perceval), so no other rows were affected by either the bug or the fix.
+magna_and_magna_ease_confirmed_absent_from_source: >
+  Coordinator Fix 2 also asked to map "Magna" and "Magna Ease" name variants -- direct
+  search of the raw PDF text for pages 52-57 (Table A4) found ZERO lines containing "Magna"
+  (case-insensitive) anywhere outside "BaxterPerimount", and zero containing "Ease" at all.
+  This is a genuine SOURCE-DATA absence in the ASE 2024 guideline's own Table A4, not an
+  extraction bug -- Magna and Magna Ease simply do not have their own reference-value rows
+  in this table (only the base "Perimount" family entry does). No row exists to map for
+  either model; they remain in the "canonical models with no reference values" list below
+  and would need a different source (e.g. one of the FDA SSEDs, or a future edition of the
+  ASE guideline) to fill this specific gap.
+canonical_models_with_no_reference_values_2026-09-16: >
+  25 of device_table.csv's 42 canonical models have zero rows in this table: ACURATE neo,
+  ACURATE neo2, Avalus Ultra, Crown PRT, Epic Supra, Evolut FX, Evolut FX+, Evolut PRO,
+  Evolut PRO+, Hancock II Ultra, JenaValve (Trilogy), Konect (legacy pre-RESILIA), Konect
+  RESILIA, Lotus, Magna, Magna Ease, Mosaic Ultra, Myval, Navitor, Perceval Plus, Portico,
+  SAPIEN 3 Ultra, SAPIEN 3 Ultra RESILIA, Toronto SPV, Trifecta GT. Most of these are newer-
+  generation devices (Ultra/Plus/FX/RESILIA variants, or TAVR platforms like Navitor/Portico/
+  Lotus/JenaValve/ACURATE) that postdate, or were never itemised as their own row in, this
+  2024 guideline's Table A4/A1-A3 reference tables -- expected, not a mapping bug. Where a
+  more specific generation is missing but its base model IS present (e.g. SAPIEN 3 Ultra
+  missing but SAPIEN 3 present; Evolut PRO missing but CoreValve/EvolutR present), the base
+  model's reference values are the closest available proxy, with the caveat that hemodynamics
+  can differ materially by generation (e.g. Ultra's larger outer skirt) -- do not treat them
+  as interchangeable without noting the substitution.
+verification_10_cell_spot_check_2026-09-16: >
+  SAPIEN 23mm mean=9.92+/-4.27 EOA=1.56+/-0.43 DVI=0.53+/-0.13; SAPIEN3 20mm
+  mean=16.23+/-5.01 EOA=1.22+/-0.22 DVI=0.42+/-0.07; CoreValve 31mm mean=9.55+/-3.44
+  EOA=2.15+/-0.72 DVI=0.49+/-0.12; ViV CoreValve peak=23.48+/-12.10 mean=12.89+/-0.20
+  EOA=1.62+/-0.14; ViV SAPIEN3 peak=33.93+/-10.11 mean=27.00+/-10.20 EOA=1.07+/-0.32;
+  BaxterPerimount 19mm peak=32.5+/-8.5 mean=19.5+/-5.5 EOA=1.3+/-0.2; AbbottEpic 21mm
+  mean=19.1+/-8.2 (low-confidence single-value row) EOA=1.0+/-0.3; HancockII 23mm
+  peak=34.0+/-13.0 mean=16.6+/-8.5 EOA=1.3+/-0.4; Mitroflow 19mm peak=18.6+/-5.3
+  mean=13.1+/-3.3 EOA=1.1+/-0.2; Medtronic Avalus 25mm mean=11.7+/-4.0 (low-confidence)
+  EOA=1.57+/-0.31 -- all 10 confirmed by hand against pdfplumber page.extract_text() output
+  for PDF pages 50-54, exact string matches, zero discrepancies found.
+retrieved_at: "2026-09-16, see retrieved_at column"

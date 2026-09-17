@@ -1,0 +1,13 @@
+table: implant_era_by_design_class.csv
+source: data/derived/private/passport.csv (private, not committed)
+definition: Count of patients per (era, design_class) pair, era = first implant_year
+  binned into 2006-2012 / 2013-2017 / 2018-2022 (per task spec). Patients with no
+  implant_year, or an implant_year outside 2006-2022, are excluded from this table.
+columns:
+- era
+- design_class
+- n_patients
+row_count: 15
+small_cell_suppression: Cells with a true count under 5 are shown as the string '<5'.
+retrieved_at: '2026-09-17T11:56:44Z'
+privacy_note: No patient IDs or note text appear in this table.

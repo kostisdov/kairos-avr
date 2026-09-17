@@ -1,0 +1,126 @@
+{
+  "$defs": {
+    "ExposureEpisode": {
+      "properties": {
+        "agent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent"
+        },
+        "class": {
+          "enum": [
+            "VKA",
+            "FXa",
+            "DTI",
+            "SAPT",
+            "DAPT",
+            "none"
+          ],
+          "title": "Class",
+          "type": "string"
+        },
+        "indication": {
+          "default": "unknown",
+          "enum": [
+            "AF",
+            "VTE",
+            "postop_prophylaxis",
+            "suspected_valve_thrombosis",
+            "other",
+            "unknown"
+          ],
+          "title": "Indication",
+          "type": "string"
+        },
+        "source": {
+          "default": "prescription",
+          "enum": [
+            "prescription",
+            "confirmed_adherence"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "start": {
+          "title": "Start",
+          "type": "string"
+        },
+        "started_within_90d_after_suspicious_echo": {
+          "default": false,
+          "title": "Started Within 90D After Suspicious Echo",
+          "type": "boolean"
+        },
+        "stop": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stop"
+        }
+      },
+      "required": [
+        "class",
+        "start"
+      ],
+      "title": "ExposureEpisode",
+      "type": "object"
+    },
+    "INRValue": {
+      "properties": {
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "value": {
+          "maximum": 12,
+          "minimum": 0.5,
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "date",
+        "value"
+      ],
+      "title": "INRValue",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "episodes": {
+      "items": {
+        "$ref": "#/$defs/ExposureEpisode"
+      },
+      "title": "Episodes",
+      "type": "array"
+    },
+    "inr": {
+      "items": {
+        "$ref": "#/$defs/INRValue"
+      },
+      "title": "Inr",
+      "type": "array"
+    },
+    "passport_id": {
+      "title": "Passport Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "passport_id"
+  ],
+  "title": "ExposureTimeline",
+  "type": "object"
+}

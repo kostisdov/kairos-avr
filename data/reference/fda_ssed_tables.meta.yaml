@@ -1,0 +1,35 @@
+tables: [fda_ssed_hemodynamics.csv, fda_ssed_events.csv]
+built_by: src/kairos/build_fda_ssed_tables.py
+source: >
+  Each row's `document` column names the exact SSED PDF in data/raw/fda_ssed/ and `page`
+  gives the exact page number the value was read from (1-indexed, matching the PDF's own
+  printed page footer, e.g. "PMA P140031: FDA Summary of Safety and Effectiveness Data
+  Page 25" -> page=25). Together `document` + `page` are this table's full citation --
+  equivalent to a `source` column, just split into two more specific fields. The PDFs
+  themselves stay in data/raw/fda_ssed/ (not redistributed); only the extracted numbers
+  with this citation are here, per NON-NEGOTIABLE RULE 4.
+correction_to_task_brief: >
+  PMA P180029, listed in the task brief's own URL list as "Evolut R/PRO", is confirmed by
+  that SSED's own page-1 "Device Trade Name" field to actually be the LOTUS Edge Valve
+  System (Boston Scientific, approved 2019-04-23). The file is
+  data/raw/fda_ssed/P180029B_LOTUS_Edge_original_SSED.pdf (renamed 2026-09-16, coordinator
+  Fix 3, from an earlier longer working filename; MANIFEST.csv updated to match); its data
+  appears in these two tables labelled canonical_model="Lotus Edge" (and bonus
+  canonical_model="CoreValve" rows, since the Lotus pivotal trial used CoreValve as an
+  active non-inferiority comparator). No genuine Evolut R/PRO SSED was located this session.
+  canonical_model="Lotus Edge" here is deliberately more specific than device_table.csv's
+  canonical_model="Lotus" (the broader task-assigned bucket name) -- both name the same
+  product; "Lotus Edge" is what the coordinator asked these two SSED-specific tables to use.
+design_class_column: >
+  Added (coordinator Fix 3, 2026-09-16) to both tables, auto-populated for every row (not
+  only Lotus Edge) by looking up canonical_model against device_table.csv's design_class
+  column -- "Lotus Edge" resolves via an explicit alias to device_table.csv's "Lotus" row
+  ("self-expanding intra-annular TAVR"), confirmed correct in the rebuilt CSVs.
+definition: >
+  Each row's `definition` column states, in the SSED's own words where possible, which
+  analysis population/timepoint/adjudication standard the number came from (e.g. "S3OUS AT
+  overall" = the SAPIEN 3 outside-US trial's all-treated population; "CEC-adjudicated" =
+  Clinical Events Committee adjudicated). Different SSEDs use different population
+  definitions for the same nominal metric -- do not pool mean-gradient or event-rate numbers
+  across documents without checking that the `definition` columns are actually comparable.
+retrieved_at: "2026-09-16, see the retrieved_at column (all rows same session)"

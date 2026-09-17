@@ -1,0 +1,67 @@
+# Parameter specification v1 for kairos.calibration (design section 6, step 3). A small declared free set;
+# everything else keeps scenario or registry values. Priors are on the transformed scale and centred on the
+# current scenario values (labelled assumed or literature_informed in config/scenarios.yaml). evidence_links are target-id
+# prefixes; a free parameter counts as linked only when a link prefixes a usable fit target.
+parameters:
+  - name: death_annual_at_79
+    path: death_hazard.annual_at_age_79
+    lower: 0.02
+    upper: 0.30
+    transform: log
+    prior_mean: 0.10
+    prior_sd: 1.0
+    status: free
+    value: 0.10
+    evidence_links: ["pub:notion:tavi:all_cause_mortality:", "pub:notion:savr:all_cause_mortality:"]
+    label: literature_informed_prior
+    notes: "Gompertz death hazard at age 79; mortality targets are implantation-origin intention-to-treat"
+  - name: svd_baseline_savr
+    path: svd_hazard.baseline_annual.SAVR
+    lower: 0.003
+    upper: 0.08
+    transform: log
+    prior_mean: 0.022
+    prior_sd: 1.0
+    status: free
+    value: 0.022
+    evidence_links: ["pub:notion:savr:moderate_or_severe_svd:"]
+    label: literature_informed_prior
+    notes: "latent SVD initiation hazard; the adjudicated endpoint adds progression, detection and confirmation"
+  - name: svd_baseline_tavr
+    path: svd_hazard.baseline_annual.TAVR
+    lower: 0.003
+    upper: 0.08
+    transform: log
+    prior_mean: 0.021
+    prior_sd: 1.0
+    status: free
+    value: 0.021
+    evidence_links: ["pub:notion:tavi:moderate_or_severe_svd:"]
+    label: literature_informed_prior
+  - name: replacement_non_svd
+    path: replacement_non_svd.annual_hazard
+    lower: 0.0005
+    upper: 0.02
+    transform: log
+    prior_mean: 0.004
+    prior_sd: 1.0
+    status: fixed
+    value: 0.004
+    evidence_links: []
+    label: assumed
+    notes: "no compatible non-SVD replacement target: kept fixed"
+  - name: p_diabetes
+    path: generator.baseline.comorbidity.p_diabetes
+    lower: 0.05
+    upper: 0.60
+    transform: logit
+    prior_mean: 0.30
+    prior_sd: 1.0
+    status: fixed
+    value: 0.30
+    evidence_links: []
+    label: assumed
+    notes: "free only when a supported local or external proportion target exists"
+sensitivity_sets:
+  high_death: {death_annual_at_79: 0.16}
+  low_death: {death_annual_at_79: 0.06}

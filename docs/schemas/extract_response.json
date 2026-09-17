@@ -1,0 +1,506 @@
+{
+  "$defs": {
+    "Confidence": {
+      "properties": {
+        "canonical_model": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Canonical Model",
+          "type": "number"
+        },
+        "route": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Route",
+          "type": "number"
+        },
+        "size_mm": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Size Mm",
+          "type": "number"
+        }
+      },
+      "title": "Confidence",
+      "type": "object"
+    },
+    "EchoObservation": {
+      "properties": {
+        "ar_grade": {
+          "anyOf": [
+            {
+              "enum": [
+                "none",
+                "trace",
+                "mild",
+                "moderate",
+                "severe"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ar Grade"
+        },
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "dvi": {
+          "anyOf": [
+            {
+              "maximum": 1.5,
+              "minimum": 0.05,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dvi"
+        },
+        "eoa_cm2": {
+          "anyOf": [
+            {
+              "maximum": 6,
+              "minimum": 0.1,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Eoa Cm2"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "lvef_pct": {
+          "anyOf": [
+            {
+              "maximum": 90,
+              "minimum": 5,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lvef Pct"
+        },
+        "mean_gradient_mmhg": {
+          "anyOf": [
+            {
+              "maximum": 150,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mean Gradient Mmhg"
+        },
+        "native_vs_prosthetic": {
+          "default": "uncertain",
+          "enum": [
+            "prosthetic",
+            "native",
+            "uncertain"
+          ],
+          "title": "Native Vs Prosthetic",
+          "type": "string"
+        },
+        "passport_id": {
+          "title": "Passport Id",
+          "type": "string"
+        },
+        "peak_velocity_ms": {
+          "anyOf": [
+            {
+              "maximum": 8,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Peak Velocity Ms"
+        },
+        "source": {
+          "default": "rule",
+          "enum": [
+            "rule",
+            "llm",
+            "manual"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "svi_ml_m2": {
+          "anyOf": [
+            {
+              "maximum": 120,
+              "minimum": 5,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Svi Ml M2"
+        }
+      },
+      "required": [
+        "passport_id",
+        "date"
+      ],
+      "title": "EchoObservation",
+      "type": "object"
+    },
+    "Evidence": {
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "rule",
+            "llm"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "span": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Span",
+          "type": "array"
+        },
+        "text": {
+          "maxLength": 160,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "span",
+        "text",
+        "method"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "Passport": {
+      "properties": {
+        "canonical_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Canonical Model"
+        },
+        "confidence": {
+          "$ref": "#/$defs/Confidence"
+        },
+        "design_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Design Class"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/PassportEvent"
+          },
+          "title": "Events",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "generation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Generation"
+        },
+        "implant_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Implant Date"
+        },
+        "market_status": {
+          "default": "unknown",
+          "enum": [
+            "active",
+            "withdrawn",
+            "discontinued",
+            "unknown"
+          ],
+          "title": "Market Status",
+          "type": "string"
+        },
+        "passport_id": {
+          "title": "Passport Id",
+          "type": "string"
+        },
+        "route": {
+          "default": "unknown",
+          "enum": [
+            "SAVR",
+            "TAVR",
+            "unknown"
+          ],
+          "title": "Route",
+          "type": "string"
+        },
+        "size_mm": {
+          "anyOf": [
+            {
+              "maximum": 36,
+              "minimum": 15,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Size Mm"
+        },
+        "source": {
+          "$ref": "#/$defs/PassportSource"
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "title": "Passport",
+      "type": "object"
+    },
+    "PassportEvent": {
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "span": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Span"
+        },
+        "type": {
+          "enum": [
+            "valve_in_valve",
+            "redo",
+            "dysfunction",
+            "endocarditis",
+            "thrombosis"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "PassportEvent",
+      "type": "object"
+    },
+    "PassportSource": {
+      "properties": {
+        "date": {
+          "description": "YYYY-MM-DD or YYYY",
+          "title": "Date",
+          "type": "string"
+        },
+        "note_ref": {
+          "description": "opaque note reference; never note text",
+          "title": "Note Ref",
+          "type": "string"
+        },
+        "note_type": {
+          "enum": [
+            "operative",
+            "procedure",
+            "progress",
+            "discharge"
+          ],
+          "title": "Note Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "note_ref",
+        "note_type",
+        "date"
+      ],
+      "title": "PassportSource",
+      "type": "object"
+    },
+    "Prescreen": {
+      "properties": {
+        "mentions_prosthesis": {
+          "title": "Mentions Prosthesis",
+          "type": "boolean"
+        },
+        "method": {
+          "enum": [
+            "rules",
+            "llm",
+            "rules+llm"
+          ],
+          "title": "Method",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mentions_prosthesis",
+        "method"
+      ],
+      "title": "Prescreen",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "echo_observations": {
+      "items": {
+        "$ref": "#/$defs/EchoObservation"
+      },
+      "title": "Echo Observations",
+      "type": "array"
+    },
+    "label": {
+      "default": "illustrative, unvalidated: model trained on synthetic scenarios",
+      "title": "Label",
+      "type": "string"
+    },
+    "llm_used": {
+      "title": "Llm Used",
+      "type": "boolean"
+    },
+    "methods_used": {
+      "items": {
+        "enum": [
+          "rule",
+          "llm"
+        ],
+        "type": "string"
+      },
+      "title": "Methods Used",
+      "type": "array"
+    },
+    "passport": {
+      "$ref": "#/$defs/Passport"
+    },
+    "prescreen": {
+      "$ref": "#/$defs/Prescreen"
+    },
+    "source_kind": {
+      "enum": [
+        "real",
+        "synthetic"
+      ],
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "passport",
+    "echo_observations",
+    "prescreen",
+    "methods_used",
+    "llm_used",
+    "source_kind"
+  ],
+  "title": "ExtractResponse",
+  "type": "object"
+}

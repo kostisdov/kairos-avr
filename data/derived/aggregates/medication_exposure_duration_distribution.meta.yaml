@@ -1,0 +1,14 @@
+table: medication_exposure_duration_distribution.csv
+source: medications_deidentified.xlsx via data/derived/private/medication_exposure_durations.csv
+  (private, not committed)
+definition: Count of distinct patients per (drug_class, duration_bin) pair, duration_bin
+  from n_years_exposed (distinct calendar years with >=1 exposed day) binned into
+  1 year / 2-3 years / 4 years / 5+ years.
+columns:
+- drug_class
+- duration_bin
+- n_patients
+row_count: 19
+small_cell_suppression: Cells with a true count under 5 are shown as the string '<5'.
+retrieved_at: '2026-09-16T12:09:19Z'
+privacy_note: No patient IDs or note text appear in this table.

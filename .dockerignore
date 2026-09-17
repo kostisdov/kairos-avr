@@ -1,0 +1,20 @@
+# Build contexts must never contain patient-level material (design rule 0.2).
+*.xlsx
+data/raw/
+data/derived/private/
+tmp/
+docs/
+.git/
+.github/
+.venv/
+.pytest_cache/
+.ruff_cache/
+__pycache__/
+*.pyc
+*.egg-info/
+artifacts/
+.env
+.azure/
+infra/
+*.pdf
+*.png

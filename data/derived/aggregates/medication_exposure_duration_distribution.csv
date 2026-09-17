@@ -1,0 +1,20 @@
+drug_class,duration_bin,n_patients
+DOAC,2-3 years,<5
+DOAC,5+ years,<5
+VKA,1 year,<5
+VKA,5+ years,<5
+antiplatelet,1 year,8
+antiplatelet,2-3 years,7
+antiplatelet,5+ years,<5
+glucose_lowering,1 year,8
+glucose_lowering,2-3 years,<5
+glucose_lowering,5+ years,5
+heparin,1 year,10
+heparin,2-3 years,<5
+lipid_lowering,1 year,9
+lipid_lowering,2-3 years,<5
+lipid_lowering,4 years,<5
+lipid_lowering,5+ years,5
+mineral_metabolism,1 year,10
+mineral_metabolism,2-3 years,<5
+mineral_metabolism,5+ years,<5

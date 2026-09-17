@@ -1,0 +1,193 @@
+{
+  "$defs": {
+    "Evidence": {
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "rule",
+            "llm"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "span": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Span",
+          "type": "array"
+        },
+        "text": {
+          "maxLength": 160,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "span",
+        "text",
+        "method"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "ar_grade": {
+      "anyOf": [
+        {
+          "enum": [
+            "none",
+            "trace",
+            "mild",
+            "moderate",
+            "severe"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ar Grade"
+    },
+    "date": {
+      "title": "Date",
+      "type": "string"
+    },
+    "dvi": {
+      "anyOf": [
+        {
+          "maximum": 1.5,
+          "minimum": 0.05,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dvi"
+    },
+    "eoa_cm2": {
+      "anyOf": [
+        {
+          "maximum": 6,
+          "minimum": 0.1,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Eoa Cm2"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "lvef_pct": {
+      "anyOf": [
+        {
+          "maximum": 90,
+          "minimum": 5,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lvef Pct"
+    },
+    "mean_gradient_mmhg": {
+      "anyOf": [
+        {
+          "maximum": 150,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mean Gradient Mmhg"
+    },
+    "native_vs_prosthetic": {
+      "default": "uncertain",
+      "enum": [
+        "prosthetic",
+        "native",
+        "uncertain"
+      ],
+      "title": "Native Vs Prosthetic",
+      "type": "string"
+    },
+    "passport_id": {
+      "title": "Passport Id",
+      "type": "string"
+    },
+    "peak_velocity_ms": {
+      "anyOf": [
+        {
+          "maximum": 8,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Peak Velocity Ms"
+    },
+    "source": {
+      "default": "rule",
+      "enum": [
+        "rule",
+        "llm",
+        "manual"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "svi_ml_m2": {
+      "anyOf": [
+        {
+          "maximum": 120,
+          "minimum": 5,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Svi Ml M2"
+    }
+  },
+  "required": [
+    "passport_id",
+    "date"
+  ],
+  "title": "EchoObservation",
+  "type": "object"
+}

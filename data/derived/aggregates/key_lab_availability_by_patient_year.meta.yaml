@@ -1,0 +1,13 @@
+table: key_lab_availability_by_patient_year.csv
+source: labs_deidentified.xlsx (respiratory-therapy / device-interrogation / free-text-transcription
+  rows excluded first)
+definition: 'PATIENT-YEAR AVAILABILITY: count of distinct patients with >=1 result
+  for each key lab in each year -- NOT lab values themselves.'
+columns:
+- lab
+- year
+- n_patients_with_ge1_result
+row_count: 105
+small_cell_suppression: Cells with a true count under 5 are shown as the string '<5'.
+retrieved_at: '2026-09-16T12:09:32Z'
+privacy_note: No patient IDs or note text appear in this table.

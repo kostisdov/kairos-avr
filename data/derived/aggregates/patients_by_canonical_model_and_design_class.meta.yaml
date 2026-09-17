@@ -1,0 +1,12 @@
+table: patients_by_canonical_model_and_design_class.csv
+source: data/derived/private/passport.csv (private, not committed)
+definition: Count of patients per (canonical_model, design_class) pair, using each
+  patient's PRIMARY (most-specific-matched) canonical_model from passport.py.
+columns:
+- canonical_model
+- design_class
+- n_patients
+row_count: 13
+small_cell_suppression: Cells with a true count under 5 are shown as the string '<5'.
+retrieved_at: '2026-09-17T11:56:44Z'
+privacy_note: No patient IDs or note text appear in this table.

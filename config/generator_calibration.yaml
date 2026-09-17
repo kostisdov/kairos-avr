@@ -1,0 +1,81 @@
+# Configuration for kairos.calibration (docs/kairos_calibrated_generator_design.md), loaded by the jobs
+# profile-observed, calibrate-generator, validate-calibration, generate-calibrated and validate-cohort.
+# `enabled` governs automatic use by other components (the standardization scaffold backend); the jobs above
+# run only when invoked explicitly.
+version: 1
+enabled: false
+inputs:
+  standardized_manifest: null          # no normalized research snapshot exists yet (kairos-standardize not implemented)
+  evidence_registry_manifest: data/reference/evidence_registry/candidates_published_rates.yaml   # proposed, none reviewed
+  population_specification: config/calibration/populations.yaml
+  parameter_specification: config/calibration/parameters_v1.yaml
+  source_split_manifest: null
+
+evidence:
+  require_frozen_manifests: true
+  require_approved_external_targets: true
+  require_transitive_observed_lineage: true
+  reject_training_scaffold: true
+  allow_defaults_as_observations: false
+  suppressed_counts_policy: exclude_from_point_estimation
+  incompatible_estimands_policy: separate_scenario_or_exclude
+  missing_target_uncertainty_policy: sensitivity_only
+
+profiling:
+  unit_of_inference: person
+  baseline_policy: first_eligible_result_in_declared_window
+  year_only_policy: cross_sectional_or_annual_descriptive_only
+  patient_weighting: equal_within_summary
+  # Engineering starting criteria, not clinical or statistical guarantees.
+  min_patients_for_local_distribution_fit: 30
+  min_paired_patients_for_dependency_fit: 50
+  sparse_policy: descriptive_only_with_external_prior
+  max_conditional_parents: 3
+
+generator:
+  backend: conditional_longitudinal
+  origin: synthetic
+  base_scenario: gradual_stenotic
+  parameterize_hardcoded_distributions: true
+  enforce_device_era_and_size_support: true
+  latent_truth_separate: true
+  endpoint_policy: shared_versioned_adjudicator
+  record_source_reporting_operators: true
+  fixed_cohort_size_semantics: attempted
+  expand_to_meet_event_thresholds: false
+
+calibration:
+  method: bounded_simulated_minimum_distance
+  # Numerical defaults are initial engineering budgets, not calibrated science.
+  initial_design_points: 32
+  multistarts: 4
+  max_objective_evaluations: 200
+  attempted_patients_per_evaluation: 2500
+  source_bootstrap_replicates: 30
+  optimizer_seed: 20260917
+  fit_simulation_seeds: [1201, 1202, 1203]
+  diagnostic_simulation_seeds: [2201, 2202, 2203]
+  objective: study_block_balanced_standardized_distance_plus_prior_penalty
+  target_tolerances_required: true
+  parameter_bounds_required: true
+  automatic_curve_digitization: false
+  automatic_model_promotion: false
+
+generation:
+  attempted_patients_per_cohort: 2500
+  cohort_replicates: 10
+  first_generation_seed: 3201
+  parameter_draw_policy: accepted_bootstrap_fits_or_labelled_sensitivity_set
+  require_accepted_bundle: true
+  allow_unidentified_parameters_as_point_truth: false
+  output_kind: calibrated_synthetic
+  training_namespace: experimental
+
+validation:
+  require_structural_pass: true
+  require_predeclared_target_acceptance: true
+  independent_target_validation_required_for_external_claim: true
+  retain_failed_targets_in_report: true
+  distinguish_calibration_fit_from_validation: true
+  distinguish_parameter_from_simulation_uncertainty: true
+  assess_privacy_before_shared_release: true

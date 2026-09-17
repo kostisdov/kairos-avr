@@ -1,0 +1,192 @@
+# KAIROS model configuration. The scientific definitions (endpoints, time zero, the three
+# predicted quantities, leakage rules, module structure and the fixed model ladder) come
+# from docs/kairos_proposal_revised.html and are not tunable here; the numbers below are
+# implementation settings. Values marked `label: assumed` are prototype choices.
+version: 0.1
+horizons_years: [1, 3, 5]
+near_term_horizon_months: 12
+
+landmark:
+  time_zero_window_days: [30, 180]      # first adequate echo 30-180 days after implantation
+  horizon_years: 5                      # administrative censoring window after each landmark
+  stale_echo_months: 18                 # values older than this are flagged, not carried forward
+  min_days_between_landmarks: 1
+
+model:
+  penalizer: 0.05                       # ridge penalty for every cause-specific Cox fit (assumed)
+  l1_ratio: 0.0
+  strata: [route]                       # route-stratified baseline hazards
+  spline_features: [age_at_implant, valve_age_years, t_lm, ref_gradient, current_gradient, delta_gradient, egfr]
+  spline_knots: 4
+  onehot_min_frequency: 15
+  min_events_for_model_level: 30        # canonical model / generation effects only above this SVD event count per level
+  max_cif_time_years: 5
+  cif_refine: 1                         # grid = 0, horizons and every baseline event time; >1 splits each interval (hazard contract)
+
+# Event support gates (CR-04). All thresholds label: assumed; they are operational gates, not statistical
+# guarantees. Events are unique patients. Cohorts in the quick namespace use the relaxed quick gates and can
+# never support performance claims or promotion.
+support:
+  mode_by_namespace: {quick: quick, full: full}
+  full:
+    fit_min_unique_events: 30           # covariate model for a cause
+    baseline_min_unique_events: 5       # below 30: covariate-free route-stratified baseline only (status reduced); below this: unsupported
+    metric_min_event_patients: 20
+    metric_min_control_patients: 20
+    slope_min_events: 50
+    bootstrap_min_valid: 100
+    bootstrap_min_success_fraction: 0.8
+    min_censoring_survival: 0.05
+    min_at_risk: 10                     # follow-up support: largest time with this many rows still observed
+  quick:
+    fit_min_unique_events: 5
+    baseline_min_unique_events: 1       # smoke tests only: a route with at least one event patient
+    metric_min_event_patients: 5
+    metric_min_control_patients: 5
+    slope_min_events: 10
+    bootstrap_min_valid: 20
+    bootstrap_min_success_fraction: 0.8
+    min_censoring_survival: 0.05
+    min_at_risk: 5
+
+feature_types:
+  categorical: [route, design_class, canonical_model, generation, sex, ac_class_current, ac_indication, ac_current_status, mismatch_grade, tissue_treatment]
+  binary: [diabetes, dialysis, af, bicuspid, overdue_flag, stale_echo, dialysis_current, lipid_lowering, ac_post_suspicion, on_antiplatelet]
+
+feature_blocks:
+  reference: [valve_age_years, route, design_class]
+  core_static: [age_at_implant, sex, bsa, bmi, route, design_class, canonical_model, generation, size_mm, implant_year, diabetes, egfr0, dialysis, af, bicuspid, ieoa, mismatch_grade, tissue_treatment]
+  core_reference_echo: [ref_gradient, ref_eoa, ref_dvi, ref_ar, ref_lvef, ref_svi]
+  core_serial_echo: [current_gradient, delta_gradient, last_change_gradient, last_change_interval_years, gradient_slope, current_eoa, delta_eoa, current_dvi, delta_dvi, current_ar, delta_ar, current_lvef, current_svi, time_since_last_echo_years, overdue_flag, n_echoes, stale_echo]
+  core_time: [valve_age_years, t_lm]
+  biomarker_renal_metabolic: [egfr, egfr_slope, dialysis_current, hba1c, diabetes_duration, ldl, lipid_lowering]
+  biomarker_mineral: [phosphate, calcium_corrected, pth, alp]
+  biomarker_lipid: [lpa]
+  biomarker_cardiac: [ntprobnp]
+  biomarker_inflammatory: [hscrp]
+  anticoagulant: [ac_class_current, ac_indication, ac_current_status, ac_cum_vka_years, ac_cum_oac_years, ac_days_since_change, ac_post_suspicion, on_antiplatelet]
+
+core_blocks: [core_static, core_reference_echo, core_serial_echo, core_time]
+biomarker_blocks: [biomarker_renal_metabolic, biomarker_mineral, biomarker_lipid, biomarker_cardiac, biomarker_inflammatory]
+
+eligibility:
+  # Fitted inside every training fold (and every inner fold) on the rows it is given; never on held-out rows.
+  # Denominator: patients in the training rows. A marker is measured for a patient if any of that patient's
+  # landmark rows has a value. label: assumed.
+  min_patient_fraction: 0.2
+  # A module is unavailable (switched off, never imputed) when an anchor is below the cutoff. With the anchors
+  # available, every remaining marker is judged on its own: excluded when absent, below the cutoff or constant.
+  anchors:
+    biomarker_renal_metabolic: [egfr]
+    biomarker_mineral: [phosphate]
+    biomarker_lipid: [lpa]
+    biomarker_cardiac: [ntprobnp]
+    biomarker_inflammatory: [hscrp]
+    anticoagulant: [ac_records_available]   # measured = medication records exist for the patient
+  markers:
+    biomarker_renal_metabolic: [egfr, hba1c, ldl]
+    biomarker_mineral: [phosphate, calcium_corrected, pth, alp]
+    biomarker_lipid: [lpa]
+    biomarker_cardiac: [ntprobnp]
+    biomarker_inflammatory: [hscrp]
+  # derived features judged on their own column (a slope needs dated history, not just a source value)
+  derived:
+    egfr_slope: {source: egfr}
+  # Other block features (dialysis_current, diabetes_duration, lipid_lowering, ac_*) follow the module status.
+  # Any feature with no non-missing training value is excluded with reason "absent", whatever its block.
+
+# dp-ucMGP (vitamin K status) is a consumed input of the anticoagulant module, never imputed across a
+# cohort: the step containing the anticoagulant block is fitted on the full cohort, then, in the
+# substudy rows where dp-ucMGP is measured, an offset model (full-cohort SVD linear predictor as
+# offset) estimates only a spline main effect and an interaction with cumulative VKA exposure.
+vitamin_k:
+  marker: dp_ucmgp
+  unit: pmol/L
+  requires_block: anticoagulant
+  carry_forward_months: 12              # measured at time zero and each annual landmark; stale after this
+  spline_knots: 3
+  penalizer: 0.05                       # label: assumed
+  min_measured_rows: 150                # label: assumed; below either minimum the offset model is not fitted
+  min_measured_svd_events: 15
+  wald_bootstrap: 200                   # patient-resampled covariance for the test of the dp-ucMGP terms
+  seed: 20260917
+
+# The model ladder is fixed by the specification.
+ladder:
+  - {name: reference, blocks: [reference]}
+  - {name: core, blocks: [core_static, core_reference_echo, core_serial_echo, core_time]}
+  - {name: core_plus_renal_metabolic, blocks: [core_static, core_reference_echo, core_serial_echo, core_time, biomarker_renal_metabolic]}
+  - {name: core_plus_mineral, blocks: [core_static, core_reference_echo, core_serial_echo, core_time, biomarker_mineral]}
+  - {name: core_plus_lipid, blocks: [core_static, core_reference_echo, core_serial_echo, core_time, biomarker_lipid]}
+  - {name: core_plus_cardiac, blocks: [core_static, core_reference_echo, core_serial_echo, core_time, biomarker_cardiac]}
+  - {name: core_plus_inflammatory, blocks: [core_static, core_reference_echo, core_serial_echo, core_time, biomarker_inflammatory]}
+  - {name: core_plus_biomarkers, blocks: [core_static, core_reference_echo, core_serial_echo, core_time, biomarker_renal_metabolic, biomarker_mineral, biomarker_lipid, biomarker_cardiac, biomarker_inflammatory]}
+  - {name: core_plus_anticoagulant, blocks: [core_static, core_reference_echo, core_serial_echo, core_time, anticoagulant]}
+  - {name: core_plus_both, blocks: [core_static, core_reference_echo, core_serial_echo, core_time, biomarker_renal_metabolic, biomarker_mineral, biomarker_lipid, biomarker_cardiac, biomarker_inflammatory, anticoagulant]}
+  - {name: core_without_serial_echo, blocks: [core_static, core_reference_echo, core_time]}
+
+deployed_model:
+  scenario: gradual_stenotic            # the bundle the predict service serves
+  ladder_step: core_plus_both
+  family: cox                           # served family; changes only after a passed, frozen promotion rule
+
+evaluation:
+  n_splits: 5
+  bootstrap: 200
+  seed: 20260916
+  quick_bootstrap: 30                   # used by tests and --quick runs
+
+messages:
+  earlier_assessment_p_svd_12m_threshold: 0.05   # label: assumed; brings the next assessment forward
+  overdue_grace_months: 3
+
+guideline_surveillance:
+  ESC_EACTS:
+    description: "ESC/EACTS 2021: yearly clinical review with imaging for bioprostheses (2025 table unverified)."
+    interval_months: {SAVR: 12, TAVR: 12}
+  ACC_AHA:
+    description: "2020 ACC/AHA: transthoracic echo at 5 and 10 years then yearly for surgical bioprostheses; annual echo after TAVI."
+    SAVR: {milestones_years: [5, 10], yearly_after_years: 10}
+    TAVR: {interval_months: 12}
+
+# Observation-process and onset sensitivity (CR-02). Steps and draw counts are prespecified (label: assumed);
+# boosting, when added, reuses the primary analysis hyperparameters (no re-tuning inside sensitivities).
+sensitivity:
+  steps: [reference, core, core_plus_both]
+  uniform_draws: {full: 20, quick: 3}
+  informative_p_missed_visit: 0.28
+
+# Model families (CR-08). Cox is the reference implementation and the default served family until the frozen
+# promotion rule is met on development evaluation. Gradient boosting hyperparameters are tuned only on
+# patient-grouped inner folds of each outer training set (label: assumed engineering defaults).
+families:
+  default: cox
+  gradient_boosting:
+    grid: {n_estimators: [100, 300], learning_rate: [0.03, 0.1], max_depth: [1, 2]}
+    quick_grid: {n_estimators: [30, 60], learning_rate: [0.1], max_depth: [1, 2]}
+    budget_grid: {n_estimators: [300], learning_rate: [0.1], max_depth: [2]}   # KAIROS_BOOSTING_GRID=budget: whole-cohort tuned values, exploratory only (deviation 46)
+    fixed: {min_samples_leaf: 20, subsample: 1.0, random_state: 20260917}
+    default_hyperparameters: {n_estimators: 100, learning_rate: 0.1, max_depth: 2}   # only when a caller passes none and skips tuning
+    inner_splits: 3
+    objective: mean IPCW Brier over svd, death and replacement at 1, 3 and 5 years (unscaled)
+
+# Grouped local sensitivity explanations (WP-D2). Each group is replaced in one copy of the patient's
+# feature row and the 12-month SVD probability is recomputed: delta = p(actual) - p(reference). These are
+# model sensitivities, not treatment effects. own_reference_echo: the measurement is set to its own reference
+# study value and its change features to 0 ("had not changed since the reference study"); training_reference:
+# training median (numeric) or mode (categorical), stored in bundle.reference_profile. Features absent from a
+# bundle are skipped. label: assumed grouping.
+explanation_groups:
+  gradient: {reference_kind: own_reference_echo, from_reference: {current_gradient: ref_gradient}, zero: [delta_gradient, last_change_gradient, gradient_slope]}
+  eoa: {reference_kind: own_reference_echo, from_reference: {current_eoa: ref_eoa}, zero: [delta_eoa]}
+  dvi: {reference_kind: own_reference_echo, from_reference: {current_dvi: ref_dvi}, zero: [delta_dvi]}
+  regurgitation: {reference_kind: own_reference_echo, from_reference: {current_ar: ref_ar}, zero: [delta_ar]}
+  demographics: {reference_kind: training_reference, features: [age_at_implant, sex, bsa, bmi]}
+  valve: {reference_kind: training_reference, features: [design_class, canonical_model, generation, size_mm, implant_year, ieoa, mismatch_grade, tissue_treatment]}
+  comorbidity: {reference_kind: training_reference, features: [diabetes, egfr0, dialysis, af, bicuspid]}
+  renal_metabolic: {reference_kind: training_reference, features: [egfr, egfr_slope, dialysis_current, hba1c, diabetes_duration, ldl, lipid_lowering]}
+  mineral: {reference_kind: training_reference, features: [phosphate, calcium_corrected, pth, alp]}
+  lipoprotein_a: {reference_kind: training_reference, features: [lpa]}
+  cardiac_biomarker: {reference_kind: training_reference, features: [ntprobnp]}
+  inflammation: {reference_kind: training_reference, features: [hscrp]}
+  anticoagulant_exposure: {reference_kind: training_reference, features: [ac_class_current, ac_indication, ac_current_status, ac_cum_vka_years, ac_cum_oac_years, ac_days_since_change, ac_post_suspicion, on_antiplatelet]}

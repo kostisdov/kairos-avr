@@ -1,0 +1,26 @@
+# Patient-level material never enters version control (design rule 0.2)
+*.xlsx
+data/raw/
+data/derived/private/
+tmp/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+*.egg-info/
+build/
+dist/
+.ipynb_checkpoints/
+
+# Local artefacts and secrets
+artifacts/
+.env
+.azure/
+infra/*.local.json
+
+# Presentation working files (the PDF is the deliverable)
+presentation/*.html

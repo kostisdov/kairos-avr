@@ -1,0 +1,11 @@
+table: event_mention_counts.csv
+source: data/derived/private/passport.csv (private, not committed)
+definition: Count of patients with >=1 note matching each event-mention regex (valve-in-valve,
+  redo, prosthetic dysfunction/SVD-like, endocarditis, thrombosis).
+columns:
+- event
+- n_patients
+row_count: 5
+small_cell_suppression: Cells with a true count under 5 are shown as the string '<5'.
+retrieved_at: '2026-09-17T11:56:44Z'
+privacy_note: No patient IDs or note text appear in this table.

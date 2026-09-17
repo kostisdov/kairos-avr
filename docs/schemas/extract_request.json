@@ -1,0 +1,69 @@
+{
+  "properties": {
+    "date": {
+      "title": "Date",
+      "type": "string"
+    },
+    "method": {
+      "default": "auto",
+      "enum": [
+        "auto",
+        "rules",
+        "llm"
+      ],
+      "title": "Method",
+      "type": "string"
+    },
+    "note_ref": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Note Ref",
+      "type": "string"
+    },
+    "note_type": {
+      "enum": [
+        "operative",
+        "procedure",
+        "progress",
+        "discharge"
+      ],
+      "title": "Note Type",
+      "type": "string"
+    },
+    "passport_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Passport Id"
+    },
+    "source_kind": {
+      "enum": [
+        "real",
+        "synthetic"
+      ],
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "text": {
+      "maxLength": 200000,
+      "minLength": 1,
+      "title": "Text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "text",
+    "source_kind",
+    "note_ref",
+    "note_type",
+    "date"
+  ],
+  "title": "ExtractRequest",
+  "type": "object"
+}
