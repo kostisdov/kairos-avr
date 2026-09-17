@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+#
+# KAIROS research prototype: Azure Developer CLI manifest.
+#   azd auth login && azd up        provisions infra/main.bicep and deploys the four services
+#   azd deploy                      redeploys code only
+# Images are built remotely in Azure Container Registry (no local Docker daemon).
+# The Container Apps are matched by their azd-service-name tag (set in infra/resources.bicep).
+# The az CLI path (scripts/deploy.ps1 / scripts/deploy.sh) is the reference path; see infra/README.md.
+name: kairos
+metadata:
+  template: kairos@0.1.0
+infra:
+  provider: bicep
+  path: infra
+  module: main
+services:
+  extract:
+    project: .
+    host: containerapp
+    language: python
+    docker:
+      path: services/extract/Dockerfile
+      context: .
+      remoteBuild: true
+  predict:
+    project: .
+    host: containerapp
+    language: python
+    docker:
+      path: services/predict/Dockerfile
+      context: .
+      remoteBuild: true
+  jobs:
+    project: .
+    host: containerapp
+    language: python
+    docker:
+      path: services/jobs/Dockerfile
+      context: .
+      remoteBuild: true
+  demo:
+    project: .
+    host: containerapp
+    language: python
+    docker:
+      path: services/demo/Dockerfile
+      context: .
+      remoteBuild: true

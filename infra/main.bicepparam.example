@@ -1,0 +1,46 @@
+// Template. Copy to main.bicepparam and fill in the four owner values below.
+// The real file is not in version control: it carries a personal e-mail, an Entra
+// object identifier and a tenant user principal name.
+// KAIROS: owner defaults for the dev environment.
+// Image references and demoAuthClientId are supplied on the command line by
+// scripts/deploy.ps1 / scripts/deploy.sh; everything else lives here.
+using './main.bicep'
+
+param environmentName = 'dev'
+param location = 'swedencentral'
+param resourceGroupName = 'rg-kairos-dev'
+
+// Owner (tags, budget e-mail, data-plane roles, PostgreSQL Entra administrator).
+param ownerEmail = 'owner@example.com'
+param deployerObjectId = '00000000-0000-0000-0000-000000000000'
+param postgresAdminObjectId = '00000000-0000-0000-0000-000000000000'
+param postgresAdminPrincipalName = 'owner_example.com#EXT#@yourtenant.onmicrosoft.com'
+
+// Existing Azure OpenAI account (never recreated); deployments are added to it.
+param openAiAccountName = 'papageorgiouminas-0092-resource'
+param openAiResourceGroup = 'rg-papageorgiou.minas-2513'
+param openAiApiVersion = '2025-04-01-preview'
+param openAiExtractDeploymentName = 'kairos-extract'
+// GPT-5.1 is the newest GPT model offered as a regional Standard (pay-per-token) deployment in
+// Sweden Central; newer models are Global or EU Data Zone only (see docs/runbook.md section 3).
+param openAiExtractModelName = 'gpt-5.1'
+param openAiExtractModelVersion = '2025-11-13'
+param openAiExtractSkuName = 'Standard'
+param openAiExtractCapacity = 100
+param openAiAdjudicateDeploymentName = 'kairos-adjudicate'
+param openAiAdjudicateModelName = 'gpt-5.1'
+param openAiAdjudicateModelVersion = '2025-11-13'
+param openAiAdjudicateSkuName = 'Standard'
+param openAiAdjudicateCapacity = 50
+param openAiExtractReasoningEffort = 'low'
+param openAiAdjudicateReasoningEffort = 'medium'
+// No pre-screen deployment (rules-only pre-screen, the design fallback).
+param openAiPrescreenModelName = ''
+
+// Design rule 0.3: single configuration switch, owner-confirmed 2026-09-16.
+param allowRealNotesToLlm = true
+
+// Cost Management budget (design section 9, decision 5). The start date is pinned
+// so that re-deployments do not rewrite the budget every month.
+param budgetAmount = 150
+param budgetStartDate = '2026-09-01'

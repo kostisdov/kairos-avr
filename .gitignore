@@ -25,3 +25,7 @@ infra/*.local.json
 
 # Presentation sources stay local; the PDF is the deliverable
 presentation/*.html
+
+# Deployment identity and outputs: owner-specific, never committed
+infra/main.bicepparam
+infra/outputs.local.json
