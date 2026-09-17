@@ -85,6 +85,21 @@ place; the model never recommends reintervention and never lengthens an interval
 | Irregular follow-up as an **observation process**; the three clinic messages kept separate | Patients with symptoms get more echoes and more detections. A missed visit triggers a reminder and lowers confidence; its association with deterioration is learned, not imposed. A five-year risk cannot justify a six-month appointment |
 | Valve identity as **route and design class**, with model and generation where counts allow; partial pooling **planned, not claimed** | Model and generation differences are large and tangled with implant era. A frailty model pooling sparse devices toward their class is the right long-term structure, but the prototype uses the grouping it actually fits |
 
+## Results
+
+Three comparisons, all on explicitly synthetic scenarios and all reported including where the model
+loses. Full records in [`docs/comparison/`](docs/comparison/).
+
+| Comparison | Result |
+|---|---|
+| Against valve age and type, the weak reference | Brier 0.0472 against 0.0559 on gradual stenotic; area under the curve 0.80 (0.77 to 0.83); calibration slope 0.88. Removing serial echocardiography pushes Brier to 0.0575, worse than the reference, so **updating is where the value sits** |
+| Against gradient boosting, the pre-specified challenger | **Retain the Cox model** at all three ladder steps. Mean Brier difference +5.6e-04, interval [-4.0e-06, +1.1e-03], spanning zero, on 10,701 rows from 2,390 patients. The challenger failed its own promotion rule and we publish that |
+| Against the guideline threshold rule, current practice | The model produced a supported prediction on **all 10,701** landmarks; the rule returned an evaluable verdict on **none**. It abstains without a complete severity assessment, which the generator does not supply. **Net benefit against current practice therefore remains unmeasured** |
+
+Where the model loses, stated first: on abrupt regurgitant failure the reference model beats it,
+because there is no preceding gradient signal to read. The high-competing-mortality scenario has
+three events and is uninterpretable; it is published as such rather than dropped.
+
 ## What we do not claim
 
 No clinical prediction accuracy is demonstrated. No outcome improvement is shown. The prototype is
