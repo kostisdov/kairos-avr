@@ -1,0 +1,125 @@
+{
+  "decision": "not_eligible",
+  "reason": "quick or unfrozen evaluation: criteria reported for information; Cox stays the default",
+  "criteria": [
+    {
+      "criterion": "mean SVD Brier improves (95% interval below zero)",
+      "value": 0.000345162283170592,
+      "interval": [
+        -0.0007175116447937172,
+        0.0013013243423826855
+      ],
+      "passed": false
+    },
+    {
+      "criterion": "SVD Brier at 1 y not worse by more than 0.005",
+      "value": -9.164400099462549e-06,
+      "supported": false,
+      "passed": true
+    },
+    {
+      "criterion": "|observed - predicted| SVD at 1 y not worse by more than 0.01",
+      "value": -0.00019317974445187268,
+      "supported": false,
+      "passed": true
+    },
+    {
+      "criterion": "SVD calibration slope estimable at 1 y",
+      "value": -0.1607879076391359,
+      "supported": false,
+      "passed": true
+    },
+    {
+      "criterion": "SVD Brier at 3 y not worse by more than 0.005",
+      "value": 0.0004806400249598823,
+      "supported": true,
+      "passed": true
+    },
+    {
+      "criterion": "|observed - predicted| SVD at 3 y not worse by more than 0.01",
+      "value": 0.0006297573064735461,
+      "supported": true,
+      "passed": true
+    },
+    {
+      "criterion": "SVD calibration slope estimable at 3 y",
+      "value": 0.3406678762935377,
+      "supported": true,
+      "passed": true
+    },
+    {
+      "criterion": "SVD Brier at 5 y not worse by more than 0.005",
+      "value": 0.0005640112246513562,
+      "supported": true,
+      "passed": true
+    },
+    {
+      "criterion": "|observed - predicted| SVD at 5 y not worse by more than 0.01",
+      "value": -0.0015782728767004643,
+      "supported": true,
+      "passed": true
+    },
+    {
+      "criterion": "SVD calibration slope estimable at 5 y",
+      "value": 0.42808686837326626,
+      "supported": true,
+      "passed": true
+    }
+  ],
+  "tolerances": {
+    "mean_brier_ci_excludes_zero": true,
+    "max_horizon_brier_worsening": 0.005,
+    "max_abs_obs_minus_pred_worsening": 0.01
+  },
+  "mode": "quick",
+  "plan_hash": "6876ba4aee94df15",
+  "auc_used": false,
+  "decided_at": "2026-09-17T09:53:17.924389+00:00",
+  "step": "core_plus_inflammatory",
+  "scenario": "gradual_stenotic/default",
+  "comparison": {
+    "rows": 2617,
+    "common_rows": 1683,
+    "common_patients": 386,
+    "cox_only_rows": 401,
+    "gradient_boosting_only_rows": 0,
+    "status": "ok",
+    "bootstrap": {
+      "kind": "fixed_oof",
+      "n_requested": 30,
+      "n_valid": {
+        "svd|1.0|brier_diff": 30,
+        "svd|1.0|abs_obs_minus_pred_diff": 30,
+        "svd|3.0|brier_diff": 30,
+        "svd|3.0|abs_obs_minus_pred_diff": 30,
+        "svd|5.0|brier_diff": 30,
+        "svd|5.0|abs_obs_minus_pred_diff": 30,
+        "svd|mean|brier_diff": 30,
+        "death|1.0|brier_diff": 30,
+        "death|1.0|abs_obs_minus_pred_diff": 30,
+        "death|3.0|brier_diff": 30,
+        "death|3.0|abs_obs_minus_pred_diff": 30,
+        "death|5.0|brier_diff": 30,
+        "death|5.0|abs_obs_minus_pred_diff": 30,
+        "death|mean|brier_diff": 30,
+        "replacement|1.0|brier_diff": 30,
+        "replacement|1.0|abs_obs_minus_pred_diff": 30,
+        "replacement|3.0|brier_diff": 30,
+        "replacement|3.0|abs_obs_minus_pred_diff": 30,
+        "replacement|5.0|brier_diff": 30,
+        "replacement|5.0|abs_obs_minus_pred_diff": 30,
+        "replacement|mean|brier_diff": 30,
+        "alive_intact|1.0|brier_diff": 30,
+        "alive_intact|1.0|abs_obs_minus_pred_diff": 30,
+        "alive_intact|3.0|brier_diff": 30,
+        "alive_intact|3.0|abs_obs_minus_pred_diff": 30,
+        "alive_intact|5.0|brier_diff": 30,
+        "alive_intact|5.0|abs_obs_minus_pred_diff": 30,
+        "alive_intact|mean|brier_diff": 30
+      },
+      "failures": {},
+      "min_valid": 20,
+      "min_success_fraction": 0.8
+    }
+  }
+}
