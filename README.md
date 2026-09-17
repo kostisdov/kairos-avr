@@ -10,6 +10,9 @@ From **καιρός**, the right moment: knowing which patients need to be looke
 > unvalidated.** Nothing here claims clinical accuracy, recommends reintervention or a treatment
 > change, or alters guideline surveillance.
 
+**Team kairos** · Panagiotis Sotiropoulos, physician · Kostis Dovelos, PhD, engineering ·
+Minas Papageorgiou, engineering
+
 | Deliverable | File |
 |---|---|
 | Study design | [`protocol/study_protocol.md`](protocol/study_protocol.md) |
