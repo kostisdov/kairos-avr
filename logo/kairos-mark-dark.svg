@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="512" height="512" role="img" aria-label="KAIROS mark">
+  <title>KAIROS</title>
+    <circle cx="32" cy="32" r="24" stroke="#E7EBF0" stroke-width="1.9" stroke-dasharray="3.4 3.6" opacity="0.50" fill="none"/>
+    <path d="M16 46 Q 36 46 58 10" stroke="#E7EBF0" stroke-width="3.6" stroke-linecap="round" fill="none"/>
+    <circle cx="39.3" cy="35.2" r="4.4" fill="#CF5F43"/>
+</svg>

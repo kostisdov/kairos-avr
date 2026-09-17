@@ -1,109 +1,155 @@
-# Dyania Health Hackathon 2026 — Team Submission Repository
+<img src="logo/kairos-lockup-descriptor-bright.svg" alt="KAIROS" width="420">
 
-**Challenge:** Build a study — using machine learning, a statistical model, or whatever approach you prefer — proposing a protocol to predict aortic valve durability in patients with a bioprosthetic aortic valve replacement.
-**Event:** September 15–17, 2026 (3 days)
-**Team size:** 2–3 ML engineers
-**Team:** `[Your team name]`
-**Members:** `[Name — Role]`, `[Name — Role]`, `[Name — Role]`
+# Dynamic prediction of bioprosthetic aortic valve deterioration
+
+Research prototype for the Dyania Health Hackathon 2026, AVR Durability Challenge.
+*Kinetics of Aortic bioprosthesis Integrity, Risk-adapted echO Surveillance.*
+From **καιρός**, the right moment: knowing which patients need to be looked at sooner.
+
+> **Every model output in this repository is trained on synthetic scenarios and is illustrative and
+> unvalidated.** Nothing here claims clinical accuracy, recommends reintervention or a treatment
+> change, or alters guideline surveillance.
+
+| Deliverable | File |
+|---|---|
+| Study design | [`protocol/study_protocol.md`](protocol/study_protocol.md) |
+| Model approach | [`model/approach.md`](model/approach.md) |
+| Data plan | [`data/data_plan.md`](data/data_plan.md) |
+| Slides | [`presentation/slides.pdf`](presentation/slides.pdf) |
+| Proof of concept | [`notebooks/`](notebooks/) |
 
 ---
 
-## Problem Statement
+## The problem
 
-> *Fill in: 2–3 sentences framing the clinical problem your team is solving. What is the durability/failure detection gap for aortic valve replacement patients? Who is affected? What is the cost of late identification of structural valve deterioration?*
+Bioprosthetic aortic valves wear out, and they do it quietly. In a 1,387-patient surgical cohort
+about a third developed haemodynamic deterioration over a decade, mostly without symptoms. In a
+2,403-patient transcatheter registry, VARC-3 moderate or severe deterioration reached 10.8% at five
+years.
 
-## Our Approach
+Surveillance is a fixed schedule, the same for every patient and every valve. Roughly a third of
+scheduled five-year echocardiograms in trials never happened, and echo readings vary between sites.
+So deterioration is often recognised late, when reoperation is urgent rather than planned. In UK
+national data on all reoperative aortic valve surgery from 1996 to 2019, operative mortality was
+4.8% elective, 11.8% urgent and 31.7% emergency — a description of how presentation urgency and
+mortality travel together across all reoperation causes, not a count of preventable deaths.
 
-> *Fill in: Briefly describe your team's strategy. What data sources are you targeting (echocardiography, implant registries, follow-up visits, imaging)? What ML approach did you choose and why? What makes your risk-prediction design clinically actionable for surveillance scheduling?*
+Every bioprosthetic recipient is affected. Most acutely, the growing group implanted under 65, who
+will outlive their first valve, and for whom valve identity changes the odds materially.
 
-## Key Design Decisions
+**There is no durability prediction model in cardiac surgery today.** What exists is a fixed
+schedule, a threshold read against the patient's own baseline echo, and symptoms. Current practice
+asks whether a valve *is* failing. It never asks whether it *will*.
 
-> *Fill in: List 3–5 deliberate choices your team made (e.g., model choice, feature selection philosophy, how you defined structural valve deterioration as ground truth, how you handled censored/time-to-event data, how you handled missing echo follow-ups). For each, explain the reasoning.*
+## Our approach
+
+**Data.** What a hospital already holds: implant and procedure records, echo reports both structured
+and free-text, laboratory results, dated medication history, and outcomes from procedure codes and
+death records. Assembled per patient by text extraction and adjudicated against VARC-3 criteria.
+Public device identifiers and guideline reference tables supply the device hierarchy and contextual
+reference values; open-access trial reports and FDA device summaries supply simulation parameters.
+
+**Method.** One primary model: penalised cause-specific proportional hazards for structural valve
+deterioration, for death, and for non-SVD index-valve replacement, fitted on a landmark dataset so
+that each prediction uses only information available at that time, and combined into cumulative
+incidence. Biomarker and anticoagulant-exposure modules are added as separate blocks and judged on
+incremental calibration and Brier score. Gradient boosting is an optional challenger, lower in
+priority than the modules.
+
+**What comes out.** The probability of deterioration before death at 1, 3 and 5 years plus a
+12-month horizon, with the probability of death before deterioration and of remaining alive with an
+intact valve, the main drivers, and a reliability statement. Three separate messages reach the
+clinic: a current abnormality needing assessment now, a predicted risk high enough to bring the next
+assessment forward, and a scheduled echo that has not happened. Guideline surveillance stays in
+place; the model never recommends reintervention and never lengthens an interval.
+
+## Three layers, kept apart
+
+| Layer | Status | What it is |
+|---|---|---|
+| Real-record extraction | **Implemented** | A valve passport from 202 de-identified notes covering 117 patients: route, model and generation, size, implant year, serial gradients, event mentions. It establishes what a hospital record actually contains. **It does not train the model.** |
+| Model development | **Demonstrated** | A penalised cause-specific model with dynamic landmarking, developed and evaluated on explicitly synthetic scenarios whose parameters are literature-informed, assumed, or varied in sensitivity analysis |
+| Clinical validation | **Planned** | Retrospective development in adequate cohorts, a frozen model, temporal and external validation, then prospective silent evaluation. Its absence today is the boundary of a 36-hour event, not a failure of the objective |
+
+## Key design decisions
 
 | Decision | Rationale |
 |---|---|
-| | |
-| | |
-| | |
+| Predict **adjudicated structural deterioration**, not generic valve failure. Death and non-SVD replacement compete; thrombosis is a reversible intercurrent state | Reintervention undercounts deterioration and arrives too late to change surveillance. A raised gradient is a sign, not a cause, so attribution is adjudicated. A valve replaced for endocarditis can never show structural deterioration, so that replacement competes; a treated thrombosis resolves, so it does not |
+| **Time zero is the patient's own reference echo**, 30 to 180 days after implantation, not a fixed day-90 landmark | A day-90 prediction cannot use an echo performed on day 150. Anchoring on the actual study removes that contradiction and the look-ahead leakage that comes with it. The echo that establishes an endpoint is never used to predict that endpoint |
+| The comparator that decides usefulness is **the guideline threshold rule**, not valve age and type | Valve age and type is a bar almost anything clears. What a cardiologist does today is read the current echo against the reference study. If the model cannot beat that, it adds nothing, whatever it scores |
+| Biomarker and anticoagulant information as **separate modules on a working core**, each measured | Susceptibility biology and treatment history are where this differs from a valve-age chart, but plausibility is not prediction. Modular evaluation shows what each block adds and keeps the core usable when a marker is unmeasured |
+| Irregular follow-up as an **observation process**; the three clinic messages kept separate | Patients with symptoms get more echoes and more detections. A missed visit triggers a reminder and lowers confidence; its association with deterioration is learned, not imposed. A five-year risk cannot justify a six-month appointment |
+| Valve identity as **route and design class**, with model and generation where counts allow; partial pooling **planned, not claimed** | Model and generation differences are large and tangled with implant era. A frailty model pooling sparse devices toward their class is the right long-term structure, but the prototype uses the grouping it actually fits |
+
+## What we do not claim
+
+No clinical prediction accuracy is demonstrated. No outcome improvement is shown. The prototype is
+not deployment-ready. The supplied records carry year-only dates and almost no serial echo; they
+establish extraction feasibility and descriptive counts, nothing more. Anticoagulant associations are
+predictive, confounded by indication and era, and carry no treatment implication. To our knowledge
+no externally validated, individual-level, dynamic prediction model of adjudicated structural valve
+deterioration is in clinical use; existing work consists of cohort analyses of risk factors and
+device comparisons.
 
 ---
+## Layout
 
-## Getting Started
+```
+src/kairos/            core package (kairos-core)
+  passport.py, varc3.py, km_reconstruct.py, build_*.py   existing data-plumbing layer (tested)
+  extraction/          schema.py (all payloads), rules.py (span-aware rules), llm.py (Azure OpenAI, flag-gated)
+  adjudication/        framework.py (reference study, candidates, endpoint, uncertain class)
+  modelling/           landmark.py, features.py, cause_specific.py, cif.py, modules.py, predictor.py, train.py
+  simulation/          scenarios.py (config/scenarios.yaml), generators.py (six synthetic scenarios)
+  evaluation/          metrics.py (IPCW Brier, calibration, AUC), ladder.py, plots.py
+  io/                  config.py (settings and the real-notes switch), storage.py (Blob or local), db.py
+  privacy.py           privacy scan used by CI and the deploy scripts
+services/              extract (FastAPI), predict (FastAPI), jobs (CLI), demo (Streamlit), one Dockerfile each
+infra/                 Bicep (subscription scope) and azure.yaml for azd
+scripts/               deploy.ps1 / deploy.sh, privacy_scan.py, export_schemas.py, build_all.py
+config/                scenarios.yaml (literature skeleton + simulation section), model.yaml, app.yaml
+tests/                 unit, contract and service tests; synthetic note fixtures
+docs/                  specification, design, runbook, deviations, JSON schemas
+data/reference/        public reference tables (committed); data/derived/aggregates: small-cell-suppressed aggregates
+```
 
-> ⚠️ **Do not upload real patient data or clinical notes to this repository.** Any data you use must be de-identified, synthetic, or otherwise cleared for public sharing — this repo (and your fork) may be publicly visible.
+Patient-level material (`*.xlsx`, `data/raw/`, `data/derived/private/`, `tmp/`) never enters
+version control, a build context or a log. `scripts/privacy_scan.py` enforces this.
 
-### 1. Fork this repository
-
-Go to **[https://github.com/dyaniahealth/dyania-hackathon-avr-durability](https://github.com/dyaniahealth/dyania-hackathon-avr-durability)** and click **Fork** (top-right) to create a copy under your own GitHub account.
-
-### 2. Clone your fork
+## Local quick start (Windows or Linux, Python 3.11)
 
 ```bash
-git clone https://github.com/<your-username>/dyania-hackathon-avr-durability.git
-cd dyania-hackathon-avr-durability
+python -m venv .venv
+.venv/Scripts/pip install -e ".[dev]"        # Linux/macOS: .venv/bin/pip
+.venv/Scripts/python -m pytest -q
+.venv/Scripts/python scripts/build_all.py --quick   # scenarios, training, evaluation into artifacts/
 ```
 
-### 3. Create your team branch
-
-Branch names must follow this format: `team/<your-team-name>` (lowercase, hyphens for spaces).
+Run the services locally (artefacts under `artifacts/`, SQLite database):
 
 ```bash
-git checkout -b team/your-team-name
+.venv/Scripts/python -m uvicorn app:app --app-dir services/extract --port 8001
+.venv/Scripts/python -m uvicorn app:app --app-dir services/predict --port 8002
+.venv/Scripts/python -m streamlit run services/demo/app.py
 ```
 
-Examples: `team/panathinea`, `team/valve-guardians`, `team/svd-sentinels`
+Or run the patient model alone, with both services in-process: set `KAIROS_DEMO_BACKEND=inprocess` and run only the
+Streamlit command.
 
-### 4. Work on your branch
+## Azure
 
-Edit the template files inside `protocol/`, `model/`, `data/`, and `presentation/`. Every `> *Fill in:*` block is a placeholder — replace it with your team's content.
+One command provisions and deploys everything into `rg-kairos-dev` (Sweden Central):
 
-```bash
-# Stage and commit as you go
-git add .
-git commit -m "your message"
+```powershell
+.\scripts\deploy.ps1
 ```
 
-### 5. Submit — open a Pull Request before the deadline
+or `bash scripts/deploy.sh`, or `azd up` when the Azure Developer CLI is installed. Details,
+the model-availability record, cost notes and the teardown are in `docs/runbook.md`.
 
-Push your branch to your fork and open a Pull Request to the original repository:
+## Interfaces
 
-```bash
-git push origin team/your-team-name
-```
-
-Then go to your fork on GitHub and click **"Compare & pull request"**.
-Set the base repository to `dyaniahealth/dyania-hackathon-avr-durability` and the base branch to `main`.
-Title your PR: `Team submission: <your-team-name>`
-
-> **Deadline: September 17, 2026 — before the presentation session.**
-> Only the last commit pushed before the deadline will be evaluated.
-> Make sure your PR is open — **do not** merge it.
-
----
-
-## Repository Structure
-
-```
-.
-├── README.md                        # This file — team overview and key decisions
-├── protocol/
-│   └── study_protocol.md            # Full study design (main deliverable)
-├── model/
-│   └── approach.md                  # Model methodology and validation strategy
-├── data/
-│   └── data_plan.md                 # Data sources, preprocessing, availability
-├── presentation/
-│   └── slides.pdf                   # 5–10 slide deck for expert panel
-└── notebooks/                       # Proof-of-concept implementation
-```
-
----
-
-## Submission Checklist
-
-- [ ] `README.md` — team overview, problem framing, key design decisions
-- [ ] `protocol/study_protocol.md` — complete study protocol
-- [ ] `model/approach.md` — model methodology
-- [ ] `data/data_plan.md` — data plan
-- [ ] `presentation/slides.pdf` — slide deck
-- [ ] `notebooks/` — proof-of-concept implementation
+Both HTTP services publish OpenAPI documents (`/docs`). The JSON schemas of every payload
+(passport, echo observation, exposure timeline, prediction, requests and responses) are
+exported to `docs/schemas/` and checked for drift in CI.
