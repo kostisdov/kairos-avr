@@ -1,0 +1,131 @@
+{
+  "decision": "retain_cox",
+  "evidence": "exploratory",
+  "reason": "at least one criterion not met; the gradient boosting result is still published (exploratory: quick namespace or no matching frozen plan)",
+  "criteria": [
+    {
+      "criterion": "mean SVD Brier improves (95% interval below zero)",
+      "value": 3.4192210709645065e-06,
+      "interval": [
+        -6.43640538435586e-05,
+        6.453915786965684e-05
+      ],
+      "passed": false
+    },
+    {
+      "criterion": "SVD Brier at 1 y not worse by more than 0.005",
+      "value": 2.6555575680054996e-07,
+      "supported": true,
+      "passed": true
+    },
+    {
+      "criterion": "|observed - predicted| SVD at 1 y not worse by more than 0.01",
+      "value": -1.9833382929068145e-06,
+      "supported": true,
+      "passed": true
+    },
+    {
+      "criterion": "SVD calibration slope estimable at 1 y",
+      "value": 0.8514251448393392,
+      "supported": false,
+      "passed": true
+    },
+    {
+      "criterion": "SVD Brier at 3 y not worse by more than 0.005",
+      "value": -1.63822422572929e-05,
+      "supported": true,
+      "passed": true
+    },
+    {
+      "criterion": "|observed - predicted| SVD at 3 y not worse by more than 0.01",
+      "value": -5.406669257174493e-05,
+      "supported": true,
+      "passed": true
+    },
+    {
+      "criterion": "SVD calibration slope estimable at 3 y",
+      "value": 1.0593099159408466,
+      "supported": true,
+      "passed": true
+    },
+    {
+      "criterion": "SVD Brier at 5 y not worse by more than 0.005",
+      "value": 2.637434971338587e-05,
+      "supported": true,
+      "passed": true
+    },
+    {
+      "criterion": "|observed - predicted| SVD at 5 y not worse by more than 0.01",
+      "value": -0.00038471045936170484,
+      "supported": true,
+      "passed": true
+    },
+    {
+      "criterion": "SVD calibration slope estimable at 5 y",
+      "value": 0.9242218474440154,
+      "supported": true,
+      "passed": true
+    }
+  ],
+  "tolerances": {
+    "mean_brier_ci_excludes_zero": true,
+    "max_horizon_brier_worsening": 0.005,
+    "max_abs_obs_minus_pred_worsening": 0.01
+  },
+  "mode": "full",
+  "plan_hash": "1f36d79dea7db6e1",
+  "auc_used": false,
+  "decided_at": "2026-09-17T11:28:08.612088+00:00",
+  "step": "reference",
+  "scenario": "gradual_stenotic/default",
+  "comparison": {
+    "rows": 10701,
+    "common_rows": 10701,
+    "common_patients": 2390,
+    "cox_only_rows": 0,
+    "gradient_boosting_only_rows": 0,
+    "status": "ok",
+    "bootstrap": {
+      "kind": "fixed_oof",
+      "n_requested": 200,
+      "n_valid": {
+        "svd|1.0|brier_diff": 200,
+        "svd|1.0|abs_obs_minus_pred_diff": 200,
+        "svd|3.0|brier_diff": 200,
+        "svd|3.0|abs_obs_minus_pred_diff": 200,
+        "svd|5.0|brier_diff": 200,
+        "svd|5.0|abs_obs_minus_pred_diff": 200,
+        "svd|mean|brier_diff": 200,
+        "death|1.0|brier_diff": 200,
+        "death|1.0|abs_obs_minus_pred_diff": 200,
+        "death|3.0|brier_diff": 200,
+        "death|3.0|abs_obs_minus_pred_diff": 200,
+        "death|5.0|brier_diff": 200,
+        "death|5.0|abs_obs_minus_pred_diff": 200,
+        "death|mean|brier_diff": 200,
+        "replacement|1.0|brier_diff": 200,
+        "replacement|1.0|abs_obs_minus_pred_diff": 200,
+        "replacement|3.0|brier_diff": 200,
+        "replacement|3.0|abs_obs_minus_pred_diff": 200,
+        "replacement|5.0|brier_diff": 200,
+        "replacement|5.0|abs_obs_minus_pred_diff": 200,
+        "replacement|mean|brier_diff": 200,
+        "alive_intact|1.0|brier_diff": 200,
+        "alive_intact|1.0|abs_obs_minus_pred_diff": 200,
+        "alive_intact|3.0|brier_diff": 200,
+        "alive_intact|3.0|abs_obs_minus_pred_diff": 200,
+        "alive_intact|5.0|brier_diff": 200,
+        "alive_intact|5.0|abs_obs_minus_pred_diff": 200,
+        "alive_intact|mean|brier_diff": 200
+      },
+      "failures": {},
+      "min_valid": 100,
+      "min_success_fraction": 0.8
+    }
+  },
+  "plan_status": {
+    "status": "unfrozen_plan",
+    "evidence": "exploratory",
+    "reason": "evaluation plan not frozen"
+  }
+}

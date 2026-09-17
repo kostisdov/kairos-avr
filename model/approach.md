@@ -57,10 +57,28 @@ is **Planned** and is labelled as such wherever the hierarchy appears.
 as regurgitation rather than stenosis. A constrained model is a pre-specified sensitivity analysis,
 and performance is reported separately by failure phenotype.
 
-**Challenger — Planned, lower priority.** A gradient-boosting survival model fitted to the same
-cause-specific structure, reported only if it beats the primary model on calibration and Brier
-score. A Cox-objective boosted score alone yields a relative hazard, not a competing-risk
-probability, so the challenger must model death as well. No other model family is promised.
+**Challenger — Demonstrated.** A gradient-boosting survival model fitted to the same cause-specific
+structure, promoted only if it beats the primary model on calibration and Brier score. A Cox-objective
+boosted score alone yields a relative hazard, not a competing-risk probability, so the challenger
+models death as well. No other model family is promised.
+
+The comparison has been run and the challenger **did not earn promotion**. On the gradual-stenotic
+scenario, with out-of-fold predictions on identical rows for both families and 200 bootstrap
+replicates resampled by patient:
+
+| Ladder step | Decision | Mean Brier difference | 95% interval |
+|---|---|---|---|
+| Reference | retain Cox | +3.4e-06 | [-6.4e-05, +6.5e-05] |
+| Core | retain Cox | +2.0e-04 | [-2.9e-04, +7.0e-04] |
+| Core plus both modules | retain Cox | +5.6e-04 | [-4.0e-06, +1.1e-03] |
+
+10,701 landmark rows from 2,390 patients. A positive difference means boosting scored worse. Every
+interval spans zero, so the two families are indistinguishable here and the first promotion criterion
+fails at every step. The remaining criteria pass, so boosting is not worse beyond tolerance either; it
+simply adds nothing on this scenario.
+
+The result is published rather than dropped. A challenger that fails its own pre-specified promotion
+rule is evidence that the rule was applied. Full decision records are in `docs/comparison/`.
 
 ---
 
