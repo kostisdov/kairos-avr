@@ -1,0 +1,24 @@
+{
+  "comparator_id": "varc3_hvd_comparator_v1",
+  "reference_policy": "kairos_30_180_days",
+  "model_version": null,
+  "threshold": 0.05,
+  "threshold_status": "unchanged_assumed",
+  "source_run_identity": null,
+  "output_scope": "comparison_only",
+  "evidence_status": "synthetic_unvalidated",
+  "inputs": {
+    "landmarks": {
+      "path": "/home/kostis/Desktop/avr_docathon/submission/artifacts/clinical_comparison/landmarks.parquet",
+      "sha256": "441288921d23b6f187928ec875a887fa5caa2ae7c1e7313c9beba688a4eb7ebc"
+    },
+    "predictions": {
+      "path": "/home/kostis/Desktop/avr_docathon/submission/artifacts/clinical_comparison/predictions.parquet",
+      "sha256": "2d131fa1c9d062fd98e783953f97d5617f908b6751901bc095b59a9797f1f60a"
+    },
+    "comparator_rows": {
+      "path": "/home/kostis/Desktop/avr_docathon/submission/artifacts/clinical_comparison/comparator_rows.parquet",
+      "sha256": "2942ca550de1bad01d271056b80c7678b16f87ba59fb48c2007366f6c38245ce"
+    }
+  }
+}

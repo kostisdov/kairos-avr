@@ -1,0 +1,12 @@
+{
+  "n_total": 10701,
+  "n_common": 0,
+  "n_comparator_evaluable": 0,
+  "n_model_supported": 10701,
+  "n_rule_only": 0,
+  "n_model_only": 10701,
+  "n_neither": 0,
+  "n_rule_positive": 0,
+  "degenerate_no_rule_positives": true,
+  "status": "complete"
+}

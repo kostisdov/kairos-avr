@@ -80,6 +80,20 @@ simply adds nothing on this scenario.
 The result is published rather than dropped. A challenger that fails its own pre-specified promotion
 rule is evidence that the rule was applied. Full decision records are in `docs/comparison/`.
 
+### The guideline threshold rule — Demonstrated
+
+The comparison the protocol names as the primary clinical one has also been run, on the same 10,701
+landmarks from 2,390 patients. The model produced a supported prediction on **all 10,701**. The rule
+returned an evaluable verdict on **none of them**, because it requires a complete severity assessment
+and the synthetic generator does not populate every input it needs, above all confirmation that
+regurgitation is intraprosthetic. Faced with incomplete inputs the comparator abstains rather than
+guessing.
+
+That is a real difference in data requirement, not a claim about patients: a real echocardiography
+report carries the confirmation fields the generator omits. With zero rule positives the decision
+curve is degenerate, so **net benefit against current practice remains unmeasured**, and closing that
+gap is the first analysis of the next phase. Full outputs are in `docs/comparison/clinical_rule/`.
+
 ---
 
 ## 3. Features
