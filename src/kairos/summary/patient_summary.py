@@ -4,12 +4,15 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from datetime import date
 from typing import Any, Mapping
 
 from kairos import ILLUSTRATIVE_LABEL
 from kairos.adjudication.framework import select_reference, to_points
-from kairos.comparators.varc3_hvd import ComparatorContext, ComparatorResult, evaluate_varc3_comparator
+from kairos.comparators.varc3_hvd import (
+    ComparatorContext,
+    ComparatorResult,
+    evaluate_varc3_comparator,
+)
 from kairos.extraction.schema import PredictRequest, parse_date
 from kairos.summary.schema import AllowedAction, ClinicianFindings, PatientSummaryFacts, SummaryFact
 
@@ -140,6 +143,10 @@ def assemble_patient_summary(request: PredictRequest | Mapping[str, Any], model_
     _add(facts, "comparator.reasons", "Comparator reason codes", comp.get("reason_codes") or [], "comparator", "computed")
 
     returned_family = response.get("model_family") or _dict(response.get("reliability")).get("model_family")
+    if response and (not returned_family or not response.get("model_version")):
+        raise ValueError("a model response used in Patient Summary must verify its family and version")
+    if selected_family and returned_family and selected_family != returned_family:
+        raise ValueError("the returned model family does not match the selected family")
     _add(facts, "model.family", "Returned model family", returned_family, "model", "prediction service")
     _add(facts, "model.version", "Model version", response.get("model_version"), "model", "prediction service")
     _add(facts, "model.risk_12m", "Twelve-month SVD risk", response.get("p_svd_12m"), "model", "prediction service", "probability")
@@ -148,16 +155,21 @@ def assemble_patient_summary(request: PredictRequest | Mapping[str, Any], model_
                        ("earlier_assessment", "Earlier-assessment flag"),
                        ("overdue_surveillance", "Overdue-surveillance flag")):
         _add(facts, f"model.flag.{key}", label, messages.get(key), "model", "prediction service")
-    for index, reason in enumerate((_dict(response.get("reliability")).get("reasons") or [])):
+    for index, reason in enumerate(_dict(response.get("reliability")).get("reasons") or []):
         if isinstance(reason, Mapping):
             _add(facts, f"model.reason.{index}", "Model reliability reason", dict(reason), "limitation", "prediction service")
+    reliability = _dict(response.get("reliability"))
+    _add(facts, "model.modules", "Model module status", reliability.get("modules"), "model", "prediction service")
+    _add(facts, "model.excluded_features", "Excluded model features", reliability.get("excluded_features"),
+         "limitation", "prediction service")
+    _add(facts, "model.dp_ucmgp", "dp-ucMGP use", response.get("dp_ucmgp"), "model", "prediction service")
     _add(facts, "comparison.category", "Model-versus-comparator category", category, "comparison", "computed")
     _add(facts, "comparison.interpretation", "Deterministic interpretation", category_text, "comparison", "computed")
     _add(facts, "limitation.validation", "Evidence status", ILLUSTRATIVE_LABEL, "limitation", "fixed")
 
     for i, lab in enumerate(req.labs):
         _add(facts, f"laboratory.{i}", lab.analyte, lab.value, "laboratory", source, lab.unit or None, lab.date)
-    for i, episode in enumerate((req.exposure.episodes if req.exposure else [])):
+    for i, episode in enumerate(req.exposure.episodes if req.exposure else []):
         _add(facts, f"exposure.{i}", "Antithrombotic exposure",
              {"class": episode.class_, "indication": episode.indication, "start": episode.start, "stop": episode.stop},
              "exposure", source)
@@ -193,7 +205,7 @@ def assemble_patient_summary(request: PredictRequest | Mapping[str, Any], model_
 
 def validate_findings(draft: ClinicianFindings, facts: PatientSummaryFacts) -> ClinicianFindings:
     fact_ids = {f.id for f in facts.facts}
-    action_ids = {a.action_id for a in facts.allowed_actions}
+    actions = {a.action_id: a for a in facts.allowed_actions}
     allowed_numbers = {str(n) for n in (1, 3, 5, 12)}
     for fact in facts.facts:
         if isinstance(fact.value, (int, float)) and not isinstance(fact.value, bool):
@@ -204,16 +216,36 @@ def validate_findings(draft: ClinicianFindings, facts: PatientSummaryFacts) -> C
     for item in entries:
         if any(eid not in fact_ids for eid in item.evidence_ids):
             raise ValueError("draft cites an unknown evidence ID")
+        if any(token in item.text.lower() for token in ("<", ">", "](", "http://", "https://", "javascript:")):
+            raise ValueError("draft contains unsafe markup or an arbitrary link")
     for item in draft.recommendations:
-        if item.action_id not in action_ids:
+        if item.action_id not in actions:
             raise ValueError("draft selected an ineligible action")
         if any(eid not in fact_ids for eid in item.evidence_ids):
             raise ValueError("recommendation cites an unknown evidence ID")
+        if not set(item.evidence_ids).intersection(actions[item.action_id].evidence_ids):
+            raise ValueError("recommendation does not cite evidence supporting its allowed action")
+        if any(token in item.rationale.lower() for token in ("<", ">", "](", "http://", "https://", "javascript:")):
+            raise ValueError("recommendation contains unsafe markup or an arbitrary link")
     text = " ".join([*(item.text for item in entries), *(item.rationale for item in draft.recommendations)])
     prohibited = ("prescribe", "start anticoag", "stop anticoag", "reintervention is indicated",
                   "superior model", "normal valve", "clinician-approved")
     if any(term in text.lower() for term in prohibited):
         raise ValueError("draft exceeds the permitted interpretation/recommendation scope")
+    lower = text.lower()
+    by_id = {fact.id: fact.value for fact in facts.facts}
+    earlier = by_id.get("model.flag.earlier_assessment")
+    if earlier is True and any(phrase in lower for phrase in ("no earlier-assessment flag", "earlier-assessment flag is absent",
+                                                               "risk is below the threshold")):
+        raise ValueError("draft contradicts the supplied earlier-assessment flag")
+    if earlier is False and any(phrase in lower for phrase in ("earlier-assessment flag is present", "earlier-assessment flag triggered",
+                                                                "risk is above the threshold")):
+        raise ValueError("draft contradicts the supplied earlier-assessment flag")
+    comparator_status = by_id.get("comparator.status")
+    if comparator_status == "negative" and any(phrase in lower for phrase in ("comparator is positive", "comparator triggered")):
+        raise ValueError("draft contradicts the comparator status")
+    if comparator_status == "positive" and "comparator is negative" in lower:
+        raise ValueError("draft contradicts the comparator status")
     for token in re.findall(r"(?<![A-Za-z])\d+(?:\.\d+)?", text):
         normal = f"{float(token):g}"
         if normal not in allowed_numbers:

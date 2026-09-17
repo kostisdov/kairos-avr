@@ -162,7 +162,12 @@ def _decrease(reference: float | None, current: float | None, absolute: float,
         return None, None, None
     delta = reference - current
     pct = 100.0 * delta / reference
-    return bool(delta >= absolute or pct >= percent), delta, pct
+    return bool(_ge(delta, absolute) or _ge(pct, percent)), delta, pct
+
+
+def _ge(value: float, threshold: float) -> bool:
+    """Inclusive comparison tolerant only of binary representation at the exact boundary."""
+    return value > threshold or math.isclose(value, threshold, rel_tol=1e-12, abs_tol=1e-12)
 
 
 def evaluate_varc3_comparator(reference: Any, current: Any,
@@ -213,6 +218,13 @@ def evaluate_varc3_comparator(reference: Any, current: Any,
     # integrated pair can never become a reassuring negative.
     rd, cd, pd = _date(result.reference_study_date), _date(result.current_study_date), _date(ctx.prediction_date)
     invalid_selection = False
+    ref_valve = _value(reference, "index_valve_id", "valve_id", "passport_id")
+    cur_valve = _value(current, "index_valve_id", "valve_id", "passport_id")
+    if ((ref_valve is not None and cur_valve is not None and ref_valve != cur_valve)
+            or (ctx.index_valve_id is not None
+                and any(value is not None and value != ctx.index_valve_id for value in (ref_valve, cur_valve)))):
+        result.reason_codes.append("index_valve_mismatch")
+        invalid_selection = True
     if rd is not None and cd is not None and cd < rd:
         result.reason_codes.append("current_before_reference")
         invalid_selection = True
@@ -230,8 +242,8 @@ def evaluate_varc3_comparator(reference: Any, current: Any,
 
     rg, cg = ref["mean_gradient_mmhg"], cur["mean_gradient_mmhg"]
     grad_rise = (cg - rg) if rg is not None and cg is not None else None
-    grad2 = None if grad_rise is None else bool(grad_rise >= 10.0 and cg >= 20.0)
-    grad3 = None if grad_rise is None else bool(grad_rise >= 20.0 and cg >= 30.0)
+    grad2 = None if grad_rise is None else bool(_ge(grad_rise, 10.0) and _ge(cg, 20.0))
+    grad3 = None if grad_rise is None else bool(_ge(grad_rise, 20.0) and _ge(cg, 30.0))
     eoa2, eoa_drop, eoa_pct = _decrease(ref["eoa_cm2"], cur["eoa_cm2"], 0.3, 25.0)
     eoa3, _, _ = _decrease(ref["eoa_cm2"], cur["eoa_cm2"], 0.6, 50.0)
     dvi2, dvi_drop, dvi_pct = _decrease(ref["dvi"], cur["dvi"], 0.1, 20.0)

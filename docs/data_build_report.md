@@ -388,3 +388,25 @@ Downstream: `generate-calibrated` produced 2 replicates (1864 and 1870 reference
 passed structure and the training contract (7308 landmark rows); `train-calibrated` (Cox) and `evaluate-calibrated
 --quick` wrote to `models/experimental/` and `metrics/experimental/` only (ladder 264 rows). Privacy is `not_assessed`
 because the recovery bundle has no real snapshot.
+
+## Phase D and time-boxed Phase E (17 September 2026)
+
+Phase D: reliability reason codes and the `ErrorDetail` contract; `?family=` and `GET /models` in the predict service;
+grouped local sensitivity (`modelling/explain.py`); demo family selector and "Compare families" tab; run-scoped model
+store with `publish` / `publish --rollback`; model cards; deviations 39-46. Tests: 262 passed, ruff clean, schemas
+regenerated. The privacy scan lists only the local private folders and spreadsheets that stay on this machine.
+
+Time-boxed family comparison (deviation 46; exploratory, biased towards boosting, **not the release comparison**):
+full gradual_stenotic cohort, 5 outer folds, budget tuple, 3 steps in parallel processes, about 20 minutes wall time.
+Runs `eval-20260917T110855-4b466e` (reference), `-5e5094` (core), `-58679d` (core_plus_both). SVD Brier score:
+
+| step | family | 1 y | 3 y | 5 y |
+|---|---|---|---|---|
+| reference | Cox | 0.0033 | 0.0196 | 0.0386 |
+| reference | boosting | 0.0033 | 0.0196 | 0.0386 |
+| core | Cox | 0.0032 | 0.0177 | 0.0354 |
+| core | boosting | 0.0032 | 0.0179 | 0.0358 |
+| core_plus_both | Cox | 0.0031 | 0.0173 | 0.0350 |
+| core_plus_both | boosting | 0.0032 | 0.0180 | 0.0360 |
+
+Boosting did not improve on Cox at any step, even with the bias in its favour. Paired `compare` decision for all three steps: `retain_cox` (exploratory: no frozen plan). The served family stays Cox.

@@ -47,7 +47,8 @@ class FindingItem(BaseModel):
     @field_validator("text")
     @classmethod
     def no_markup(cls, value: str) -> str:
-        if "<" in value or ">" in value or "http://" in value.lower() or "https://" in value.lower():
+        if ("<" in value or ">" in value or "](" in value or "http://" in value.lower()
+                or "https://" in value.lower() or "javascript:" in value.lower()):
             raise ValueError("generated HTML and arbitrary links are not allowed")
         return value.strip()
 
@@ -61,7 +62,8 @@ class RecommendationItem(BaseModel):
     @field_validator("rationale")
     @classmethod
     def no_markup(cls, value: str) -> str:
-        if "<" in value or ">" in value or "http://" in value.lower() or "https://" in value.lower():
+        if ("<" in value or ">" in value or "](" in value or "http://" in value.lower()
+                or "https://" in value.lower() or "javascript:" in value.lower()):
             raise ValueError("generated HTML and arbitrary links are not allowed")
         return value.strip()
 

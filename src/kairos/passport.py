@@ -116,15 +116,6 @@ EVENT_PATS = {
     "thrombosis": re.compile(r"valve thromb|leaflet thromb|\bHALT\b", re.I),
 }
 
-# ---------------------------------------------------------------------------
-# Structured form fields that DENY an event
-# ---------------------------------------------------------------------------
-# Operative reports carry key-value fields such as "Valve in Valve: No". Matching
-# the key as if it were prose counts the patient as having had the very event the
-# field denies. In the supplied corpus every occurrence of that field is "No" and
-# "Yes" never appears; a positive value is deliberately left in place so that it
-# still matches. Spans are returned rather than the text being rewritten, so
-# evidence offsets stay valid for callers that report them.
 _NEGATED_FIELD_PATS = (
     re.compile(r"Valve\s+in\s+Valve\s*:\s*(?:No|None|N/?A)\b", re.I),
     re.compile(r"Reoperation\s*:\s*No previous surgeries", re.I),
@@ -133,7 +124,13 @@ _NEGATED_FIELD_PATS = (
 
 
 def negated_field_spans(text: str) -> list[tuple[int, int]]:
-    """Character spans of structured fields whose recorded value is negative."""
+    """Character spans of structured fields whose recorded value is negative.
+
+    Operative reports carry key-value fields such as "Valve in Valve: No". Matching
+    the key as if it were prose counts the patient as having had the very event the
+    field denies. Spans are returned rather than the text rewritten, so evidence
+    offsets stay valid for callers that report them.
+    """
     return [m.span() for pat in _NEGATED_FIELD_PATS for m in pat.finditer(text)]
 
 

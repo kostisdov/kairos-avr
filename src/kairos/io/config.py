@@ -81,6 +81,10 @@ class Settings(BaseSettings):
     def llm_configured(self) -> bool:
         return bool(self.openai_endpoint and self.openai_extract_deployment)
 
+    @property
+    def summary_llm_configured(self) -> bool:
+        return bool(self.openai_endpoint and self.openai_summary_deployment)
+
     def model_version(self) -> str:
         sha = self.git_sha if self.git_sha and self.git_sha != "nogit" else ""
         return f"{__version__}+{sha or revision_tag()}"

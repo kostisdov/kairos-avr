@@ -12,6 +12,7 @@ if str(ROOT / "src") not in sys.path:
 
 from kairos.evaluation.clinical_comparison import (  # noqa: E402
     ComparisonInputs,
+    evaluate_comparator_rows,
     evaluate_paired_rows,
     manifest_for_inputs,
     pair_inputs,
@@ -28,6 +29,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--output-dir", required=True, help="new comparison directory")
     p.add_argument("--keys", nargs="+", default=["patient_id", "index_valve_id", "landmark_date"])
     p.add_argument("--model-version", default=None)
+    p.add_argument("--source-run-id", default=None, help="identity of the existing evaluation run")
     p.add_argument("--threshold", type=float, default=0.05)
     p.add_argument("--bootstrap", type=int, default=200)
     return p.parse_args()
@@ -40,10 +42,13 @@ def main() -> int:
     coverage: dict = {"status": "failed"}
     try:
         landmarks, predictions, comparator = (read_table(p) for p in (args.landmarks, args.predictions, args.comparator_rows))
+        if "status" not in comparator:
+            comparator = evaluate_comparator_rows(comparator)
         paired = pair_inputs(landmarks, predictions, comparator, args.keys)
         metrics, coverage = evaluate_paired_rows(paired, threshold=args.threshold, n_boot=args.bootstrap)
         coverage["status"] = "complete"
-        manifest = manifest_for_inputs(inputs, model_version=args.model_version, threshold=args.threshold)
+        manifest = manifest_for_inputs(inputs, model_version=args.model_version, threshold=args.threshold,
+                                       source_run_identity=args.source_run_id)
         write_comparison_artifacts(out, paired_rows=paired, metrics=metrics, coverage=coverage, manifest=manifest)
     except Exception as exc:  # a coverage report is still required on an unavailable comparator/input
         out.mkdir(parents=True, exist_ok=True)

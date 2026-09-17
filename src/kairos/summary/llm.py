@@ -70,12 +70,13 @@ class PatientSummaryWriter:
             raise LLMNotConfigured("no Patient Summary deployment configured")
         body = facts.model_dump(mode="json")
         start = time.monotonic()
+        header_source = "synthetic" if source == "synthetic" else "real"
         completion = self.client.chat.completions.parse(
             model=self.settings.openai_summary_deployment,
             messages=[{"role": "system", "content": SYSTEM_PROMPT},
                       {"role": "user", "content": json.dumps(body, sort_keys=True, separators=(",", ":"))}],
             response_format=ClinicianFindings,
-            extra_headers={"x-kairos-source": source},
+            extra_headers={"x-kairos-source": header_source},
             **sampling_kwargs(self.settings.openai_summary_reasoning_effort,
                               self.settings.summary_max_completion_tokens),
         )

@@ -7,5 +7,5 @@ columns:
 - n_patients
 row_count: 9
 small_cell_suppression: Cells with a true count under 5 are shown as the string '<5'.
-retrieved_at: '2026-09-17T11:56:44Z'
+retrieved_at: '2026-09-17T12:22:01Z'
 privacy_note: No patient IDs or note text appear in this table.
