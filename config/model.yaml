@@ -137,7 +137,7 @@ evaluation:
   quick_bootstrap: 30                   # used by tests and --quick runs
 
 messages:
-  earlier_assessment_p_svd_12m_threshold: 0.05   # label: assumed; brings the next assessment forward
+  earlier_assessment_p_svd_12m_threshold: 0.02   # label: assumed; brings the next assessment forward. Was 0.05; re-chosen for the 12-month horizon on the synthetic surveillance comparison (deviation 47)
   overdue_grace_months: 3
 
 guideline_surveillance:

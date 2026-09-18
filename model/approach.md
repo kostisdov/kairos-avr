@@ -80,19 +80,25 @@ simply adds nothing on this scenario.
 The result is published rather than dropped. A challenger that fails its own pre-specified promotion
 rule is evidence that the rule was applied. Full decision records are in `docs/comparison/`.
 
-### The guideline threshold rule — Demonstrated
+### The guideline threshold rule — Demonstrated, as a surveillance policy
 
-The comparison the protocol names as the primary clinical one has also been run, on the same 10,701
-landmarks from 2,390 patients. The model produced a supported prediction on **all 10,701**. The rule
-returned an evaluable verdict on **none of them**, because it requires a complete severity assessment
-and the synthetic generator does not populate every input it needs, above all confirmation that
-regurgitation is intraprosthetic. Faced with incomplete inputs the comparator abstains rather than
-guessing.
+A first attempt scored the rule and the model on the same 10,701 landmarks and got a verdict from the
+rule on none of them (`docs/comparison/clinical_rule/`). Two reasons. The synthetic echoes did not
+state whether regurgitation was intraprosthetic, so the rule abstained. More fundamentally, landmarks
+stop before the first echo that meets the endpoint, so the rule is negative at every landmark by
+construction: it is a detector, the model a predictor.
 
-That is a real difference in data requirement, not a claim about patients: a real echocardiography
-report carries the confirmation fields the generator omits. With zero rule positives the decision
-curve is degenerate, so **net benefit against current practice remains unmeasured**, and closing that
-gap is the first analysis of the next phase. Full outputs are in `docs/comparison/clinical_rule/`.
+The comparison is therefore run over time (`docs/comparison/surveillance/`). Generator 2.2 reports the
+regurgitation location, and each held-out patient's noise-free trajectory is replayed under the
+ESC/EACTS yearly schedule and the ACC/AHA calendar, with and without KAIROS bringing the next echo
+forward. Detection is the first echo on which the VARC-3 rule is positive. On the gradual stenotic
+scenario at a 2 percent 12-month threshold, detection is 1.8 months earlier on average (95% CI 1.2
+to 2.6) for 2 percent more echoes on the yearly schedule. On the ACC/AHA calendar, the share of
+deteriorating surgical valves detected before follow-up ends rises from 30 to 43 percent. At the
+protocol's 5 to 15 percent band the policy barely changes, because baseline 12-month risk is about
+0.3 percent; the alert threshold has to be re-chosen for the 12-month horizon. A calendar comparator
+(12-month incidence by route and valve age under or over five years) is scored alongside, and the
+primary population excludes landmarks with prevalent early haemodynamic deterioration.
 
 ---
 
