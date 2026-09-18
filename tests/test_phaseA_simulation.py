@@ -46,7 +46,7 @@ def test_prefix_separates_size_and_namespace():
 
 def test_manifest_v2_is_traceable_and_reproducible(base):
     m = base.manifest
-    assert m["schema_version"] == 2 and m["generator_version"] == "2.1" and m["endpoint_version"] == "2"
+    assert m["schema_version"] == 2 and m["generator_version"] == "2.2" and m["endpoint_version"] == "2"
     assert m["code_revision"]["kind"] in ("git", "source_tree") and m["code_revision"]["value"] != "nogit"
     assert m["n_requested"] == 400 and m["n_retained"] == len(base.patients)
     assert m["n_retained"] + m["exclusions"]["died_or_replaced_before_reference"] == 400

@@ -19,6 +19,9 @@ TRUTH_COLUMNS = frozenset({
     "crossing_in_interval", "n_thrombosis_episodes", "thrombosis_episodes", "n_scheduled_visits", "n_attended_visits",
     "visit_index", "scheduled_date", "years_since_implant", "attended", "eligible", "active_thrombosis",
     "true_mean_gradient", "true_eoa", "true_dvi", "true_ar_grade",
+    # replayable noise-free trajectory, generator 2.2
+    "traj_t0_years", "traj_t_end_years", "traj_t_onset_years", "traj_regurgitant", "traj_slope_mmhg_per_year",
+    "traj_eoa_fall_fraction", "traj_ref_gradient", "traj_ref_eoa", "traj_ref_dvi", "traj_ref_ar",
     # enrolled (implantation-origin) view, generator 2.1
     "attempt_index", "planned_reference_date", "reference_eligible", "exclusion_reason", "latent_death_date",
     "latent_replacement_date", "admin_end_date",

@@ -76,10 +76,18 @@ from kairos.simulation.truth import TRUTH_TABLES, attendance_by_year
 from kairos.varc3 import Echo, stage_hvd
 
 DAYS = 365.25
-GENERATOR_VERSION = "2.1"
+GENERATOR_VERSION = "2.2"   # 2.2: echo-report fields (AR location, paravalvular leak) and the replayable trajectory
 ENDPOINT_VERSION = "2"
 NAMESPACES = ("quick", "full")
-STREAMS = {"static": 1, "latent": 2, "visits": 3, "measurement": 4, "labs": 5, "treatment": 6, "mgp": 7}
+STREAMS = {"static": 1, "latent": 2, "visits": 3, "measurement": 4, "labs": 5, "treatment": 6, "mgp": 7,
+           "report": 8}
+# Echo-report fields (generator 2.2). Drawn from their own stream, so every earlier table of a
+# cohort is unchanged by them. label: assumed.
+ECHO_REPORT_DEFAULTS = {
+    "p_ar_location_reported": 0.9,
+    "paravalvular_leak_probs": {"SAVR": {"none": 0.9, "mild": 0.09, "moderate": 0.01},
+                                "TAVR": {"none": 0.6, "mild": 0.33, "moderate": 0.07}},
+}
 TIME_ZERO_WINDOW_DAYS = (30, 180)
 STUDY_END = date(2026, 6, 30)   # version-2.0 default; the registry calendar is authoritative
 
@@ -269,6 +277,7 @@ def generate_cohort(spec: ScenarioSpec, n: int | None = None, seed: int = 202609
     ac = p["anticoagulation"]
     surv = p["surveillance"]
     prog = p["progression"]
+    report = {**ECHO_REPORT_DEFAULTS, **(p.get("echo_report") or {})}
     yr_lo, yr_hi = p["implant_year_range"]
     lag_lo, lag_hi = p["reference_echo_lag_days"]
     shape = float(svd["weibull_shape"])
@@ -296,7 +305,7 @@ def generate_cohort(spec: ScenarioSpec, n: int | None = None, seed: int = 202609
     for i in range(n):
         rs = patient_streams(seed, i)
         r_static, r_latent, r_visits, r_meas = rs["static"], rs["latent"], rs["visits"], rs["measurement"]
-        r_labs, r_treat, r_mgp = rs["labs"], rs["treatment"], rs["mgp"]
+        r_labs, r_treat, r_mgp, r_report = rs["labs"], rs["treatment"], rs["mgp"], rs["report"]
         pid = f"SYN-{spec.name[:12]}-{i:05d}"
 
         # static covariates --------------------------------------------------------------------
@@ -467,6 +476,9 @@ def generate_cohort(spec: ScenarioSpec, n: int | None = None, seed: int = 202609
         z_lab = r_labs.normal(size=(n_vis, len(analytes)))
         u_mgp = r_mgp.uniform(size=n_vis)
         z_mgp = r_mgp.normal(size=n_vis)
+        pvl_probs = report["paravalvular_leak_probs"][route]
+        pvl_grade = str(r_report.choice(list(pvl_probs), p=list(pvl_probs.values())))
+        u_location = r_report.uniform(size=n_vis)
         lab_re = {}
         if calibrated:   # per-patient random intercepts and slopes on each analyte's transformed scale
             for analyte in analytes:
@@ -525,7 +537,11 @@ def generate_cohort(spec: ScenarioSpec, n: int | None = None, seed: int = 202609
                 labs.append({"patient_id": pid, "date": visit_date, "analyte": "dp_ucmgp", "value": round(float(np.exp(log_val)), 0)})
             row = {"patient_id": pid, "date": visit_date, "mean_gradient": round(grad_obs, 1),
                    "eoa": round(eoa_obs, 2), "dvi": round(dvi_obs, 2), "ar_grade": ar,
-                   "lvef": round(lvef, 0), "svi": round(svi, 0), "is_reference": j == 0}
+                   "lvef": round(lvef, 0), "svi": round(svi, 0), "is_reference": j == 0,
+                   # ar_grade is the intraprosthetic (transvalvular) grade; the report states that
+                   # location with probability p_ar_location_reported, otherwise it is unspecified
+                   "ar_location": "intraprosthetic" if u_location[j] < float(report["p_ar_location_reported"]) else None,
+                   "paravalvular_leak_grade": pvl_grade}
             echoes.append(row)
             pat_echoes.append(row)
             if j == 0:
@@ -623,7 +639,13 @@ def generate_cohort(spec: ScenarioSpec, n: int | None = None, seed: int = 202609
                       "thrombosis_episodes": json.dumps([{"start": _to_date(implant, e["start"]).isoformat(),
                                                           "end": _to_date(implant, e["end"]).isoformat(),
                                                           "treated": bool(e["treated"])} for e in episodes]),
-                      "n_scheduled_visits": n_vis, "n_attended_visits": n_attended})
+                      "n_scheduled_visits": n_vis, "n_attended_visits": n_attended,
+                      # the noise-free trajectory, so evaluation can replay the valve under another
+                      # surveillance schedule (kairos.evaluation.surveillance)
+                      "traj_t0_years": t0, "traj_t_end_years": t_end, "traj_t_onset_years": t_onset,
+                      "traj_regurgitant": bool(regurgitant), "traj_slope_mmhg_per_year": slope,
+                      "traj_eoa_fall_fraction": eoa_frac, "traj_ref_gradient": ref_grad, "traj_ref_eoa": ref_eoa,
+                      "traj_ref_dvi": ref_dvi, "traj_ref_ar": ref_ar})
 
     cohort = Cohort(patients=pd.DataFrame(patients), echoes=pd.DataFrame(echoes), labs=pd.DataFrame(labs),
                     exposures=pd.DataFrame(exposures), events=pd.DataFrame(events),
