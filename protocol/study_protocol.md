@@ -190,6 +190,10 @@ are excluded from the primary analysis and reported separately. At those landmar
 stage 2 is close to deterministic and the comparison against a threshold rule becomes circular. The
 clinically useful population is the one in which deterioration has not yet declared itself.
 
+> **Implementation note (deviation 48).** VARC-3 stage 1 is morphological and is not captured by the
+> generator or the extraction, so prevalent early deterioration is approximated haemodynamically: a
+> mean-gradient rise of at least 10 mmHg over the reference study, or regurgitation up a grade.
+
 ### Horizon
 
 Three years is the primary horizon. One year is reported alongside because it is the horizon the
@@ -266,6 +270,12 @@ clinical review with echocardiography at 6 months rather than at the next schedu
 addition to the guideline schedule and never in place of it.** The threshold band is pre-specified at
 5 to 15 percent, and the operating point is selected by decision-curve net benefit before results
 are seen.
+
+> **Amendment, 19 September 2026 (deviation 47 in `docs/deviations.md`).** Synthetic development
+> showed that baseline 12-month SVD incidence is about 0.3 percent, so a threshold in the 5 to 15
+> percent band almost never fires. The working threshold is 2 percent, chosen on synthetic scenarios
+> and to be re-chosen by decision curve on real data. The comparison against the guideline rule is run
+> as a surveillance-policy simulation (deviation 49, `docs/comparison/surveillance/`).
 
 Three messages are kept apart and are never merged into one number:
 

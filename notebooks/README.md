@@ -1,40 +1,23 @@
-# Notebooks — Proof-of-Concept Implementation
+# Notebooks
 
-> This folder is **required** — include your proof-of-concept implementation here.
+`01_kairos_proof_of_concept.ipynb` runs the pipeline end to end and is committed with its outputs.
 
-Place your Jupyter notebooks here. A strong submission includes:
+1. **Extract** a valve passport from the real de-identified notes (skipped when the spreadsheets are
+   absent, as they are in this repository; committed aggregates are shown instead).
+2. **Stage** an echo against the patient's own reference study under VARC-3.
+3. **Build** a landmark dataset from the synthetic `gradual_stenotic` scenario, with the leakage guard.
+4. **Fit** the cause-specific model and show the four probabilities (SVD, death, replacement for
+   another reason, alive with an intact valve) for two contrasting patients.
+5. **Compare** with current practice: guideline surveillance with and without KAIROS, read from
+   `docs/comparison/surveillance/`.
 
-- Data loading and exploratory analysis
-- Feature engineering pipeline
-- Model training and evaluation
-- SHAP / feature importance visualisation
+Steps 3 to 5 are synthetic and illustrative. To run it:
 
-## Suggested Notebook Structure
-
-```
-notebooks/
-├── 01_eda.ipynb                 # Exploratory data analysis on your chosen dataset
-├── 02_feature_engineering.ipynb # Feature construction (gradient progression rate, EOA index, PPM flag, etc.)
-├── 03_model_training.ipynb      # Model training, cross-validation, hyperparameter tuning
-└── 04_evaluation.ipynb          # Metrics, calibration, SHAP plots, subgroup analysis
-```
-
-You can combine these into a single notebook if preferred — the split is just for readability.
-
-## Environment
-
-Document your dependencies here so the panel can reproduce your results:
-
-```
-python >= 3.10
-pandas
-numpy
-scikit-learn
-xgboost       # or your chosen framework
-lifelines     # or scikit-survival, for time-to-event modelling
-shap
-matplotlib
-jupyter
+```bash
+pip install -e ".[dev]" jupyter
+jupyter nbconvert --to notebook --execute --inplace notebooks/01_kairos_proof_of_concept.ipynb
 ```
 
-Or include a `requirements.txt` / `environment.yml` in this folder.
+The heavier analyses have their own scripts: `scripts/build_all.py` (training and the model
+ladder), `scripts/evaluate_surveillance.py` (the comparison with current practice) and
+`scripts/score_real_extract.py` (the implant-time model on the real notes, where they are available).
