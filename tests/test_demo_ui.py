@@ -6,6 +6,12 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "services" / "demo" / "app.py"
 FIXTURE = ROOT / "tests" / "fixtures" / "synthetic_notes" / "02_savr_op_trifecta_hashsize.txt"
+LLM_CLIENT_BUILDS: list = []
+
+
+def _record_llm_client(settings):
+    LLM_CLIENT_BUILDS.append(settings)
+    raise RuntimeError("no hosted model in the demo tests")
 
 
 @pytest.fixture()
@@ -19,6 +25,8 @@ def app(tmp_path, monkeypatch, small_bundle):
     monkeypatch.setenv("KAIROS_LOCAL_ARTIFACTS_DIR", str(tmp_path))
     monkeypatch.setenv("KAIROS_DEMO_BACKEND", "inprocess")
     monkeypatch.setenv("KAIROS_OPENAI_ENDPOINT", "")
+    LLM_CLIENT_BUILDS.clear()
+    monkeypatch.setattr("kairos.summary.llm.build_client", _record_llm_client)
     reset_settings_cache()
     st.cache_resource.clear()
     st.cache_data.clear()
@@ -36,8 +44,7 @@ def _errors(at):
 
 def test_form_loads_the_first_example(app):
     assert not _errors(app)
-    assert app.title[0].value == "Patient model"
-    assert len(app.image) >= 1
+    assert len(app.image) >= 1  # the KAIROS logo heads the page
     assert app.radio(key="v_route").value == "SAVR" and app.selectbox(key="v_model").value == "Trifecta"
     assert app.selectbox(key="v_size").value == 21 and app.number_input(key="p_age").value == 66.0
     assert any("Time zero" in s.value for s in app.success)
@@ -115,14 +122,12 @@ def test_single_family_comparison_state_is_explicit(app):
     assert any("two-family comparison has not been run" in i.value for i in app.info)
 
 
-def test_summary_requires_update_and_does_not_call_llm_on_open(app):
-    assert not _errors(app)
-    assert "summary_binding" not in app.session_state and "summary_draft" not in app.session_state
-    app.button(key="update_summary").click().run()
+def test_summary_is_built_on_open_without_calling_a_language_model(app):
     assert not _errors(app)
     assert app.session_state["summary_binding"]["comparator"]["comparator_id"] == "varc3_hvd_comparator_v1"
-    assert "summary_draft" not in app.session_state
-    assert app.button(key="generate_findings").label == "Generate findings"
+    assert app.session_state["summary_draft"]["kind"] == "Template summary"
+    assert not LLM_CLIENT_BUILDS
+    assert app.button(key="generate_findings").label == "Regenerate findings"
 
 
 def test_fill_from_note_applies_the_extracted_valve(app):
