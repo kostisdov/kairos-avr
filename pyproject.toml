@@ -59,7 +59,7 @@ filterwarnings = [
 line-length = 100
 target-version = "py311"
 src = ["src", "services", "scripts", "tests"]
-extend-exclude = ["tmp", "data", "docs", ".venv", "artifacts"]
+extend-exclude = ["tmp", "data", "docs", ".venv", "artifacts", "notebooks"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["kairos", "tests"]
