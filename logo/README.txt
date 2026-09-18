@@ -1,6 +1,9 @@
 KAIROS logo assets
 ==================
 
+The mark is an open heart: one stroke that stops just short of closing, near
+where the aorta leaves the heart.
+
 Vector, use these by default. Infinitely scalable, no font needed: the
 wordmark is converted to outlines, so it renders identically on any machine.
 
@@ -14,28 +17,27 @@ wordmark is converted to outlines, so it renders identically on any machine.
 Raster, only where SVG is not accepted. Transparent background.
 
   kairos-mark-*.png                      1024 x 1024
-  kairos-lockup-*.png                    3000 x 730
-  kairos-lockup-descriptor-*.png         3000 x 838
+  kairos-lockup-*.png                    3000 x 832
+  kairos-lockup-descriptor-*.png         3000 x 832
 
 Backgrounds are transparent in every file. The "bright" versions carry dark
-strokes and belong on a light ground; the "dark" versions carry pale strokes
-and belong on a dark ground. Do not place a bright file on a dark slide.
+lettering and belong on a light ground; the "dark" versions carry pale
+lettering and belong on a dark ground. Do not place a bright file on a dark
+slide.
 
 Colour
   bright   ink #223142   accent #A8402C   ground #EFF1F3   surface #FCFCFD
   dark     ink #E7EBF0   accent #CF5F43   ground #0F141A   surface #182029
 
-The accent is used for the dot and for nothing else.
+The heart is always the accent; the wordmark is always ink.
 
 Rules
-  Below 44 px open the ring dash so it does not fill in.
-  Below 24 px drop the ring and keep the curve and the dot.
-  Clear space on all sides is the height of the letter K, measured from the
-  ring rather than from the tail that breaks through it.
-  Never close the ring into a solid circle, never colour the curve, and never
-  trim the tail back inside the ring.
+  The mark reads down to 16 px; below that use a solid dot of the accent.
+  Clear space on all sides is the height of the letter K.
+  Never close the heart, never fill it, and never recolour it in ink.
 
 Typeface, for anything set alongside the mark
-  Wordmark    Spectral SemiBold, all caps, letter-spacing 0.20 em
-  Descriptor  IBM Plex Sans Regular, all caps, letter-spacing 0.15 em
-  Both are free from Google Fonts. The supplied files need neither.
+  Wordmark    Inter Display SemiBold, all caps, letter-spacing 0.035 em
+  Descriptor  Inter Display Medium, all caps, letter-spacing 0.17 em
+  Inter is free (SIL Open Font License) from Google Fonts and rsms.me/inter.
+  The supplied files need neither.
