@@ -1,0 +1,7 @@
+policy,versus,threshold,crossers,detected_by_both,only_guided_detected,only_base_detected,lead_mean_months,lead_mean_ci95,lead_median_months,earlier_pct,extra_echoes_per_1000py,extra_echoes_ci95
+annual+kairos@0.02,annual,0.02,266,216,6,3,0.64,"[0.34, 1.0]",0.0,8.8,36.3,"[30.8, 43.04]"
+annual+kairos@0.05,annual,0.05,266,218,1,1,0.03,"[0.0, 0.09]",0.0,0.5,2.2,"[1.21, 3.22]"
+annual+kairos@0.1,annual,0.1,266,219,0,0,0.0,"[0.0, 0.0]",0.0,0.0,0.1,"[0.0, 0.3]"
+acc_aha+kairos@0.02,acc_aha,0.02,266,142,14,0,1.46,"[0.61, 2.73]",0.0,7.0,35.1,"[27.38, 44.17]"
+acc_aha+kairos@0.05,acc_aha,0.05,266,142,3,0,0.0,"[0.0, 0.0]",0.0,0.0,1.4,"[0.5, 2.4]"
+acc_aha+kairos@0.1,acc_aha,0.1,266,142,0,0,0.0,"[0.0, 0.0]",0.0,0.0,0.1,"[0.0, 0.29]"

@@ -1,0 +1,216 @@
+{
+  "scenario": "gradual_stenotic",
+  "patients_generated": 2390,
+  "seed": 20260916,
+  "generator_version": "2.2",
+  "model_step": "core",
+  "settings": {
+    "model_step": "core",
+    "thresholds": [
+      0.02,
+      0.05,
+      0.1
+    ],
+    "brought_forward_months": 6,
+    "min_gain_months": 1.2,
+    "base_schedules": [
+      "annual",
+      "acc_aha"
+    ],
+    "p_ar_location_reported": 0.9,
+    "calendar": {
+      "cut_years": 5,
+      "by_route": true
+    },
+    "primary_population": {
+      "gradient_rise_mmhg": 10,
+      "ar_increase_grades": 1
+    },
+    "decision_band": [
+      0.05,
+      0.15
+    ],
+    "decision_curve_from": 0.01,
+    "decision_band_step": 0.01,
+    "n_splits": 5,
+    "bootstrap": 200
+  },
+  "code_revision": {
+    "kind": "git",
+    "value": "0c60e24"
+  },
+  "evidence": "synthetic, illustrative, unvalidated",
+  "landmark_counts": {
+    "landmarks": 10701,
+    "patients": 2390,
+    "primary_population_landmarks": 10618,
+    "excluded_prevalent_early_hvd": 83
+  },
+  "calendar_cards": [
+    {
+      "comparator_id": "calendar_valve_age_v1",
+      "cut_years": 5.0,
+      "by_route": true,
+      "horizon_years": 1.0,
+      "cells": {
+        "SAVR|<5y": {
+          "rows": 3639,
+          "patients": 947,
+          "risk": 0.004948622237550906,
+          "fallback": false
+        },
+        "SAVR|>=5y": {
+          "rows": 1165,
+          "patients": 538,
+          "risk": 0.008394143149384761,
+          "fallback": false
+        },
+        "TAVR|<5y": {
+          "rows": 3059,
+          "patients": 965,
+          "risk": 0.0009808395057593889,
+          "fallback": false
+        },
+        "TAVR|>=5y": {
+          "rows": 674,
+          "patients": 318,
+          "risk": 0.0021724745466335693,
+          "fallback": false
+        }
+      },
+      "overall": 0.003606341702076
+    },
+    {
+      "comparator_id": "calendar_valve_age_v1",
+      "cut_years": 5.0,
+      "by_route": true,
+      "horizon_years": 1.0,
+      "cells": {
+        "SAVR|<5y": {
+          "rows": 3675,
+          "patients": 957,
+          "risk": 0.0038116088078380527,
+          "fallback": false
+        },
+        "SAVR|>=5y": {
+          "rows": 1190,
+          "patients": 552,
+          "risk": 0.004739961697812977,
+          "fallback": false
+        },
+        "TAVR|<5y": {
+          "rows": 3006,
+          "patients": 955,
+          "risk": 0.0016637363345852608,
+          "fallback": false
+        },
+        "TAVR|>=5y": {
+          "rows": 637,
+          "patients": 304,
+          "risk": 0.004475602635502542,
+          "fallback": false
+        }
+      },
+      "overall": 0.0031287766861672153
+    },
+    {
+      "comparator_id": "calendar_valve_age_v1",
+      "cut_years": 5.0,
+      "by_route": true,
+      "horizon_years": 1.0,
+      "cells": {
+        "SAVR|<5y": {
+          "rows": 3666,
+          "patients": 952,
+          "risk": 0.0030011153955817427,
+          "fallback": false
+        },
+        "SAVR|>=5y": {
+          "rows": 1189,
+          "patients": 551,
+          "risk": 0.008223987957586602,
+          "fallback": false
+        },
+        "TAVR|<5y": {
+          "rows": 3059,
+          "patients": 960,
+          "risk": 0.0009807126511932013,
+          "fallback": false
+        },
+        "TAVR|>=5y": {
+          "rows": 679,
+          "patients": 321,
+          "risk": 0.004164377339005864,
+          "fallback": false
+        }
+      },
+      "overall": 0.002843887675151584
+    },
+    {
+      "comparator_id": "calendar_valve_age_v1",
+      "cut_years": 5.0,
+      "by_route": true,
+      "horizon_years": 1.0,
+      "cells": {
+        "SAVR|<5y": {
+          "rows": 3594,
+          "patients": 936,
+          "risk": 0.00389663479265007,
+          "fallback": false
+        },
+        "SAVR|>=5y": {
+          "rows": 1150,
+          "patients": 538,
+          "risk": 0.009639339056126635,
+          "fallback": false
+        },
+        "TAVR|<5y": {
+          "rows": 3089,
+          "patients": 976,
+          "risk": 0.0016190203451453065,
+          "fallback": false
+        },
+        "TAVR|>=5y": {
+          "rows": 680,
+          "patients": 319,
+          "risk": 0.0041174186337582,
+          "fallback": false
+        }
+      },
+      "overall": 0.0036066094129007416
+    },
+    {
+      "comparator_id": "calendar_valve_age_v1",
+      "cut_years": 5.0,
+      "by_route": true,
+      "horizon_years": 1.0,
+      "cells": {
+        "SAVR|<5y": {
+          "rows": 3666,
+          "patients": 944,
+          "risk": 0.004093413899118923,
+          "fallback": false
+        },
+        "SAVR|>=5y": {
+          "rows": 1210,
+          "patients": 561,
+          "risk": 0.006948058505618106,
+          "fallback": false
+        },
+        "TAVR|<5y": {
+          "rows": 3099,
+          "patients": 968,
+          "risk": 0.0012911080117957714,
+          "fallback": false
+        },
+        "TAVR|>=5y": {
+          "rows": 678,
+          "patients": 322,
+          "risk": 0.0020482695756100693,
+          "fallback": false
+        }
+      },
+      "overall": 0.0031906812560722566
+    }
+  ]
+}

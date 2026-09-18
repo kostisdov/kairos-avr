@@ -12,3 +12,25 @@ output:
   root: artifacts/clinical_comparison
   scope: comparison_only
   row_level_private: true
+
+# KAIROS against current practice (kairos.evaluation.surveillance, scripts/evaluate_surveillance.py).
+# Every value is label: assumed unless a source is given.
+surveillance:
+  model_step: core                        # no anticoagulant block: post-suspicion prescriptions in the cohort
+                                          # were triggered by the original echo stream, not the replayed one
+  thresholds: [0.02, 0.05, 0.10]          # 12-month SVD risk that brings the next echo forward; 0.05 is the
+                                          # existing alert threshold (config/model.yaml messages)
+  brought_forward_months: 6
+  min_gain_months: 1.2                    # bring forward only if at least this much earlier than the next scheduled echo
+  base_schedules: [annual, acc_aha]       # annual = ESC/EACTS 2021 yearly; acc_aha = 2020 ACC/AHA (SAVR 5 and 10 years
+                                          # then yearly; TAVI yearly), config/model.yaml guideline_surveillance
+  p_ar_location_reported: 0.9             # matches the generator's echo-report default
+  calendar: {cut_years: 5, by_route: true}
+  primary_population:                     # protocol: exclude prevalent stage 1 or worse; haemodynamic proxy
+    gradient_rise_mmhg: 10
+    ar_increase_grades: 1
+  decision_band: [0.05, 0.15]             # protocol: alert threshold chosen from the 5-15% band by decision curve
+  decision_curve_from: 0.01               # thresholds below the band, reported for context
+  decision_band_step: 0.01
+  n_splits: 5
+  bootstrap: 200
