@@ -13,7 +13,7 @@ Timestamps UTC. No patient-level values or note text appear in this file.
   `Rscript` not found on PATH -> no R/IPDfromKM available, will implement Guyot 2012
   KM-reconstruction algorithm in pure Python per the task's documented fallback.
   Network connectivity to clinicaltrials.gov confirmed (HTTP 200).
-- **2026-09-16T10:13Z** — Created folder layout under `D:\Dyania`: `data\raw\{gudid,fda_ssed,
+- **2026-09-16T10:13Z** — Created folder layout under the project root: `data\raw\{gudid,fda_ssed,
   ctgov,openfda,papers}`, `data\reference\published_curves`, `data\derived\{private,
   aggregates}`, `config`, `src\kairos`, `tests\fixtures\synthetic_notes`, `docs`. Wrote
   `.gitignore` (`*.xlsx`, `data/raw/`, `data/derived/private/`, `tmp/`, `__pycache__/`,

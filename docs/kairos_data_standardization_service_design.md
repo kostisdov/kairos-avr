@@ -41,7 +41,7 @@ Current code constraints that the adapter must address:
 
 ## 3. Architecture
 
-The proposed [evidence-calibrated generator module](D:/Dyania/docs/kairos_calibrated_generator_design.md) consumes this service's normalized research snapshots and approved external evidence. It shares the batch-job runtime but owns its statistical calibration separately. Training scaffolds and generated defaults are excluded from its observed-data inputs.
+The proposed [evidence-calibrated generator module](kairos_calibrated_generator_design.md) consumes this service's normalized research snapshots and approved external evidence. It shares the batch-job runtime but owns its statistical calibration separately. Training scaffolds and generated defaults are excluded from its observed-data inputs.
 
 Implement one Python package with a FastAPI control service and a background worker, sharing the existing extraction and adjudication libraries. Avoid splitting terminology, lab conversion, and note extraction into separate deployed services initially.
 

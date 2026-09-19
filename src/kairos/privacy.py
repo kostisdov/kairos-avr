@@ -2,8 +2,8 @@
 
 Findings are raised for: the de-identified patient identifier pattern ``Patient_\\d{3}``;
 spreadsheet files; anything under ``data/raw``, ``data/derived/private`` or ``tmp``; the
-column names of the source spreadsheets appearing in data files; and long free-text
-cells in data files that read like clinical narrative. Documentation and source code are
+column names of the source spreadsheets appearing in data files or notebooks; and long
+free-text cells in data files or notebook outputs that read like clinical narrative. Documentation and source code are
 scanned for the identifier pattern only.
 """
 from __future__ import annotations
@@ -22,7 +22,7 @@ SOURCE_COLUMNS = ("Profile Key", "Authoring Provider", "Signed Status", "Service
 NARRATIVE_WORDS = re.compile(r"\b(patient|valve|gradient|echocardiogra|sternotomy|bioprosth)", re.I)
 FORBIDDEN_PARTS = {"raw", "private", "tmp"}
 FORBIDDEN_SUFFIXES = {".xlsx", ".xls", ".xlsm"}
-DATA_SUFFIXES = {".csv", ".json", ".jsonl", ".yaml", ".yml", ".txt", ".md", ".parquet"}
+DATA_SUFFIXES = {".csv", ".json", ".jsonl", ".yaml", ".yml", ".txt", ".md", ".parquet", ".ipynb"}
 SKIP_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_cache", ".ruff_cache",
              "artifacts", ".azure", "tmp", "build", "dist"}
 SKIP_DIR_PATHS = {("data", "raw"), ("data", "derived", "private")}
@@ -118,16 +118,36 @@ def scan_file(path: Path, root: Path, self_path: Path | None = None) -> list[Fin
         break
     if is_source_or_doc:
         return out
-    if path.suffix.lower() in {".csv", ".json", ".jsonl", ".yaml", ".yml"}:
+    if path.suffix.lower() == ".ipynb":
+        text = notebook_outputs(text)
+    # notebooks are checked like data files: a saved cell output is the likeliest place for a
+    # patient-level row or note text to slip into version control
+    if path.suffix.lower() in {".csv", ".json", ".jsonl", ".yaml", ".yml", ".ipynb"}:
         for col in SOURCE_COLUMNS:
             if col in text:
                 out.append(Finding(rels, "source-column", f"source spreadsheet column name {col!r}"))
-        if path.suffix.lower() in {".csv", ".json", ".jsonl"}:
+        if path.suffix.lower() in {".csv", ".json", ".jsonl", ".ipynb"}:
             for chunk in re.split(r"[\n,\"]", text):
                 if len(chunk) > MAX_CELL_CHARS and NARRATIVE_WORDS.search(chunk):
                     out.append(Finding(rels, "narrative", f"free-text cell of {len(chunk)} characters with clinical wording"))
                     break
     return out
+
+
+def notebook_outputs(raw: str) -> str:
+    """The saved outputs of a notebook, where data could leak; the code cells are source and are
+    checked for the identifier pattern only. An unparsable notebook is checked whole."""
+    try:
+        nb = json.loads(raw)
+    except ValueError:
+        return raw
+    parts = []
+    for cell in nb.get("cells", []):
+        for o in cell.get("outputs", []) or []:
+            for chunk in (o.get("text"), *(o.get("data") or {}).values()):
+                if chunk:
+                    parts.append("".join(chunk) if isinstance(chunk, list) else str(chunk))
+    return "\n".join(parts)
 
 
 def scan(root: Path, include_forbidden: bool = True, self_path: Path | None = None) -> list[Finding]:

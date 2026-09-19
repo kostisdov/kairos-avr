@@ -1,12 +1,12 @@
-# KAIROS on Azure: build design for the implementing agent
+# KAIROS on Azure: build design
 
-Design for developing and deploying the KAIROS research prototype in the owner's Azure subscription. Written for an implementing agent (Claude Opus) working in `D:\Dyania`. The scientific specification is `docs/kairos_proposal_revised.html`; this document turns it into components, interfaces, Azure resources, milestones and acceptance criteria. Where a choice depends on something only the owner knows, the assumption is stated and marked **ASSUMPTION**.
+Design for developing and deploying the KAIROS research prototype in the owner's Azure subscription. Written for whoever implements it, working in the repository root. The scientific specification is `docs/kairos_proposal_revised.html`; this document turns it into components, interfaces, Azure resources, milestones and acceptance criteria. Where a choice depends on something only the owner knows, the assumption is stated and marked **ASSUMPTION**.
 
-## 0. Ground rules for the implementing agent
+## 0. Ground rules for the implementation
 
 1. **Scope is a research prototype**, not a clinical product. Every user-facing surface labels model outputs as trained on synthetic scenarios, illustrative and unvalidated. No claim of clinical accuracy anywhere in code, UI or docs.
-2. **No patient-level data enters the repository.** The three de-identified spreadsheets in `D:\Dyania` are never committed, never placed in a public container, never logged. If a job needs them in Azure, they are staged in the private `raw` container of the storage account under the owner's identity and deleted when the job is done. Aggregates with small-cell suppression may be committed and uploaded.
-3. **Real de-identified notes may be sent to Azure OpenAI in Sweden Central.** The owner confirmed on 16 September 2026 that the organisers' terms permit this. The extraction service keeps the configuration flag `ALLOW_REAL_NOTES_TO_LLM`, now defaulting to `true`, read from configuration and never from a request, so the owner can switch it off in one place. Every request records whether its input was real or synthetic. Extracted fields and aggregates are stored; note text is not stored in the database and is not written to logs.
+2. **No patient-level data enters the repository.** The three de-identified spreadsheets at the repository root are never committed, never placed in a public container, never logged. If a job needs them in Azure, they are staged in the private `raw` container of the storage account under the owner's identity and deleted when the job is done. Aggregates with small-cell suppression may be committed and uploaded.
+3. **Real de-identified notes may be sent to Azure OpenAI in Sweden Central.** The owner confirmed on 16 September 2026 that the organisers' terms permit this. The extraction service keeps the configuration flag `ALLOW_REAL_NOTES_TO_LLM`, off by default in code and switched on in the deployment parameters, read from configuration and never from a request, so the owner can switch it off in one place. Every request records whether its input was real or synthetic. Extracted fields and aggregates are stored; note text is not stored in the database and is not written to logs.
 4. **Reuse the existing package.** `src/kairos/` already holds `passport.py` (rule-based extraction), `varc3.py` (staging), `km_reconstruct.py`, the build scripts and 39 passing tests. Extend it; do not rewrite it. Keep the tests green in CI.
 5. **Everything reproducible from one command.** `azd up` provisions and deploys; `make all` (or `invoke all`) rebuilds every artefact locally from the raw sources and the scenario config.
 6. **Do not change the scientific definitions.** Endpoints, time zero, the three predicted quantities, the leakage rules and the module structure are fixed by the specification. If an implementation detail forces a deviation, record it in `docs/deviations.md` and stop for review rather than silently adapting.
@@ -62,7 +62,7 @@ flowchart LR
 ## 2. Repository layout to produce
 
 ```
-D:\Dyania\
+kairos-avr\
   src\kairos\                 existing package, extended
     extraction\               rules.py (existing logic), llm.py (hosted model), schema.py
     adjudication\             varc3.py (existing), framework.py (candidate flags, uncertain class)
@@ -76,7 +76,7 @@ D:\Dyania\
     jobs\                     CLI entrypoints for scenarios, train, evaluate; Dockerfile
     demo\                     Streamlit app; Dockerfile
   infra\                      Bicep modules and main.bicep; azure.yaml for azd
-  .github\workflows\          ci.yml (tests, privacy scan, lint), deploy.yml (azd, OIDC)
+  .github\workflows\          ci.yml (tests, privacy scan, lint)
   config\                     scenarios.yaml (existing), model.yaml, app.yaml
   tests\                      existing plus service and schema tests
   docs\                       specification, this design, deviations.md, runbook.md
@@ -142,7 +142,7 @@ Rules encoded in the predict service: `p_svd_before_death + p_death_before_svd +
 
 ## 4. Models on Azure
 
-**Confirmed by the owner:** Azure OpenAI is provisioned in Sweden Central. Model availability still changes by month; the agent must query the account (`az cognitiveservices account list-models`) and record what it found in `docs/runbook.md` before creating deployments. The fallback column applies only if a first-choice model is missing from the region.
+**Confirmed by the owner:** Azure OpenAI is provisioned in Sweden Central. Model availability still changes by month; the implementer must query the account (`az cognitiveservices account list-models`) and record what it found in `docs/runbook.md` before creating deployments. The fallback column applies only if a first-choice model is missing from the region.
 
 | Role | First choice | Fallback | Why |
 |---|---|---|---|
@@ -181,7 +181,7 @@ Evaluation of extraction: on the synthetic fixtures, rules versus hosted model v
 | User-assigned managed identity | | Roles: Storage Blob Data Contributor, Key Vault Secrets User, Cognitive Services OpenAI User, AcrPull |
 | Azure OpenAI account and deployments | Standard | Deployments per §4; capacity small (tens of thousands of tokens per minute) |
 
-Deployment flow: `azd auth login`, `azd up` provisions infrastructure and deploys the four containers; `azd deploy` redeploys code; GitHub Actions `deploy.yml` uses OpenID Connect federated credentials, no stored secrets. `ci.yml` runs pytest, ruff, the privacy scan (`Patient_\d{3}` and note-text heuristics over committable folders) and a schema check, and fails the build on any hit.
+Deployment flow: `azd auth login`, `azd up` provisions infrastructure and deploys the four containers; `azd deploy` redeploys code. Deployment runs from a workstation; the repository carries no deploy workflow and no stored secrets. `ci.yml` runs pytest, ruff, the privacy scan (`Patient_\d{3}` and note-text heuristics over committable folders) and a schema check, and fails the build on any hit.
 
 Cost envelope for the event and a month after: Container Apps at scale-to-zero, a burstable Postgres, LRS storage and a few hundred thousand model tokens land in the low tens of dollars per month **ASSUMPTION**; the runbook records actual spend from Cost Management after the first week.
 
@@ -204,7 +204,7 @@ Cost envelope for the event and a month after: Container Apps at scale-to-zero, 
 | M5 Demo | One-patient story on synthetic dates; real extracted values shown only where the flag allows and labelled illustrative | Entra-authenticated; three messages visibly separated; guideline schedule displayed unchanged |
 | M6 Hardening | Runbook, deviations log, cost record, model availability record, privacy scan in CI | Owner can redeploy from scratch following the runbook |
 
-## 8. Things the implementing agent must not do
+## 8. Things the implementation must not do
 
 - Upload, copy or log the de-identified spreadsheets or any note text.
 - Call a hosted model with real note text while the flag is off, or read the flag from a request.
@@ -220,10 +220,10 @@ Cost envelope for the event and a month after: Container Apps at scale-to-zero, 
 Decided on 16 September 2026:
 
 1. Region: **Sweden Central**.
-2. **Azure OpenAI is provisioned** in the subscription; the agent queries the account for available models and records them.
-3. **Sending de-identified note text to Azure OpenAI is permitted** by the organisers' terms; the real-notes flag defaults to on and remains a single configuration switch.
+2. **Azure OpenAI is provisioned** in the subscription; the implementer queries the account for available models and records them.
+3. **Sending de-identified note text to Azure OpenAI is permitted** by the organisers' terms; the real-notes flag remains a single configuration switch, off by default in code and switched on explicitly in the deployment parameters.
 
 Still assumed, to be corrected by the owner if wrong:
 
-4. Demo login uses the owner's Entra ID tenant, with access for the owner and the two teammates listed in the submission masthead; the agent creates the app registration and leaves the user list as a parameter.
+4. Demo login uses the owner's Entra ID tenant, with access for the owner and the two teammates listed in the submission masthead; the deploy script creates the app registration and leaves the user list as a parameter.
 5. Cost ceiling: a Cost Management budget of 150 USD per month on the resource group with an alert at 80%; SKUs in §6 stay within it at scale-to-zero.

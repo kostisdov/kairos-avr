@@ -41,10 +41,10 @@ param deployPostgresAdministrators bool = true
 // Azure OpenAI (existing account, deployments added to it)
 // ---------------------------------------------------------------------------
 @description('Existing Azure AI Services / Azure OpenAI account name.')
-param openAiAccountName string = 'papageorgiouminas-0092-resource'
+param openAiAccountName string
 
 @description('Resource group of that account.')
-param openAiResourceGroup string = 'rg-papageorgiou.minas-2513'
+param openAiResourceGroup string
 
 @description('Azure OpenAI API version handed to the services.')
 param openAiApiVersion string = '2025-04-01-preview'
@@ -90,7 +90,7 @@ param jobsImage string = ''
 param demoAuthClientId string = ''
 
 @description('Single switch permitting de-identified real note text to be sent to Azure OpenAI.')
-param allowRealNotesToLlm bool = true
+param allowRealNotesToLlm bool = false
 
 @description('Monthly Cost Management budget on the resource group.')
 @minValue(1)

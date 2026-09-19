@@ -10,7 +10,7 @@
 
 env_vars:
   KAIROS_ENV: { default: "local", description: "local | dev" }
-  ALLOW_REAL_NOTES_TO_LLM: { default: "true", description: "Single switch permitting de-identified real note text to be sent to Azure OpenAI. Owner-confirmed 2026-09-16." }
+  ALLOW_REAL_NOTES_TO_LLM: { default: "false", description: "Single switch permitting de-identified real note text to be sent to Azure OpenAI. Off unless a deployment sets it; set it only where the data terms permit (the owner confirmed this for the Docathon deployment on 2026-09-16)." }
   KAIROS_STORAGE_ACCOUNT_URL: { default: "", description: "https://<account>.blob.core.windows.net ; empty = local filesystem under artifacts/" }
   KAIROS_LOCAL_ARTIFACTS_DIR: { default: "artifacts", description: "Local stand-in for Blob containers when KAIROS_STORAGE_ACCOUNT_URL is empty" }
   KAIROS_PG_HOST: { default: "", description: "PostgreSQL Flexible Server FQDN; empty = SQLite file under artifacts/kairos.db" }

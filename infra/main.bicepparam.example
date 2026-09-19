@@ -17,8 +17,8 @@ param postgresAdminObjectId = '00000000-0000-0000-0000-000000000000'
 param postgresAdminPrincipalName = 'owner_example.com#EXT#@yourtenant.onmicrosoft.com'
 
 // Existing Azure OpenAI account (never recreated); deployments are added to it.
-param openAiAccountName = 'papageorgiouminas-0092-resource'
-param openAiResourceGroup = 'rg-papageorgiou.minas-2513'
+param openAiAccountName = '<existing-openai-account>'
+param openAiResourceGroup = '<existing-openai-resource-group>'
 param openAiApiVersion = '2025-04-01-preview'
 param openAiExtractDeploymentName = 'kairos-extract'
 // GPT-5.1 is the newest GPT model offered as a regional Standard (pay-per-token) deployment in
@@ -37,8 +37,9 @@ param openAiAdjudicateReasoningEffort = 'medium'
 // No pre-screen deployment (rules-only pre-screen, the design fallback).
 param openAiPrescreenModelName = ''
 
-// Design rule 0.3: single configuration switch, owner-confirmed 2026-09-16.
-param allowRealNotesToLlm = true
+// Design rule 0.3: single configuration switch. Set true only where the data terms permit sending
+// de-identified note text to the hosted model.
+param allowRealNotesToLlm = false
 
 // Cost Management budget (design section 9, decision 5). The start date is pinned
 // so that re-deployments do not rewrite the budget every month.

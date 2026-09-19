@@ -149,7 +149,7 @@ Total downloaded: ~567 MB across 18 successful fetches. All PDFs remain in `data
 ## 5. Exact commands to re-run everything
 
 ```bash
-# from D:\Dyania, with the packages listed in the task brief installed
+# from the repository root, with the packages listed in the task brief installed
 # (pip install pdfplumber pymupdf requests pyyaml pyarrow pytest rapidfuzz)
 
 # Task 1 (downloads) -- see docs/data_build_log.md for the exact GUDID URL used

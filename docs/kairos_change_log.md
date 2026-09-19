@@ -1,6 +1,6 @@
 # KAIROS revision: change log
 
-Revision of the KAIROS proposal (original preserved as `kairos_proposal_original_v13.html`) into a submission for the Dyania Health Hackathon 2026. Applied 16 September 2026.
+Revision of the KAIROS proposal (original preserved as `archive/kairos_proposal_original_v13.html`) into a submission for the Dyania Health Hackathon 2026. Applied 16 September 2026.
 
 ## Scope and positioning
 

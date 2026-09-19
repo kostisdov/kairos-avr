@@ -10,13 +10,12 @@ secrets in files.
 |---|---|
 | `main.bicep` | Subscription-scoped entry point: resource group, then the three modules below; all outputs |
 | `identity.bicep` | User-assigned managed identity `id-kairos-<env>` (created first so its object id can feed the other modules) |
-| `openai.bicep` | Deployments `kairos-extract` and `kairos-adjudicate` (both `gpt-5.1`, regional Standard) on the existing account `papageorgiouminas-0092-resource` (resource group `rg-papageorgiou.minas-2513`), created one at a time, plus the *Cognitive Services OpenAI User* role for the identity. The account and its other deployments are never modified |
+| `openai.bicep` | Deployments `kairos-extract` and `kairos-adjudicate` (both `gpt-5.1`, regional Standard) on an existing account (parameters `openAiAccountName`, `openAiResourceGroup`), created one at a time, plus the *Cognitive Services OpenAI User* role for the identity. The account and its other deployments are never modified |
 | `resources.bicep` | Log Analytics, Application Insights, Container Registry, Storage, Key Vault, VNet, private DNS zone, PostgreSQL Flexible Server, Container Apps environment, three apps, three jobs, budget, role assignments |
 | `main.bicepparam` | Owner defaults for `dev` |
 | `outputs.local.json` | Written by the deploy scripts (git-ignored); the deployment outputs as JSON |
 | `../azure.yaml` | Azure Developer CLI manifest (optional path) |
 | `../scripts/deploy.ps1`, `../scripts/deploy.sh` | Reference deployment path with the plain Azure CLI |
-| `../.github/workflows/deploy.yml` | Same script from GitHub Actions with OIDC |
 
 ## Parameters (`main.bicep`)
 
@@ -29,8 +28,8 @@ secrets in files.
 | `deployerObjectId` | `''` (`main.bicepparam`: owner object id) | Gets *Storage Blob Data Contributor* on the storage account and *Key Vault Secrets Officer* on the vault; empty skips. The scripts override it with the signed-in user |
 | `postgresAdminObjectId` | `''` (`main.bicepparam`: owner object id) | Second PostgreSQL Entra administrator (type `User`); empty skips |
 | `postgresAdminPrincipalName` | `''` (`main.bicepparam`: owner UPN) | Principal name of that user |
-| `openAiAccountName` | `papageorgiouminas-0092-resource` | Existing Azure AI Services account |
-| `openAiResourceGroup` | `rg-papageorgiou.minas-2513` | Its resource group |
+| `openAiAccountName` | required | Existing Azure AI Services account |
+| `openAiResourceGroup` | required | Its resource group |
 | `openAiApiVersion` | `2025-04-01-preview` | `KAIROS_OPENAI_API_VERSION`; `v1` switches the services to the version-free `/openai/v1/` endpoint |
 | `openAiExtractDeploymentName` / `ModelName` / `ModelVersion` / `SkuName` / `Capacity` | `kairos-extract` / `gpt-5.1` / `2025-11-13` / `Standard` / `100` | Extraction deployment (regional, pay-per-token; capacity is throughput only) |
 | `openAiAdjudicateDeploymentName` / `ModelName` / `ModelVersion` / `SkuName` / `Capacity` | `kairos-adjudicate` / `gpt-5.1` / `2025-11-13` / `Standard` / `50` | Adjudication-assist deployment |
@@ -38,7 +37,7 @@ secrets in files.
 | `openAiPrescreenDeploymentName` / `ModelName` / `ModelVersion` / `SkuName` / `Capacity` | `kairos-prescreen` / `''` / `''` / `Standard` / `10` | Pre-screen deployment; an empty model name skips it and `KAIROS_OPENAI_PRESCREEN_DEPLOYMENT` stays empty (rules-only pre-screen) |
 | `extractImage`, `predictImage`, `demoImage`, `jobsImage` | `''` | Full image references (`<acr>.azurecr.io/kairos-<svc>:<tag>`); empty means the placeholder `mcr.microsoft.com/k8se/quickstart:latest` |
 | `demoAuthClientId` | `''` | Application id of `kairos-demo-<env>`; empty leaves the demo without built-in authentication |
-| `allowRealNotesToLlm` | `true` | Rendered as `ALLOW_REAL_NOTES_TO_LLM` (`true`/`false`); design rule 0.3 |
+| `allowRealNotesToLlm` | `false` | Rendered as `ALLOW_REAL_NOTES_TO_LLM` (`true`/`false`); design rule 0.3 |
 | `budgetAmount` | `150` | Monthly budget on the resource group |
 | `budgetStartDate` | `utcNow('yyyy-MM-01')` (`main.bicepparam`: `2026-09-01`) | First of a month; pinned in the parameter file so re-deployments do not rewrite the budget |
 | `gitSha` | `''` | `KAIROS_GIT_SHA`; the scripts pass the image tag |
@@ -135,62 +134,24 @@ scripts). azd does not create the Entra app registration or the Key Vault secret
 `scripts/deploy.ps1 -SkipInfra -SkipBuild` once for step 3 and the wiring pass. The
 scripts are the path validated here; azd was not installed on the build machine.
 
-## GitHub Actions (OIDC, no stored secrets)
+## Continuous integration
 
 `ci.yml` runs on every push and pull request: `ruff check .`, `pytest -q`,
 `python scripts/privacy_scan.py`, `python scripts/export_schemas.py --check`.
 
-`deploy.yml` runs on `workflow_dispatch` (input `environment`, default `dev`) and on
-pushes to `main` touching `src/**`, `services/**`, `config/**`, `infra/**` or
-`pyproject.toml`. It logs in with `azure/login@v2` using the repository **variables**
-`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` and runs
-`bash scripts/deploy.sh --env dev --skip-auth`. The CI identity has no Microsoft Graph
-permissions, so the app registration is created once by the owner from a workstation;
-CI reads the client id back from the deployed auth configuration.
-
-One-time set-up by the owner (the only place an app registration for CI is created):
-
-```bash
-SUB=004a53c3-3a7f-4d2f-b288-483265274096
-APP_ID=$(az ad app create --display-name kairos-github-deploy --query appId -o tsv)
-az ad sp create --id "$APP_ID"
-SP_ID=$(az ad sp show --id "$APP_ID" --query id -o tsv)
-
-# Federated credential for the main branch (repeat with subject
-# repo:<owner>/<repo>:environment:dev if a GitHub environment is used).
-az ad app federated-credential create --id "$APP_ID" --parameters '{
-  "name": "kairos-main",
-  "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:<owner>/<repo>:ref:refs/heads/main",
-  "audiences": ["api://AzureADTokenExchange"]
-}'
-
-# Roles: Contributor + User Access Administrator (role assignments in the template),
-# either on the subscription or on both resource groups, plus Cognitive Services
-# Contributor on the OpenAI resource group (model deployments).
-az role assignment create --assignee-object-id "$SP_ID" --assignee-principal-type ServicePrincipal \
-  --role Contributor --scope "/subscriptions/$SUB"
-az role assignment create --assignee-object-id "$SP_ID" --assignee-principal-type ServicePrincipal \
-  --role "User Access Administrator" --scope "/subscriptions/$SUB"
-az role assignment create --assignee-object-id "$SP_ID" --assignee-principal-type ServicePrincipal \
-  --role "Cognitive Services Contributor" \
-  --scope "/subscriptions/$SUB/resourceGroups/rg-papageorgiou.minas-2513"
-```
-
-Resource-group scoped alternative: `--scope /subscriptions/$SUB/resourceGroups/rg-kairos-dev`
-(create the group first) and the same two roles on `rg-papageorgiou.minas-2513`; the
-subscription-level deployment itself then needs at least Reader on the subscription.
-Then set the repository variables: `AZURE_CLIENT_ID=$APP_ID`,
-`AZURE_TENANT_ID=b38e34be-d9fb-457f-b1b8-d4d3b2ef89fb`, `AZURE_SUBSCRIPTION_ID=$SUB`.
+This repository has no deploy workflow. Deployment runs from a workstation with
+`scripts/deploy.ps1` or `scripts/deploy.sh`, signed in with the Azure CLI; the scripts use the
+signed-in account's subscription and user unless `AZURE_SUBSCRIPTION_ID` and
+`KAIROS_OWNER_OBJECT_ID` are set.
 
 ## Teardown
 
 ```bash
 az group delete --name rg-kairos-dev --yes --no-wait
-az cognitiveservices account deployment delete --name papageorgiouminas-0092-resource \
-  --resource-group rg-papageorgiou.minas-2513 --deployment-name kairos-extract
-az cognitiveservices account deployment delete --name papageorgiouminas-0092-resource \
-  --resource-group rg-papageorgiou.minas-2513 --deployment-name kairos-adjudicate
+az cognitiveservices account deployment delete --name <existing-openai-account> \
+  --resource-group <existing-openai-resource-group> --deployment-name kairos-extract
+az cognitiveservices account deployment delete --name <existing-openai-account> \
+  --resource-group <existing-openai-resource-group> --deployment-name kairos-adjudicate
 az ad app delete --id "$(az ad app list --display-name kairos-demo-dev --query '[0].appId' -o tsv)"
 az keyvault purge --name <kv-kairos-...> --location swedencentral   # optional: frees the soft-deleted name
 ```

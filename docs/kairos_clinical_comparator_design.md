@@ -2,7 +2,7 @@
 
 Date: 17 September 2026. Status: proposed design; no runtime, endpoint, fitted model or threshold changed by this document.
 
-Scope correction from the owner: `kairos_varc3_sol_implementation_design.md` is the controlling Sol brief and specifies an isolated comparator with read-only access to existing predictions and labels, plus the explicitly requested Patient Summary tab and Azure OpenAI/Foundry findings draft. The proposed engine, prediction API, bundle and action-threshold integrations below are deferred; use this document's evaluation methods only where compatible with that brief. Additive summary UI/settings are allowed. Do not change the current engine, relabel data, regenerate cohorts or retrain models for this task.
+Scope correction from the owner: `kairos_varc3_comparator_implementation_design.md` is the controlling implementation brief and specifies an isolated comparator with read-only access to existing predictions and labels, plus the explicitly requested Patient Summary tab and Azure OpenAI/Foundry findings draft. The proposed engine, prediction API, bundle and action-threshold integrations below are deferred; use this document's evaluation methods only where compatible with that brief. Additive summary UI/settings are allowed. Do not change the current engine, relabel data, regenerate cohorts or retrain models for this task.
 
 The requested change is justified. Keep the patient's reference echocardiogram and add the current-echo gradient rule to the evaluation ladder. Retain valve age and type as a minimal statistical comparator. Clinical incremental value must be evaluated against an explicit decision strategy, on the same eligible patients and prediction times, with twelve-month outcomes.
 

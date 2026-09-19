@@ -43,11 +43,11 @@
 [CmdletBinding()]
 param(
     [string]$EnvironmentName = 'dev',
-    [string]$SubscriptionId = '004a53c3-3a7f-4d2f-b288-483265274096',
+    [string]$SubscriptionId = $env:AZURE_SUBSCRIPTION_ID,   # default: the signed-in account
     [string]$Location = 'swedencentral',
     [string]$ResourceGroup = '',
     [string]$Tag = '',
-    [string]$OwnerObjectId = '31b7b1d3-2262-4032-8af2-6df67ea834b4',
+    [string]$OwnerObjectId = $env:KAIROS_OWNER_OBJECT_ID,   # default: the signed-in user
     [string[]]$AllowedUserObjectIds = @(),
     [switch]$SkipInfra,
     [switch]$SkipBuild,
@@ -569,6 +569,8 @@ try {
         throw 'python is required (privacy scan)'
     }
 
+    if (-not $SubscriptionId) { $SubscriptionId = (az account show --query id -o tsv) }
+    if (-not $OwnerObjectId) { $OwnerObjectId = (az ad signed-in-user show --query id -o tsv) }
     Write-Step "KAIROS deploy: env=$EnvironmentName resource-group=$ResourceGroup location=$Location subscription=$SubscriptionId"
 
     # 1. Subscription and providers

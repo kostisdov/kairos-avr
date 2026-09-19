@@ -27,26 +27,23 @@ the code.
   Container Registry (`az acr build`) and infrastructure is deployed with
   `az deployment sub create`; this is the reference path (design section 6a). `azure.yaml`
   is provided for `azd up` on a machine that has `azd`.
-- Subscription `004a53c3-3a7f-4d2f-b288-483265274096` ("Azure subscription 1"), tenant
-  `b38e34be-d9fb-457f-b1b8-d4d3b2ef89fb`, signed in as the owner (Owner role at
-  subscription scope). A second subscription in another tenant is visible; the scripts
-  set the subscription explicitly.
+- An Azure subscription in which the deploying user holds the Owner role. The scripts use
+  the signed-in account's subscription unless `AZURE_SUBSCRIPTION_ID` is set, and always set
+  it explicitly before deploying.
 - Region: Sweden Central for everything. Resource providers were registered on
   16 September 2026 (`Microsoft.App` was not registered before; Container Apps quota
   in the region: 15 managed environments).
 - Python environment: `.venv` created from `pyproject.toml`; `requirements.lock.txt`
   pins the resolved versions for the container images.
-- The repository directory is **not** a git repository. `model_version` therefore ends in
-  `+nogit` until the owner runs `git init`; the deploy script tags images with a UTC
-  timestamp in that case and with the short commit hash once git exists.
+- Images are tagged with the short commit hash; outside a git checkout `model_version`
+  ends in `+nogit` and the deploy script tags images with a UTC timestamp instead.
 
 ## 3. Model availability record (Azure OpenAI, Sweden Central, 16 September 2026)
 
-Account: `papageorgiouminas-0092-resource` (kind AIServices, resource group
-`rg-papageorgiou.minas-2513`, endpoint `https://papageorgiouminas-0092-resource.openai.azure.com/`,
-system-assigned identity, local auth enabled, public network access enabled). Existing
-deployments on the account (never touched by KAIROS): `metaklisi-gpt-5-nano`,
-`metaklisi-gpt-5-mini`, `mdm-reader-luna`, `mdm-reader-terra`.
+Account: `<existing-openai-account>` (kind AIServices, resource group
+`<existing-openai-resource-group>`, endpoint `https://<existing-openai-account>.openai.azure.com/`,
+system-assigned identity, local auth enabled, public network access enabled). Other
+deployments on the account are never touched by KAIROS.
 
 `az cognitiveservices account list-models` (filtered to the candidates of design section 4):
 
@@ -135,7 +132,7 @@ Confirm the model deployments answer before anything else (about 30 seconds; one
 synthetic structured-output call per deployment, signed in as the owner):
 
 ```powershell
-$env:KAIROS_OPENAI_ENDPOINT = "https://papageorgiouminas-0092-resource.openai.azure.com/"
+$env:KAIROS_OPENAI_ENDPOINT = "https://<existing-openai-account>.openai.azure.com/"
 $env:KAIROS_OPENAI_ADJUDICATE_DEPLOYMENT = "kairos-adjudicate"
 .venv\Scripts\python services\jobs\cli.py llm-check
 ```
@@ -165,8 +162,6 @@ Database tables are created on first use by every service; no separate migration
 (`--args migrate` exists for an explicit check).
 
 Redeploy code only: `.\scripts\deploy.ps1 -SkipAuth` (re-builds images and re-wires them).
-GitHub Actions (`.github/workflows/deploy.yml`) does the same through OIDC once the
-federated credential in `infra/README.md` exists; no secret is stored in GitHub.
 
 To switch off the real-notes path in one place:
 
@@ -291,88 +286,30 @@ idle, model tokens a few USD per hundred thousand tokens. The Cost Management bu
 
 ```bash
 az group delete -n rg-kairos-dev --yes
-az cognitiveservices account deployment delete -n papageorgiouminas-0092-resource -g rg-papageorgiou.minas-2513 --deployment-name kairos-extract
-az cognitiveservices account deployment delete -n papageorgiouminas-0092-resource -g rg-papageorgiou.minas-2513 --deployment-name kairos-adjudicate
+az cognitiveservices account deployment delete -n <existing-openai-account> -g <existing-openai-resource-group> --deployment-name kairos-extract
+az cognitiveservices account deployment delete -n <existing-openai-account> -g <existing-openai-resource-group> --deployment-name kairos-adjudicate
 az ad app delete --id "$(az ad app list --display-name kairos-demo-dev --query '[0].appId' -o tsv)"
 ```
 
 The role assignment of the deleted identity on the OpenAI account disappears with the
 identity. Nothing else outside the resource group is created.
 
-## 10. Local run summary
+## 10. Results
 
-Run of 16 September 2026, 23:14 to 23:38, after fixing the horizon-censoring bug in the IPCW
-metrics (rows capped at the 5-year horizon were treated as lost instead of event-free; now
-covered by a regression test). Cohorts of 900 requested patients, 3-fold patient-grouped
-cross-validation, 30 patient-level bootstrap resamples. Synthetic scenarios only:
-illustrative, unvalidated.
+Current results are regenerated from the code rather than copied here:
 
-### IPCW Brier at 5 years (lower is better), synthetic scenarios
+- `docs/ladder_summary.md`: the Cox model ladder on every synthetic scenario
+  (`python scripts/build_ladder_summary.py`, about 20 minutes).
+- `docs/comparison/validation_splits/`: the protocol's comparators, a temporal split and
+  leave-one-design-class-out (`python scripts/evaluate_validation_splits.py`).
+- `docs/comparison/surveillance/`: KAIROS against current practice
+  (`python scripts/evaluate_surveillance.py --scenario <name>`).
+- `docs/comparison/`: penalised Cox against gradient boosting (`services/jobs/cli.py evaluate`
+  with both families, then `compare`).
 
-| scenario | reference | core | core_plus_biomarkers | core_plus_anticoagulant | core_plus_both | core_without_serial_echo | n events (5 y) |
-|---|---|---|---|---|---|---|---|
-| anticoagulant_mechanism_confounding | 0.0621 | 0.0608 | 0.0625 | 0.0607 | 0.0623 | 0.0612 | 198 |
-| biomarker_information/absent | 0.0490 | 0.0478 | 0.0477 | 0.0475 | 0.0475 | 0.0501 | 159 |
-| biomarker_information/meaningful | 0.0524 | 0.0476 | 0.0480 | 0.0468 | 0.0472 | 0.0543 | 178 |
-| biomarker_information/unmeasured | 0.0642 | 0.0610 | 0.0630 | 0.0609 | 0.0630 | 0.0641 | 227 |
-| biomarker_information/weak | 0.0504 | 0.0485 | 0.0495 | 0.0487 | 0.0497 | 0.0516 | 168 |
-| gradual_stenotic | 0.0559 | 0.0472 | 0.0489 | 0.0469 | 0.0485 | 0.0575 | 198 |
-| high_competing_mortality | 0.0041 | 0.0042 | 0.0040 | 0.0042 | 0.0039 | 0.0046 | 3 |
-| irregular_surveillance | 0.0639 | 0.0602 | 0.0590 | 0.0596 | 0.0584 | 0.0621 | 189 |
-| regurgitant_abrupt | 0.0776 | 0.0782 | 0.0783 | 0.0785 | 0.0790 | 0.0792 | 267 |
-
-### Calibration and discrimination of core_plus_both at 5 years
-
-| scenario | observed | mean predicted | cal-in-large | cal slope | AUC (95% CI) | IPA |
-|---|---|---|---|---|---|---|
-| gradual_stenotic | 0.066 | 0.084 | -0.018 | 0.88 | 0.80 (0.77-0.83) | 0.212 |
-| regurgitant_abrupt | 0.093 | 0.108 | -0.015 | 0.67 | 0.74 (0.66-0.80) | 0.067 |
-| high_competing_mortality | 0.003 | 0.011 | -0.008 | -0.04 | 0.00 (0.00-0.00) | -0.316 |
-| irregular_surveillance | 0.079 | 0.108 | -0.029 | 0.93 | 0.79 (0.73-0.83) | 0.194 |
-| biomarker_information/meaningful | 0.062 | 0.069 | -0.007 | 0.89 | 0.79 (0.72-0.87) | 0.187 |
-| biomarker_information/weak | 0.056 | 0.072 | -0.016 | 0.68 | 0.73 (0.67-0.80) | 0.058 |
-| biomarker_information/absent | 0.054 | 0.072 | -0.018 | 0.76 | 0.67 (0.58-0.75) | 0.068 |
-| biomarker_information/unmeasured | 0.078 | 0.093 | -0.016 | 0.78 | 0.75 (0.67-0.80) | 0.120 |
-| anticoagulant_mechanism_confounding | 0.070 | 0.094 | -0.025 | 0.64 | 0.66 (0.57-0.75) | 0.037 |
-
-### Reading the results
-
-- **Serial echo adds information where the scenario contains it.** In the gradual stenotic
-  scenario the core model beats both the valve-age-and-type reference and the core model
-  without serial echo, with an AUC of 0.80 at 5 years.
-- **Abrupt regurgitant failure stays hard to predict, as designed.** The core model is no
-  better than the reference, and the calibration slope drops to 0.67.
-- **The high competing mortality scenario yields only 3 SVD events at 5 years.** Its SVD
-  metrics are not interpretable. The probability bookkeeping it is meant to exercise is
-  covered by the tests instead. Open point: the assumed death multiplier makes death about
-  twenty times as likely as SVD, not several times; lower it in `config/scenarios.yaml`.
-- **The biomarker modules show no incremental value, even in the meaningful variant.** The
-  renal and metabolic markers already sit in the core, as the specification places them.
-  Phosphate and Lp(a) carry the module-specific signal but are measured in only 30 to 40 %
-  of rows. Open point: raise their measured fraction or effect size in the meaningful variant.
-- **The anticoagulant block recovers opposite directions but adds no Brier gain.** In the
-  full-data fit, current VKA exposure raises the SVD hazard and any current anticoagulation
-  lowers the thrombosis hazard. These are predictive associations in synthetic data only.
-- **dp-ucMGP (17 September run, `evaluate --scenario anticoagulant_mechanism_confounding --steps core core_plus_anticoagulant`,
-  5 folds, 200 patient bootstraps, seed 20260916).** Substudy of about half the patients; offset model on measured rows only.
-
-  | variant | test of dp-ucMGP terms (patient-bootstrap Wald p) | VKA contrast without → with marker (shrinkage) | Δ Brier at 5 y, measured rows (95% CI) |
-  |---|---|---|---|
-  | marker_mediated | 0.009 | 0.455 → 0.169 (63 %) | −0.0011 (−0.0027 to 0.0001) |
-  | marker_noise | 0.007 | 0.658 → 0.690 (−5 %) | −0.0006 (−0.0017 to 0.0005) |
-
-  The VKA contrast falls toward zero only when the marker carries the signal, as specified. The incremental Brier
-  gain is not distinguishable from zero in either variant. The noise variant's significant test at this seed is driven by the
-  interaction term (−0.27, SE 0.095). On generator seeds 12, 13 and 14 the noise variant gave p = 0.31, 0.36 and 0.28, and the
-  mediated variant gave p = 0.0003, 0.013 and 0.0003, so we read it as a chance finding at one seed rather than a
-  systematic artefact. Synthetic scenarios only.
-- **Calibration is within the 3-point usefulness threshold in every interpretable
-  scenario.** The model over-predicts by 0.7 to 2.9 percentage points at 5 years; slopes
-  run from 0.64 to 0.93.
-- **Extraction on the synthetic fixtures:** the rules path was correct on route, model and
-  size for all 16 labelled fixtures. The hosted-model comparison needs the Azure
-  deployment and has not been run.
-
+An earlier summary in this section came from a quick run of 16 September 2026 (cohorts of 900
+patients, three folds, 30 bootstrap replicates) and has been removed; its numbers do not reproduce
+at full size.
 
 ## 11. Publish and rollback (run-scoped model store)
 

@@ -32,6 +32,23 @@ def test_privacy_scan_flags_identifiers_spreadsheets_and_private_dirs(tmp_path: 
     assert privacy_main(["--root", str(tmp_path / "data" / "reference")]) == 1
 
 
+def test_privacy_scan_reads_notebook_outputs(tmp_path: Path):
+    import json
+    nb_dir = tmp_path / "notebooks"
+    nb_dir.mkdir()
+
+    def notebook(text: str) -> str:
+        return json.dumps({"cells": [{"cell_type": "code", "source": ["print(rows)"],
+                                      "outputs": [{"output_type": "stream", "text": [text]}]}]})
+
+    (nb_dir / "clean.ipynb").write_text(notebook("patients : 2390\n"), encoding="utf-8")
+    assert scan(tmp_path) == []
+    (nb_dir / "leak.ipynb").write_text(notebook("Profile Key  Service Date\n" + "Patient" + "_" + "012 2019\n"),
+                                       encoding="utf-8")
+    rules = {f.rule for f in scan(tmp_path)}
+    assert {"patient-id", "source-column"} <= rules
+
+
 def test_repository_round_trip():
     repo = get_repository(Settings(KAIROS_SQLITE_PATH=":memory:"))
     p = Passport(source=PassportSource(note_ref="n", note_type="operative", date="2016-01-01"), route="TAVR", canonical_model="SAPIEN 3")

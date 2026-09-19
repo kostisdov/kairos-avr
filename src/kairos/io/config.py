@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="", extra="ignore", case_sensitive=False)
 
     kairos_env: str = Field("local", alias="KAIROS_ENV")
-    allow_real_notes_to_llm: bool = Field(True, alias="ALLOW_REAL_NOTES_TO_LLM")
+    allow_real_notes_to_llm: bool = Field(False, alias="ALLOW_REAL_NOTES_TO_LLM")   # fails closed; a deployment opts in
 
     storage_account_url: str = Field("", alias="KAIROS_STORAGE_ACCOUNT_URL")
     local_artifacts_dir: str = Field("artifacts", alias="KAIROS_LOCAL_ARTIFACTS_DIR")

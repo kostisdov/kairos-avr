@@ -2,7 +2,7 @@
 
 Date: 17 September 2026. Status: **v1 implemented 17 September 2026** (`src/kairos/calibration/`, generator 2.1 registry and calibrated mode, jobs `profile-observed`, `calibrate-generator`, `validate-calibration`, `generate-calibrated`, `validate-cohort`, `train-calibrated`, `evaluate-calibrated`; deviations 31-38). No normalized snapshot exists yet and no external target has been reviewed, so real calibrations report `insufficient_evidence`; the machinery is exercised by synthetic parameter recovery. No curve reconstruction was run.
 
-Related designs: [standardization service](D:/Dyania/docs/kairos_data_standardization_service_design.md), especially its model adapter and optional training defaults; [configuration](D:/Dyania/config/generator_calibration.yaml).
+Related designs: [standardization service](kairos_data_standardization_service_design.md), especially its model adapter and optional training defaults; [configuration](../config/generator_calibration.yaml).
 
 ## 1. Decision and scope
 

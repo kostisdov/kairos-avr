@@ -33,11 +33,11 @@ cd "${REPO_ROOT}"
 # Defaults and constants
 # ---------------------------------------------------------------------------
 ENV_NAME="dev"
-SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID:-004a53c3-3a7f-4d2f-b288-483265274096}"
+SUBSCRIPTION_ID="${AZURE_SUBSCRIPTION_ID:-}"          # default: the signed-in account
 LOCATION="swedencentral"
 RESOURCE_GROUP=""
 IMAGE_TAG=""
-OWNER_OBJECT_ID="31b7b1d3-2262-4032-8af2-6df67ea834b4"
+OWNER_OBJECT_ID="${KAIROS_OWNER_OBJECT_ID:-}"        # default: the signed-in user
 ALLOWED_USER_OBJECT_IDS=""
 SKIP_INFRA=0
 SKIP_BUILD=0
@@ -426,6 +426,8 @@ build_images() {  # build_images <acr name>
 # ---------------------------------------------------------------------------
 # Main sequence
 # ---------------------------------------------------------------------------
+[[ -n "${SUBSCRIPTION_ID}" ]] || SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+[[ -n "${OWNER_OBJECT_ID}" ]] || OWNER_OBJECT_ID="$(az ad signed-in-user show --query id -o tsv)"
 log "KAIROS deploy: env=${ENV_NAME} resource-group=${RESOURCE_GROUP} location=${LOCATION} subscription=${SUBSCRIPTION_ID}"
 
 # 1. Subscription and providers
