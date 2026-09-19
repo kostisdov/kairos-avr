@@ -1,0 +1,12 @@
+held_out_class,event_patients,status,comparator,n,n_events,observed,mean_predicted,brier,ipa,auc,cal_slope_logit
+balloon-expandable intra-annular TAVR,9,skipped: fewer than 10 event patients,,,,,,,,,
+externally mounted pericardial,32,ok,R1_valve_age_and_type,1382.0,118.0,0.1124,0.0479,0.1037,-0.0392,0.7378,2.1927
+externally mounted pericardial,32,ok,KAIROS_core,1382.0,118.0,0.1124,0.0699,0.0921,0.0763,0.7316,1.0294
+mechanically expanded intra-annular TAVR,0,skipped: fewer than 10 event patients,,,,,,,,,
+self-expanding intra-annular TAVR,1,skipped: fewer than 10 event patients,,,,,,,,,
+self-expanding supra-annular TAVR,6,skipped: fewer than 10 event patients,,,,,,,,,
+"stented bovine pericardial, internally mounted",25,ok,R1_valve_age_and_type,3370.0,92.0,0.0378,0.0943,0.0383,-0.051,0.7437,2.2673
+"stented bovine pericardial, internally mounted",25,ok,KAIROS_core,3370.0,92.0,0.0378,0.0887,0.036,0.0112,0.7349,1.1507
+stented porcine,8,skipped: fewer than 10 event patients,,,,,,,,,
+stentless,2,skipped: fewer than 10 event patients,,,,,,,,,
+sutureless or rapid-deployment,6,skipped: fewer than 10 event patients,,,,,,,,,

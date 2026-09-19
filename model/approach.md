@@ -31,7 +31,9 @@ conditional on being alive with the index valve and free of adjudicated SVD at t
 Thrombosis-related dysfunction is modelled as its own outcome in a secondary analysis. Its
 predictors differ from those of structural deterioration — route, intra-annular balloon-expandable
 design, valve-in-valve, absence of anticoagulation — and so does its management. A resolved episode
-returns the patient to the SVD risk set with the episode recorded as a covariate.
+returns the patient to the SVD risk set (Implemented: a thrombosis-attributed finding is never an SVD
+event). Recording the episode as a time-varying covariate is Planned; in the prototype only the
+anticoagulant module's post-suspicion indicator carries it.
 
 ### Why this family and not another
 
@@ -116,6 +118,15 @@ discharge.
 
 Lipid-lowering treatment is recorded as **exposure**, not as protection.
 
+**In the prototype — Implemented** in the core: age at implant, sex, body surface area and body mass
+index, route, design class, model and generation, label size, indexed effective orifice area and
+mismatch grade, tissue treatment, the reference study's gradient, DVI, area, regurgitation, LVEF and
+stroke volume index, diabetes, eGFR at time zero, dialysis, atrial fibrillation, bicuspid native valve
+and implant year. Diabetes duration and antithrombotic class enter through the renal-metabolic and
+anticoagulant modules (section 4). **Planned:** smoking status, paravalvular leak (recorded by the
+generator since version 2.2, not yet a model feature) and residual regurgitation at discharge after
+transcatheter implantation.
+
 ### Longitudinal, at each landmark
 
 **Echo.** Current mean gradient; change from the reference study; most recent change and the interval
@@ -124,17 +135,26 @@ dimensionless index and area; regurgitation grade and its change; stroke volume 
 that flow-dependent gradients are read in context; time since the last echo; and the overdue
 indicator.
 
+Because landmarks are placed on echo dates, the time since the last echo is zero and the overdue
+indicator is off at every landmark in the prototype; both are kept for live use, where a prediction
+can be requested between studies. Removing them, and the visit-history terms, leaves the model's
+performance unchanged (`docs/comparison/validation_splits/`).
+
 **Laboratory trajectories.** eGFR slope and any dialysis start date; HbA1c trajectory; NT-proBNP
-trend. These are core features rather than an optional module: renal function, diabetes and the
-ventricle's response to load are among the few predictors with bioprosthesis-specific evidence, and
-their movement over time carries more than any single value.
+trend. Renal function, diabetes and the ventricle's response to load are among the few predictors
+with bioprosthesis-specific evidence, and their movement over time carries more than any single
+value. **In the prototype** they enter as the renal-metabolic and cardiac modules on top of the core
+(section 4), so that what they add is measured rather than assumed; making them core is planned once
+that measurement shows a gain.
 
 Only measurements dated on or before the landmark are used.
 
 ### Missing data
 
-Multiple imputation fitted within training data, for covariates measured in most patients. Markers
-essentially absent in a cohort are **not imputed into existence**: the module that needs them is
+Multiple imputation fitted within training data, for covariates measured in most patients, is
+**Planned**. **In the prototype — Implemented:** median imputation with a missing-value indicator,
+learned on training rows only and applied unchanged to held-out rows. Markers essentially absent in a
+cohort are **not imputed into existence**: the module that needs them is
 switched off and the core model reports without it. Echo values older than 18 months are flagged as
 stale, never carried forward silently.
 
@@ -217,12 +237,21 @@ appointment interval.
 As in the protocol: develop and tune with patient-level resampling, freeze, evaluate in a later
 implant cohort and an untouched external centre, then transportability checks.
 
-**In the prototype — Demonstrated.** Patient-grouped cross-validation on synthetic scenarios, a
-temporal split, and a leave-one-class-out run to exercise the code paths. Every metric is printed
-with bootstrap intervals and every result is labelled synthetic.
+**In the prototype — Demonstrated** (`docs/comparison/validation_splits/`, synthetic):
 
-The comparator ladder, the metric priority order and the surveillance-blinded variant are specified
-in `protocol/study_protocol.md` §5 and are not repeated here.
+- Patient-grouped five-fold cross-validation on every scenario (`docs/ladder_summary.md`).
+- The protocol's comparator ladder, R1 to R4. KAIROS beats R4, the current gradient and its change,
+  with a 5-year Brier difference of -0.0018 (95% CI -0.0030 to -0.0007) on the gradual stenotic
+  scenario, which is the protocol's incremental-value test.
+- The surveillance-blinded variant, and a stricter one without the visit-history terms: the
+  advantage over R4 is unchanged, so it does not come from how often patients are imaged.
+- A temporal split, fitted on implants up to 2016 and scored on later ones (AUC 0.78 against 0.73
+  for R4).
+- Leave one design class out, for the two classes with enough events: KAIROS stays better than the
+  class's average risk where valve age and type falls below it.
+
+Every result is labelled synthetic. The metric priority order is specified in
+`protocol/study_protocol.md` §5.
 
 ---
 

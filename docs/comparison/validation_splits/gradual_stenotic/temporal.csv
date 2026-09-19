@@ -1,0 +1,4 @@
+comparator,n,n_events,observed,mean_predicted,brier,ipa,auc,cal_slope_logit
+R1_valve_age_and_type,4814,142,0.0409,0.0436,0.038,0.0308,0.7446,1.3283
+R4_current_gradient_and_change,4814,142,0.0409,0.046,0.0366,0.0678,0.7319,1.1583
+KAIROS_core,4814,142,0.0409,0.0546,0.0337,0.1423,0.7806,1.1842

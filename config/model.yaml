@@ -59,6 +59,11 @@ feature_blocks:
   core_reference_echo: [ref_gradient, ref_eoa, ref_dvi, ref_ar, ref_lvef, ref_svi]
   core_serial_echo: [current_gradient, delta_gradient, last_change_gradient, last_change_interval_years, gradient_slope, current_eoa, delta_eoa, current_dvi, delta_dvi, current_ar, delta_ar, current_lvef, current_svi, time_since_last_echo_years, overdue_flag, n_echoes, stale_echo]
   core_time: [valve_age_years, t_lm]
+  # protocol comparators (study_protocol.md section 5) and the surveillance-blinded variant
+  r2_pre_implant: [age_at_implant, sex, bsa, bmi, route, design_class, canonical_model, generation, size_mm, implant_year, diabetes, egfr0, dialysis, af, bicuspid, tissue_treatment]
+  r4_single_marker: [current_gradient, delta_gradient]
+  core_serial_echo_blinded: [current_gradient, delta_gradient, last_change_gradient, last_change_interval_years, gradient_slope, current_eoa, delta_eoa, current_dvi, delta_dvi, current_ar, delta_ar, current_lvef, current_svi, n_echoes, stale_echo]
+  core_serial_echo_visit_blinded: [current_gradient, delta_gradient, last_change_gradient, gradient_slope, current_eoa, delta_eoa, current_dvi, delta_dvi, current_ar, delta_ar, current_lvef, current_svi]
   biomarker_renal_metabolic: [egfr, egfr_slope, dialysis_current, hba1c, diabetes_duration, ldl, lipid_lowering]
   biomarker_mineral: [phosphate, calcium_corrected, pth, alp]
   biomarker_lipid: [lpa]
@@ -124,6 +129,22 @@ ladder:
   - {name: core_plus_anticoagulant, blocks: [core_static, core_reference_echo, core_serial_echo, core_time, anticoagulant]}
   - {name: core_plus_both, blocks: [core_static, core_reference_echo, core_serial_echo, core_time, biomarker_renal_metabolic, biomarker_mineral, biomarker_lipid, biomarker_cardiac, biomarker_inflammatory, anticoagulant]}
   - {name: core_without_serial_echo, blocks: [core_static, core_reference_echo, core_time]}
+
+# The protocol's comparator ladder (study_protocol.md section 5), evaluated beside KAIROS by
+# scripts/evaluate_validation_splits.py. R0 is the null (Aalen-Johansen) inside every scaled Brier score;
+# R5, the guideline rule, is compared as a surveillance policy (docs/comparison/surveillance/).
+protocol_comparators:
+  - {name: R1_valve_age_and_type, blocks: [reference]}
+  - {name: R2_pre_implant, blocks: [r2_pre_implant, core_time]}
+  - {name: R3_reference_echo_once, blocks: [r2_pre_implant, core_reference_echo, core_time]}
+  - {name: R4_current_gradient_and_change, blocks: [r4_single_marker, core_time]}
+  - {name: KAIROS_core, blocks: [core_static, core_reference_echo, core_serial_echo, core_time]}
+  # protocol: time since the last echo and the overdue indicator removed. If KAIROS still beats R4
+  # without them, the advantage is biological; if not, it is surveillance triage.
+  - {name: KAIROS_surveillance_blinded, blocks: [core_static, core_reference_echo, core_serial_echo_blinded, core_time]}
+  # stricter: also without the number of echoes so far and the interval since the previous one, the two
+  # remaining terms that carry how often the patient has been imaged
+  - {name: KAIROS_visit_history_blinded, blocks: [core_static, core_reference_echo, core_serial_echo_visit_blinded, core_time]}
 
 deployed_model:
   scenario: gradual_stenotic            # the bundle the predict service serves

@@ -1,0 +1,8 @@
+comparator,n,n_events,observed,mean_predicted,brier,ipa,auc,cal_slope_logit
+R1_valve_age_and_type,10701,329,0.0412,0.0439,0.0386,0.0237,0.6909,1.0029
+R2_pre_implant,10701,329,0.0412,0.0449,0.0373,0.0555,0.6816,1.0593
+R3_reference_echo_once,10701,329,0.0412,0.045,0.0374,0.0526,0.675,1.0111
+R4_current_gradient_and_change,10701,329,0.0412,0.0468,0.0372,0.0596,0.7131,1.0501
+KAIROS_core,10701,329,0.0412,0.0484,0.0354,0.1051,0.7328,1.038
+KAIROS_surveillance_blinded,10701,329,0.0412,0.0484,0.0354,0.1051,0.7328,1.038
+KAIROS_visit_history_blinded,10701,329,0.0412,0.0483,0.0354,0.1052,0.7328,1.0403

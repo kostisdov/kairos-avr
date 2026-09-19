@@ -1,0 +1,42 @@
+{
+  "KAIROS_core vs R4_current_gradient_and_change": {
+    "difference": -0.001798,
+    "ci95": [
+      -0.002977,
+      -0.00068
+    ],
+    "patients": 2390
+  },
+  "KAIROS_surveillance_blinded vs R4_current_gradient_and_change": {
+    "difference": -0.001798,
+    "ci95": [
+      -0.002977,
+      -0.00068
+    ],
+    "patients": 2390
+  },
+  "KAIROS_visit_history_blinded vs R4_current_gradient_and_change": {
+    "difference": -0.001804,
+    "ci95": [
+      -0.002976,
+      -0.000688
+    ],
+    "patients": 2390
+  },
+  "R3_reference_echo_once vs R4_current_gradient_and_change": {
+    "difference": 0.000276,
+    "ci95": [
+      -0.00075,
+      0.001421
+    ],
+    "patients": 2390
+  },
+  "KAIROS_core vs R1_valve_age_and_type": {
+    "difference": -0.003215,
+    "ci95": [
+      -0.004526,
+      -0.001842
+    ],
+    "patients": 2390
+  }
+}
