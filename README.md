@@ -1,4 +1,7 @@
-<img src="logo/kairos-lockup-descriptor-bright.svg" alt="KAIROS" width="420">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="logo/kairos-lockup-descriptor-dark.svg">
+  <img src="logo/kairos-lockup-descriptor-bright.svg" alt="KAIROS" width="420">
+</picture>
 
 # Dynamic prediction of bioprosthetic aortic valve deterioration
 
