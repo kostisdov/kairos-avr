@@ -19,5 +19,8 @@ families are indistinguishable on this scenario and the challenger did not earn 
 remaining criteria, on one- and three-year Brier and on absolute observed-minus-predicted, all
 passed, so boosting is not *worse* beyond tolerance either; it simply adds nothing.
 
+Reproduced unchanged on 19 September 2026 with the current code (`services/jobs/cli.py evaluate` then
+`compare`, `KAIROS_BOOSTING_GRID=budget`).
+
 The result is published rather than dropped. A challenger that fails its own promotion rule is
 evidence that the rule was applied, not evidence of a weak submission.

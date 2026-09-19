@@ -90,18 +90,22 @@ place; the model never recommends reintervention and never lengthens an interval
 
 ## Results
 
-Three comparisons, all on explicitly synthetic scenarios and all reported including where the model
+Four comparisons, all on explicitly synthetic scenarios and all reported including where the model
 loses. Full records in [`docs/comparison/`](docs/comparison/).
 
 | Comparison | Result |
 |---|---|
-| Against valve age and type, the weak reference | Gradual stenotic, SVD at 5 years. The core model's Brier is **0.0472 against 0.0559** for valve age and type. The full model (core plus the biomarker and anticoagulant modules) has Brier 0.0485, area under the curve 0.80 (0.77 to 0.83) pooled over landmarks, and calibration slope 0.88. Removing serial echocardiography pushes the core model's Brier to 0.0575, worse than the reference, so **updating is where the value sits** |
+| Against valve age and type, the weak reference | Gradual stenotic, SVD at 5 years, five-fold cross-validation at full size ([`docs/ladder_summary.md`](docs/ladder_summary.md)). The core model's Brier is **0.0354 against 0.0386** for valve age and type. The full model (core plus the biomarker and anticoagulant modules) has Brier 0.0350, area under the curve 0.74 (0.69 to 0.80) pooled over landmarks, and calibration slope 0.98. Without serial echocardiography the core model scores 0.0376, so **updating accounts for about two thirds of the gain** |
+| Against the current gradient and its change (R4), the protocol's statistical comparator | Gradual stenotic, SVD at 5 years, five-fold cross-validation. KAIROS improves Brier by **0.0018 (95% CI 0.0007 to 0.0030)** and IPA from 0.060 to 0.105. The advantage is unchanged when the surveillance and visit-history terms are removed, so it does not come from how often patients are imaged. It holds on a temporal split (fitted on implants to 2016, scored on 2017 to 2020: AUC **0.78 against 0.73**) ([`docs/comparison/validation_splits/`](docs/comparison/validation_splits/)) |
 | Against gradient boosting, the pre-specified challenger | **Retain the Cox model** at all three ladder steps. Mean Brier difference +5.6e-04, interval [-4.0e-06, +1.1e-03], spanning zero, on 10,701 rows from 2,390 patients. The challenger failed its own promotion rule and we publish that |
 | Against current practice, the VARC-3 rule on a guideline schedule | Compared over time, as surveillance policies ([`docs/comparison/surveillance/`](docs/comparison/surveillance/)). With KAIROS allowed to bring the next echo forward at a 12-month SVD risk of 2%, deterioration is caught **1.8 months earlier on average (95% CI 1.2 to 2.6)** on a yearly schedule for **+2% echoes**. On the ACC/AHA calendar, which images surgical valves at 5 and 10 years, the share of deteriorating surgical valves caught before follow-up ends rises from **30% to 43%**. At the protocol's 5 to 15% band the policy barely changes, because baseline 12-month risk is about 0.3% |
 
-Where the model loses, stated first: on abrupt regurgitant failure the reference model beats it,
-because there is no preceding gradient signal to read. The high-competing-mortality scenario has
-three events and is uninterpretable; it is published as such rather than dropped.
+Where the model is weakest, stated first: on abrupt regurgitant failure it barely improves on valve
+age and type (Brier 0.0584 against 0.0601, area under the curve 0.65), because there is no preceding
+gradient signal to read. The high-competing-mortality scenario has too few SVD events for the support
+gates, so its metrics are withheld rather than reported; it is published as such rather than dropped.
+The biomarker modules add almost nothing even where they carry signal by construction (0.0409 to
+0.0407 in the meaningful-biomarker scenario).
 
 ## What we do not claim
 
