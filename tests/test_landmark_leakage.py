@@ -79,3 +79,13 @@ def test_exposure_status_past_and_post_suspicion():
     eps = [ExposureRecord("FXa", "suspected_valve_thrombosis", date(2017, 5, 1), date(2017, 11, 1), True)]
     f = exposure_features(eps, date(2018, 1, 1))
     assert f["ac_current_status"] == "past" and f["ac_post_suspicion"] is True and f["ac_class_current"] == "none"
+
+
+def test_thrombosis_after_follow_up_ends_is_not_an_event():
+    from datetime import date
+
+    from kairos.modelling.landmark import _outcome
+    out = _outcome(date(2020, 1, 1), None, None, None, date(2021, 1, 1), 5.0, thromb_date=date(2022, 1, 1))
+    assert out["event_thromb"] == 0 and abs(out["time_thromb"] - 366 / 365.25) < 1e-9
+    seen = _outcome(date(2020, 1, 1), None, None, None, date(2021, 1, 1), 5.0, thromb_date=date(2020, 7, 1))
+    assert seen["event_thromb"] == 1

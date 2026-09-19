@@ -231,7 +231,7 @@ def _outcome(landmark: date, svd_date, death_date, repl_date, end_date, horizon_
     out = {"time": t, "event": code}
     # secondary outcome: first thrombosis episode after the landmark (thrombosis-related dysfunction)
     thromb_end = thromb_end_date or end_date
-    if thromb_date is not None and landmark < thromb_date:
+    if thromb_date is not None and landmark < thromb_date <= thromb_end:   # an episode after follow-up ends is not observed
         tt = _years(thromb_date, landmark)
         out["time_thromb"], out["event_thromb"] = (min(tt, horizon_years), 1 if tt <= horizon_years else 0)
     else:

@@ -40,6 +40,13 @@ def _grid(cfg: dict, mode: str) -> dict:
     return gb["quick_grid"] if mode == "quick" else gb["grid"]
 
 
+def _nanmean(values) -> float:
+    """Mean of the finite values; NaN (without a warning) when there are none."""
+    v = np.asarray(values, dtype=float)
+    v = v[np.isfinite(v)]
+    return float(v.mean()) if len(v) else float("nan")
+
+
 def _brier(pred, time_, event, state, tau, G):
     w = ipcw_weights(time_, event, tau, G).w
     y, _ = outcome(time_, event, state, tau)
@@ -105,9 +112,9 @@ def tune_boosting(lm_train: pd.DataFrame, blocks: list[str], cfg: dict, seed: in
                 scores[key] = {"valid": False, "reason": "no inner fold could be scored", "skipped_inner_folds": skipped}
                 continue
             by = {k: float(np.mean([c[k][0] for c in cells])) for k in cells[0]}
-            ipa = {k: float(np.nanmean([c[k][1] for c in cells])) for k in cells[0]}
+            ipa = {k: _nanmean([c[k][1] for c in cells]) for k in cells[0]}
             scores[key] = {"valid": True, "reason": "", "mean_brier": float(np.mean(list(by.values()))), "brier_by": by,
-                           "mean_ipa_information_only": float(np.nanmean(list(ipa.values()))),
+                           "mean_ipa_information_only": _nanmean(list(ipa.values())),
                            "scored_inner_folds": len(cells), "skipped_inner_folds": skipped}
     valid = {k: v for k, v in scores.items() if v["valid"]}
     table = [{"max_depth": k[0], "n_estimators": k[1], "learning_rate": k[2], **v} for k, v in sorted(scores.items())]
