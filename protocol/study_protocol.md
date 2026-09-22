@@ -170,6 +170,11 @@ does. The ladder is therefore:
 | **R5** | **The guideline rule**: VARC-3 stage criteria applied to the current echo, given a calibrated risk by a one-covariate landmark model | | **Primary, clinical utility, decision curve** |
 | R6 | A published external score | — | None exists; reporting standards require this to be stated |
 
+> **Clarification.** R1 to R4 are not alternative methods: each is the same penalised cause-specific
+> Cox model on the same landmark rows, restricted to the information in its row of the table, so the
+> ladder measures what information adds and not what the modelling adds. R5 is a clinical rule and is
+> compared as a surveillance policy (deviation 49).
+
 KAIROS against R4 carries the incremental-value claim. KAIROS against R5 carries the net-benefit
 claim, and R5 is the comparator that answers what the model adds to current practice. A matched
 alert-rate table is reported: if the rule flags a given percentage of landmarks, the same top

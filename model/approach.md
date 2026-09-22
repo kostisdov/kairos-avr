@@ -237,6 +237,12 @@ appointment interval.
 As in the protocol: develop and tune with patient-level resampling, freeze, evaluate in a later
 implant cohort and an untouched external centre, then transportability checks.
 
+Every comparator in the ladder is the same penalised cause-specific Cox model on the same landmark
+rows, restricted to a smaller feature set (`src/kairos/modelling/reference_model.py`). The ladder
+therefore isolates the value of information; the value of the modelling itself — landmarking,
+competing risks, the patient's own reference echo as time zero, the adjudicated endpoint — is argued
+from correctness and is **not** measured by these comparisons.
+
 **In the prototype — Demonstrated** (`docs/comparison/validation_splits/`, synthetic):
 
 - Patient-grouped five-fold cross-validation on every scenario (`docs/ladder_summary.md`).

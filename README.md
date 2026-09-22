@@ -93,6 +93,14 @@ place; the model never recommends reintervention and never lengthens an interval
 Four comparisons, all on explicitly synthetic scenarios and all reported including where the model
 loses. Full records in [`docs/comparison/`](docs/comparison/).
 
+Every fitted comparator below — valve age and type, the pre-implant and reference-echo steps, and the
+current gradient and its change — is the **same penalised cause-specific Cox model with the same
+landmarking, competing risks, leakage rules and evaluation**, given less information. So these rows
+measure what the extra information is worth, not what the modelling is worth: a valve-age chart in
+clinic has none of that machinery behind it. The two comparisons that do change the method are
+gradient boosting, the challenger, and the VARC-3 rule, which is a clinical rule rather than a fitted
+model and is therefore compared as a surveillance policy.
+
 | Comparison | Result |
 |---|---|
 | Against valve age and type, the weak reference | Gradual stenotic, SVD at 5 years, five-fold cross-validation at full size ([`docs/ladder_summary.md`](docs/ladder_summary.md)). The core model's Brier is **0.0354 against 0.0386** for valve age and type. The full model (core plus the biomarker and anticoagulant modules) has Brier 0.0350, area under the curve 0.74 (0.69 to 0.80) pooled over landmarks, and calibration slope 0.98. Without serial echocardiography the core model scores 0.0376, so **updating accounts for about two thirds of the gain** |
